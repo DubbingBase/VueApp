@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import Home from "./views/home.vue"
 </script>
 
 <template>
-  <Home></Home>
+  <!-- <Suspense> -->
+    <router-view></router-view>
+  <!-- </Suspense> -->
 </template>
 
 <style scoped>
