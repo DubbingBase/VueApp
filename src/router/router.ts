@@ -1,13 +1,20 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/home.vue'
+import Base from '../layouts/base.vue'
 import MovieDetails from '../views/movie-details.vue'
 
 // 2. Define some routes
 // Each route should map to a component.
 // We'll talk about nested routes later.
-const routes = [
-  { path: '/', component: Home },
-  { path: '/movie/:id', component: MovieDetails },
+const routes: readonly RouteRecordRaw[] = [
+  {
+    path: '/',
+    component: Base,
+    children: [
+      { path: '', component: Home },
+      { path: '/movie/:id', component: MovieDetails }
+    ]
+  },
 ]
 
 // 3. Create the router instance and pass the `routes` option
