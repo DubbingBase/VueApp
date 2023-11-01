@@ -1,22 +1,52 @@
 <template>
-    <div class="movies">
-        <div
-            class="movie"
-            v-for="movie in TheRetour"
-            :to="{
-                name: 'MovieDetails',
-                params: {
-                    id: movie.id
-                }
-            }"
-        >
-            <div class="poster">
-                <img
-                    :src="getImage(movie.poster_path)"
-                    alt=""
-                >
+    <div class="trending-movies">
+        <div class="list-header">
+            Tendances - films
+        </div>
+        <div class="movies">
+            <router-link
+                class="movie"
+                v-for="movie in trendingMovies"
+                :to="{
+                    name: 'MovieDetails',
+                    params: {
+                        id: movie.id
+                    }
+                }"
+            >
+                <div class="poster">
+                    <img
+                        :src="getImage(movie.poster_path)"
+                        alt=""
+                    >
+                </div>
+                <div class="caption">{{ movie.title }}</div>
+            </router-link>
+        </div>
+    </div>
+    <div class="trending-series">
+        <div class="list-header">
+            Tendances - séries
+        </div>
+        <div class="series">
+            <div
+                class="serie"
+                v-for="serie in trendingSeries"
+                :to="{
+                    name: 'SerieDetails',
+                    params: {
+                        id: serie.id
+                    }
+                }"
+            >
+                <div class="poster">
+                    <img
+                        :src="getImage(serie.poster_path)"
+                        alt=""
+                    >
+                </div>
+                <div class="caption">{{ serie.name }}</div>
             </div>
-            <div class="caption">{{ movie.title }}</div>
         </div>
     </div>
 </template>
@@ -25,28 +55,29 @@
 import { onMounted } from 'vue';
 import { ref } from 'vue';
 import type { TrendingResponse } from '../model/movie'
+import { getImage } from '../utils'
 
-const TheRetour = ref<TrendingResponse["results"]>([])
-
-const getImage = (backdrop: string) => {
-    return `https://image.tmdb.org/t/p/w500/${backdrop}`
-}
+const trendingMovies = ref<TrendingResponse["results"]>([])
+const trendingSeries = ref<TrendingResponse["results"]>([])
 
 onMounted(async () => {
-    const retourbrut = await fetch("http://localhost:8000/api/home")
-    const a = await retourbrut.json() as TrendingResponse
-    TheRetour.value = a.results
-    console.log('TheRetour', TheRetour.value)
+    const trendingMovieResponseRaw = await fetch("http://localhost:8000/api/home/trending-movies")
+    const trendingMovieResponse = await trendingMovieResponseRaw.json() as TrendingResponse
+    trendingMovies.value = trendingMovieResponse.results
+
+    const trendingSeriesResponseRaw = await fetch("http://localhost:8000/api/home/trending-series")
+    const trendingSeriesResponse = await trendingSeriesResponseRaw.json() as TrendingResponse
+    trendingSeries.value = trendingSeriesResponse.results
 })
 </script>
 
 <style scoped lang="scss">
-.movies {
+.movies, .series {
     display: flex;
     flex-direction: row;
     overflow-x: auto;
 
-    .movie {
+    .movie, .serie {
         // overflow: hidden;
         width: 28%;
         margin: 4px;
@@ -87,4 +118,9 @@ onMounted(async () => {
             margin: 8px 4px;
         }
     }
-}</style>
+}
+
+.list-header {
+    margin-bottom: 4px;
+}
+</style>

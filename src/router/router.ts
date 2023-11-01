@@ -12,7 +12,7 @@ const routes: readonly RouteRecordRaw[] = [
     component: Base,
     children: [
       { path: '', component: Home },
-      { path: '/movie/:id', component: MovieDetails }
+      { name: 'MovieDetails', path: '/movie/:id', component: MovieDetails }
     ]
   },
 ]
