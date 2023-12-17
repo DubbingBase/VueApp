@@ -2,6 +2,7 @@ import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/home.vue'
 import Base from '../layouts/base.vue'
 import MovieDetails from '../views/movie-details.vue'
+import ActorDetails from '../views/actor-details.vue'
 
 // 2. Define some routes
 // Each route should map to a component.
@@ -12,7 +13,8 @@ const routes: readonly RouteRecordRaw[] = [
     component: Base,
     children: [
       { path: '', component: Home },
-      { name: 'MovieDetails', path: '/movie/:id', component: MovieDetails }
+      { name: 'MovieDetails', path: '/movie/:id', component: MovieDetails },
+      { name: 'ActorDetails', path: '/actor/:id', component: ActorDetails }
     ]
   },
 ]

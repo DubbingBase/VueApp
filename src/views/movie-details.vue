@@ -10,14 +10,21 @@
 
         <div class="body">
             <div class="actor-wrapper" v-for="actor in actors">
-                <div class="actor">
+                <router-link 
+                    class="actor"
+                    :to="{
+                    name: 'ActorDetails',
+                    params: {
+                        id: actor.id
+                    }
+                }">
                     <img
                         class="profile-img"
                         :src="getImage(actor.profile_path)"
                         alt=""
                     />
                     <div>{{ actor.name }}</div>
-                </div>
+                </router-link>
                 <div class="character">
                     <div>{{ actor.character }}</div>
                 </div>
@@ -82,6 +89,8 @@ onMounted(async () => {
 
     .actor, .va-actor, .character {
         flex: 1;
+        text-decoration: none;
+        color:inherit;
     }
 
     .character {
