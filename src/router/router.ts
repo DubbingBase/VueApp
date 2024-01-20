@@ -3,6 +3,7 @@ import Home from '../views/home.vue'
 import Base from '../layouts/base.vue'
 import MovieDetails from '../views/movie-details.vue'
 import ActorDetails from '../views/actor-details.vue'
+import SerieDetails from '../views/serie-details.vue'
 
 // 2. Define some routes
 // Each route should map to a component.
@@ -14,7 +15,8 @@ const routes: readonly RouteRecordRaw[] = [
     children: [
       { path: '', component: Home },
       { name: 'MovieDetails', path: '/movie/:id', component: MovieDetails },
-      { name: 'ActorDetails', path: '/actor/:id', component: ActorDetails }
+      { name: 'ActorDetails', path: '/actor/:id', component: ActorDetails },
+      { name: 'SerieDetails', path: '/serie/:id', component: SerieDetails },
     ]
   },
 ]

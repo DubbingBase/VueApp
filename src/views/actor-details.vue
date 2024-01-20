@@ -17,7 +17,9 @@
                     </div>
                 </TabPanel>
                 <TabPanel header="Séries">
-                    Content III
+                    <div class="series-wrapper">
+                        <serie v-for="serie in series" :value="serie"></serie>
+                    </div>
                 </TabPanel>
             </TabView>
         </div>
@@ -27,11 +29,14 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { getImage } from '../utils'
-import { Actor } from '../model/actor'
+import { getImage } from '../utils';
+import { Actor } from '../model/actor';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
-import movie from '../components/Movie.vue'
+import movie from '../components/Movie.vue';
+import serie from '../components/Serie.vue';
+import type { Serie } from '../model/serie';
+import type { Movie } from '../model/movie';
 
 const route = useRoute()
 
@@ -39,16 +44,20 @@ const actor = ref<Actor | undefined>()
 
 const active = ref(0)
 
+const isMovie = (item: Movie | Serie): item is Movie => {
+    return item.media_type === 'movie'
+}
+
+const isSerie = (item: Movie | Serie): item is Serie => {
+    return item.media_type === 'tv'
+}
+
 const movies = computed(() => {
-    return actor.value?.combined_credits.cast.filter((cast) => {
-        return cast.media_type === 'movie'
-    })
+    return actor.value?.combined_credits.cast.filter(isMovie)
 })
 
 const series = computed(() => {
-    return actor.value?.combined_credits.cast.filter((cast) => {
-        return cast.media_type === 'tv'
-    })
+    return actor.value?.combined_credits.cast.filter(isSerie)
 })
 
 
@@ -73,11 +82,17 @@ onMounted(async () => {
     img {
         height: 300px;
         width: 240px;
+        object-fit: cover;
     }
-
 }
 
 .movies-wrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.series-wrapper {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;

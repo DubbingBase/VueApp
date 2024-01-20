@@ -1,7 +1,8 @@
 import { Movie } from "./movie"
+import { Serie } from "./serie"
 
 export interface ActorCredits {
-    cast: Array<Movie>
+    cast: Array<Movie|Serie>
 }
 
 

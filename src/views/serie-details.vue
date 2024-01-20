@@ -1,11 +1,11 @@
 <template>
-    <div class="movie">
-        <div class="header" v-if="movie">
+    <div class="serie">
+        <div class="header" v-if="serie">
             <img
-                :src="getImage(movie.backdrop_path)"
+                :src="getImage(serie.backdrop_path)"
                 alt=""
             />
-            <div class="movie-title">{{ movie.title }}</div>
+            <div class="serie-title">{{ serie.title }}</div>
         </div>
 
         <div class="body">
@@ -48,12 +48,12 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { getImage } from '../utils'
-import { MovieResponse, VoiceActor } from '../model/movie'
+import { SerieResponse, VoiceActor } from '../model/serie'
 
 const route = useRoute()
 
-const movie = ref<MovieResponse['movie'] | undefined>()
-const voiceActors = ref<MovieResponse['voiceActors']>([])
+const movie = ref<SerieResponse['serie'] | undefined>()
+const voiceActors = ref<SerieResponse['voiceActors']>([])
 
 const actors = computed(() => {
     return movie.value?.credits.cast
@@ -69,14 +69,14 @@ onMounted(async () => {
     const id = route.params.id
 
     const movieResponseRaw = await fetch("http://localhost:8000/api/movie/" + id)
-    const movieResponse = await movieResponseRaw.json() as MovieResponse
-    movie.value = movieResponse.movie
+    const movieResponse = await movieResponseRaw.json() as SerieResponse
+    movie.value = movieResponse.serie
     voiceActors.value = movieResponse.voiceActors
 })
 </script>
 
 <style scoped lang="scss">
-.movie-title {
+.serie-title {
     text-align: center;
 }
 
