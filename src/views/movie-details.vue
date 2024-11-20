@@ -10,7 +10,7 @@
 
         <div class="body">
             <div class="actor-wrapper" v-for="actor in actors">
-                <router-link 
+                <router-link
                     class="actor"
                     :to="{
                     name: 'ActorDetails',
