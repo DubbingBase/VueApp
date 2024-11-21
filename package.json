@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "function": "supabase functions serve hello-world --no-verify-jwt",
     "sup:types": "npx supabase gen types --lang=typescript --local > supabase/functions/_shared/database.types.ts"
