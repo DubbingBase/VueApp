@@ -12,24 +12,7 @@
             Tendances - séries
         </div>
         <div class="series">
-            <div
-                class="serie"
-                v-for="serie in trendingSeries"
-                :to="{
-                    name: 'SerieDetails',
-                    params: {
-                        id: serie.id
-                    }
-                }"
-            >
-                <div class="poster">
-                    <img
-                        :src="getImage(serie.poster_path)"
-                        alt=""
-                    >
-                </div>
-                <div class="caption">{{ serie.name }}</div>
-            </div>
+            <show v-for="show in trendingSeries" :value="show"></show>
         </div>
     </div>
 </template>
@@ -40,6 +23,7 @@ import { ref } from 'vue';
 import type { TrendingResponse } from '../../supabase/functions/_shared/movie'
 import { getImage } from '../utils'
 import movie from '../components/Movie.vue'
+import show from '../components/Serie.vue'
 import { supabase } from '../api/supabase'
 
 const trendingMovies = ref<TrendingResponse["results"]>([])
@@ -52,7 +36,7 @@ onMounted(async () => {
     // const trendingMovieResponse = await trendingMovieResponseRaw.json() as TrendingResponse
     trendingMovies.value = trendingMovieResponseRaw.data.results
 
-    const trendingSeriesResponseRaw = await supabase.functions.invoke('trending-movies')
+    const trendingSeriesResponseRaw = await supabase.functions.invoke('trending-shows')
     // const trendingSeriesResponse = await trendingSeriesResponseRaw.json() as TrendingResponse
     trendingSeries.value = trendingSeriesResponseRaw.data.results
 })

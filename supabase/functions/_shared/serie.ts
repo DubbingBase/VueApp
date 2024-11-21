@@ -1,3 +1,6 @@
+import { WorkAndVoiceActor } from "./movie.ts";
+import { WithCast, WithExtrernalIds } from "./other.ts";
+
 export interface Serie {
     adult: boolean
     backdrop_path: string
@@ -16,27 +19,6 @@ export interface Serie {
     vote_count: number
 }
 
-export interface Genre {
-    id: number
-    name: string
-}
-
-export interface Cast {
-    gender: number
-    id: number
-    name: string
-    profile_path: string
-    cast_id: number
-    character: string
-}
-
-export interface SerieWithCast extends Serie {
-    genres: Array<Genre>
-    credits: {
-        cast: Array<Cast>
-    }
-}
-
 export interface TrendingResponse {
     page: number
     results: Array<Serie>
@@ -44,13 +26,7 @@ export interface TrendingResponse {
     total_results : number
 }
 
-export interface VoiceActor {
-    va_lastname: string
-    va_firstname: string
-    tmdb_id_actor: number
-}
-
 export interface SerieResponse {
-    serie: SerieWithCast
-    voiceActors: Array<VoiceActor>
+    serie: Serie & WithCast & WithExtrernalIds
+    voiceActors: Array<WorkAndVoiceActor>
 }

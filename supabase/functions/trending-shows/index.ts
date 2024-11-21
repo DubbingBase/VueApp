@@ -14,11 +14,7 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
-  console.log('req', req.body)
-
-  const { id } = await req.json()
-
-  const response = await fetch(`https://api.themoviedb.org/3/tv/${id}?language=fr-FR`, {
+  const response = await fetch("https://api.themoviedb.org/3/trending/tv/day?language=fr-FR", {
     headers: {
       "Content-Type": "application/json",
       'Authorization': `Bearer ${Deno.env.get('TMDB_API_KEY')}`,

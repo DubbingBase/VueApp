@@ -8,7 +8,7 @@ import { corsHeaders } from "../_shared/cors.ts"
 import { supabase } from "../_shared/supabase.ts"
 import { getEntity, getWikipediaPage, getWikipediaPageSectionAsWikitext, wikipediaPageFindSections } from "../_shared/extract/constants.ts"
 import { MistralMovieExtractOutput } from "../_shared/mistral.ts";
-import { MovieWithCast } from "../_shared/movie.ts";
+import { WithCast } from "../_shared/other.ts";
 
 const insertVoiceActor = async (voiceActorFirstName: string, voiceActorLastName: string) => {
   console.log('upserting voice actor', {
@@ -62,9 +62,13 @@ Deno.serve(async (req) => {
 
   const lang = 'fr'
 
-  const { wikiId, tmdbId } = await req.json()
+  const { wikiId, tmdbId, type } = await req.json() as {
+    wikiId: string
+    tmdbId: number
+    type: 'movie' | 'tv'
+  }
 
-  const response = await fetch(`https://api.themoviedb.org/3/movie/${tmdbId}?append_to_response=credits,external_ids&language=fr-FR`, {
+  const response = await fetch(`https://api.themoviedb.org/3/${type}/${tmdbId}?append_to_response=credits,external_ids&language=fr-FR`, {
     headers: {
       "Content-Type": "application/json",
       'Authorization': `Bearer ${Deno.env.get('TMDB_API_KEY')}`,
@@ -72,7 +76,7 @@ Deno.serve(async (req) => {
     },
   })
 
-  const movie = await response.json() as MovieWithCast
+  const movie = await response.json() as WithCast
 
   const entityURL = getEntity(wikiId)
 
@@ -95,6 +99,7 @@ Deno.serve(async (req) => {
   }
 
   const wikiepediaPageURL = getWikipediaPage(wikipediaPageTitle, lang)
+  console.log('wikiepediaPageURL', wikiepediaPageURL)
   const responseWikipedia = await fetch(wikiepediaPageURL)
   const wikipediaPage = await responseWikipedia.json()
 
@@ -111,6 +116,8 @@ Deno.serve(async (req) => {
   })
 
   for (const section of sectionIds) {
+    console.log('section', section)
+
     const sectionAsWikitextURL = getWikipediaPageSectionAsWikitext(wikipediaLangPageId, section.index)
     const responseSectionActionWikitext = await fetch(sectionAsWikitextURL)
     const wikitextJSON = await responseSectionActionWikitext.json()
@@ -145,7 +152,7 @@ Deno.serve(async (req) => {
 
     console.log('mistralSuggestion', mistralSuggestionJSON)
 
-    for (const entry of mistralSuggestionJSON.items) {
+    for (const entry of mistralSuggestionJSON?.items ?? []) {
       const { actor, voiceActorFirstname, voiceActorName } = entry
 
       if (actor && voiceActorFirstname && voiceActorName) {

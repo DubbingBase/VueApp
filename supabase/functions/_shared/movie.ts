@@ -1,3 +1,5 @@
+import { WithCast, WithExtrernalIds } from "./other.ts";
+
 export interface Movie {
     adult: boolean
     backdrop_path: string
@@ -14,37 +16,6 @@ export interface Movie {
     video: boolean
     vote_average: number
     vote_count: number
-}
-
-export interface Genre {
-    id: number
-    name: string
-}
-
-export interface Cast {
-    gender: number
-    id: number
-    name: string
-    profile_path: string
-    cast_id: number
-    character: string
-}
-
-export interface MovieWithCast {
-    genres: Array<Genre>
-    credits: {
-        cast: Array<Cast>
-    }
-}
-
-export interface MovieWithExtrernalIds {
-    external_ids: {
-        imdb_id?: string
-        wikidata_id?: string
-        facebook_id?: string
-        instagram_id?: string
-        twitter_id?: string
-    }
 }
 
 export interface TrendingResponse {
@@ -79,6 +50,6 @@ export interface WorkAndVoiceActor {
 }
 
 export interface MovieResponse {
-    movie: Movie & MovieWithCast & MovieWithExtrernalIds
+    movie: Movie & WithCast & WithExtrernalIds
     voiceActors: Array<WorkAndVoiceActor>
 }

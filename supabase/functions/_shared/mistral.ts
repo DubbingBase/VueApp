@@ -1,5 +1,5 @@
 export interface MistralMovieExtractOutput {
-    items: MistralMovieExtractItemOutput[]
+    items?: MistralMovieExtractItemOutput[]
 }
 
 export interface MistralMovieExtractItemOutput {

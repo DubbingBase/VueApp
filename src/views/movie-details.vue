@@ -71,7 +71,8 @@ const fetchInfos = async () => {
     const movieResponseRaw = await supabase.functions.invoke('prepare_movie', {
         body: {
             wikiId: id,
-            tmdbId: route.params.id
+            tmdbId: route.params.id,
+            type: 'movie'
         }
     })
     const data = movieResponseRaw.data

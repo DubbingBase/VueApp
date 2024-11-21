@@ -1,11 +1,11 @@
 <template>
-    <div class="serie">
-        <div class="header" v-if="serie">
+    <div class="show">
+        <div class="header" v-if="show">
             <img
-                :src="getImage(serie.backdrop_path)"
+                :src="getImage(show.backdrop_path)"
                 alt=""
             />
-            <div class="serie-title">{{ serie.name }}</div>
+            <div class="show-title">{{ show.title }}</div>
         </div>
 
         <div class="body">
@@ -28,19 +28,11 @@
                 <div class="character">
                     <div>{{ actor.character }}</div>
                 </div>
-                <div class="va-actor" v-if="getVoiceActorByTmdbId(actor.id)">
-                    <img
-                        class="profile-img"
-                        :src="`https://api.dicebear.com/7.x/initials/svg?seed=${getVoiceActorByTmdbId(actor.id)?.va_firstname}`"
-                        alt=""
-                    />
-                    <div>{{ getVoiceActorByTmdbId(actor.id)?.va_firstname }} {{ getVoiceActorByTmdbId(actor.id)?.va_lastname }}</div>
-                </div>
-                <div v-else class="va-actor" >
-                    Nope
-                </div>
+                <VoiceActor :model-value="getVoiceActorByTmdbId(actor.id)"></VoiceActor>
             </div>
         </div>
+
+        <Button class="fetch-infos-btn" @click="fetchInfos">Récupérer les informations</Button>
     </div>
 </template>
 
@@ -48,38 +40,60 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { getImage } from '../utils'
-import { SerieResponse, VoiceActor } from '../../supabase/functions/_shared/serie'
-import { MovieResponse } from '../../supabase/functions/_shared/movie';
+import { SerieResponse } from '../../supabase/functions/_shared/serie'
 import { supabase } from '../api/supabase';
+import VoiceActor from '../components/VoiceActor.vue';
+import { WorkAndVoiceActor } from '../../supabase/functions/_shared/movie';
 
 const route = useRoute()
 
-const serie = ref<SerieResponse['serie'] | undefined>()
+const show = ref<SerieResponse['serie'] | undefined>()
 const voiceActors = ref<SerieResponse['voiceActors']>([])
 
 const actors = computed(() => {
-    return serie.value?.credits.cast
+    return show.value?.credits.cast
 })
 
-const getVoiceActorByTmdbId = (tmdbId: number): VoiceActor | undefined => {
-    const va = voiceActors.value.find(v => v.tmdb_id_actor === tmdbId)
+const getVoiceActorByTmdbId = (tmdbId: number): WorkAndVoiceActor | undefined => {
+    const va = voiceActors.value.find(v => v.actor_id === tmdbId)
 
     return va
+}
+
+const fetchInfos = async () => {
+    const id = show.value?.external_ids?.wikidata_id
+
+    if (!id) {
+        console.error('id is undefined')
+        return
+    }
+
+    console.log('id', id)
+    const showResponseRaw = await supabase.functions.invoke('prepare_movie', {
+        body: {
+            wikiId: id,
+            tmdbId: route.params.id,
+            type: 'tv'
+        }
+    })
+    const data = showResponseRaw.data
+
+    console.log('data', data)
 }
 
 onMounted(async () => {
     const id = route.params.id
 
-    const movieResponseRaw = await supabase.functions.invoke('show', { body: { id } })
-    // const movieResponse = await movieResponseRaw.json() as MovieResponse
-    const data = movieResponseRaw.data as SerieResponse
-    serie.value = data.serie
+    const showResponseRaw = await supabase.functions.invoke('show', { body: { id } })
+    // const showResponse = await showResponseRaw.json() as SerieResponse
+    const data = showResponseRaw.data as SerieResponse
+    show.value = data.serie
     voiceActors.value = data.voiceActors
 })
 </script>
 
 <style scoped lang="scss">
-.serie-title {
+.show-title {
     text-align: center;
 }
 
@@ -115,5 +129,13 @@ onMounted(async () => {
             border-radius: 16px;
         }
     }
+}
+
+.fetch-infos-btn {
+    position: absolute;
+    bottom: 64px;
+    right: 16px;
+    padding: 4px;
+
 }
 </style>
