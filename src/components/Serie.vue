@@ -1,18 +1,19 @@
 <template>
-  <router-link
-    class="serie"
-    :to="{
-      name: 'SerieDetails',
-      params: {
-        id: value.id,
-      },
-    }"
-  >
-    <div class="poster">
-      <img :src="getImage(value.poster_path)" alt="" />
-    </div>
-    <div class="caption">{{ value.name }}</div>
-  </router-link>
+  <div class="serie">
+    <router-link
+      :to="{
+        name: 'SerieDetails',
+        params: {
+          id: value.id,
+        },
+      }"
+    >
+      <div class="poster">
+        <img :src="getImage(value.poster_path)" alt="" />
+      </div>
+      <div class="caption">{{ value.name }}</div>
+    </router-link>
+  </div>
 </template>
 
 <script lang="ts" setup>

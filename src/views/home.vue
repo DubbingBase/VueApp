@@ -4,7 +4,7 @@
             Tendances - films
         </div>
         <div class="movies">
-            <movie :key="movie.id" v-for="movie in trendingMovies" :value="movie"></movie>
+            <Movie :key="movie.id" v-for="movie in trendingMovies" :value="movie"></Movie>
         </div>
     </div>
     <div class="trending-series">
@@ -12,7 +12,7 @@
             Tendances - séries
         </div>
         <div class="series">
-            <show :key="show.id" v-for="show in trendingSeries" :value="show"></show>
+            <Show :key="show.id" v-for="show in trendingSeries" :value="show"></Show>
         </div>
     </div>
 </template>
@@ -21,9 +21,8 @@
 import { onMounted } from 'vue';
 import { ref } from 'vue';
 import type { TrendingResponse } from '../../supabase/functions/_shared/movie'
-import { getImage } from '../utils'
-import movie from '../components/Movie.vue'
-import show from '../components/Serie.vue'
+import Movie from '../components/Movie.vue'
+import Show from '../components/Serie.vue'
 import { supabase } from '../api/supabase'
 
 const trendingMovies = ref<TrendingResponse["results"]>([])
