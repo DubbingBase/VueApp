@@ -4,7 +4,7 @@
             Tendances - films
         </div>
         <div class="movies">
-            <movie v-for="movie in trendingMovies" :value="movie"></movie>
+            <movie :key="movie.id" v-for="movie in trendingMovies" :value="movie"></movie>
         </div>
     </div>
     <div class="trending-series">
@@ -12,7 +12,7 @@
             Tendances - séries
         </div>
         <div class="series">
-            <show v-for="show in trendingSeries" :value="show"></show>
+            <show :key="show.id" v-for="show in trendingSeries" :value="show"></show>
         </div>
     </div>
 </template>
@@ -31,10 +31,12 @@ const trendingSeries = ref<TrendingResponse["results"]>([])
 
 onMounted(async () => {
     const trendingMovieResponseRaw = await supabase.functions.invoke('trending-movies')
+    console.log('trendingMovieResponseRaw', trendingMovieResponseRaw)
 
     //  fetch("http://127.0.0.1:54321/functions/v1/trending-movies")
     // const trendingMovieResponse = await trendingMovieResponseRaw.json() as TrendingResponse
     trendingMovies.value = trendingMovieResponseRaw.data.results
+    console.log('trendingMovies.value', trendingMovies.value)
 
     const trendingSeriesResponseRaw = await supabase.functions.invoke('trending-shows')
     // const trendingSeriesResponse = await trendingSeriesResponseRaw.json() as TrendingResponse
