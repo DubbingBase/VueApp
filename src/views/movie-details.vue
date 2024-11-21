@@ -78,6 +78,7 @@ const fetchInfos = async () => {
     const data = movieResponseRaw.data
 
     console.log('data', data)
+    location.reload()
 }
 
 onMounted(async () => {

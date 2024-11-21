@@ -79,6 +79,7 @@ const fetchInfos = async () => {
     const data = showResponseRaw.data
 
     console.log('data', data)
+    location.reload()
 }
 
 onMounted(async () => {
