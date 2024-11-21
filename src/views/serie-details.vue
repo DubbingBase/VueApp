@@ -5,12 +5,12 @@
                 :src="getImage(serie.backdrop_path)"
                 alt=""
             />
-            <div class="serie-title">{{ serie.title }}</div>
+            <div class="serie-title">{{ serie.name }}</div>
         </div>
 
         <div class="body">
             <div class="actor-wrapper" v-for="actor in actors">
-                <router-link 
+                <router-link
                     class="actor"
                     :to="{
                     name: 'ActorDetails',
@@ -48,15 +48,17 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { getImage } from '../utils'
-import { SerieResponse, VoiceActor } from '../model/serie'
+import { SerieResponse, VoiceActor } from '../../supabase/functions/_shared/serie'
+import { MovieResponse } from '../../supabase/functions/_shared/movie';
+import { supabase } from '../api/supabase';
 
 const route = useRoute()
 
-const movie = ref<SerieResponse['serie'] | undefined>()
+const serie = ref<SerieResponse['serie'] | undefined>()
 const voiceActors = ref<SerieResponse['voiceActors']>([])
 
 const actors = computed(() => {
-    return movie.value?.credits.cast
+    return serie.value?.credits.cast
 })
 
 const getVoiceActorByTmdbId = (tmdbId: number): VoiceActor | undefined => {
@@ -68,10 +70,11 @@ const getVoiceActorByTmdbId = (tmdbId: number): VoiceActor | undefined => {
 onMounted(async () => {
     const id = route.params.id
 
-    const movieResponseRaw = await fetch("http://localhost:8000/api/movie/" + id)
-    const movieResponse = await movieResponseRaw.json() as SerieResponse
-    movie.value = movieResponse.serie
-    voiceActors.value = movieResponse.voiceActors
+    const movieResponseRaw = await supabase.functions.invoke('show', { body: { id } })
+    // const movieResponse = await movieResponseRaw.json() as MovieResponse
+    const data = movieResponseRaw.data as SerieResponse
+    serie.value = data.serie
+    voiceActors.value = data.voiceActors
 })
 </script>
 

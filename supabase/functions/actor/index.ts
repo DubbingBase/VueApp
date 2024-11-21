@@ -4,29 +4,64 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-
-console.log("Hello from Functions!")
+import { corsHeaders } from "../_shared/cors.ts"
+import { supabase } from "../_shared/supabase.ts"
 
 Deno.serve(async (req) => {
-  const { name } = await req.json()
-  const data = {
-    message: `Hello ${name}!`,
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
+  const { id } = await req.json()
+
+  console.log('id', id)
+
+  let actor = undefined
+
+  try {
+
+    const response = await fetch(`https://api.themoviedb.org/3/person/${id}?append_to_response=credits,external_ids&language=fr-FR`, {
+      headers: {
+        "Content-Type": "application/json",
+        'Authorization': `Bearer ${Deno.env.get('TMDB_API_KEY')}`,
+        'Accept': 'application/json',
+      },
+    })
+
+    actor = await response.json()
+  } catch (e) {
+    console.error('e', e)
+  }
+
+  let va = []
+
+  // try {
+  //   const { data, error } = await supabase.from('work')
+  //     .select('*')
+  //     .eq('tmdb_content_id', id)
+  //   if (error) throw error
+
+  //   va = data
+
+  // } catch (e) {
+  //   console.error('e', e)
+  // }
+
+  console.log('movie', actor)
+  console.log('va', va)
+
+  const result = {
+    actor: actor,
+    voiceActors: va,
   }
 
   return new Response(
-    JSON.stringify(data),
-    { headers: { "Content-Type": "application/json" } },
+    JSON.stringify(result),
+    {
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "application/json"
+      }
+    },
   )
 })
-
-/* To invoke locally:
-
-  1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
-  2. Make an HTTP request:
-
-  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/actor' \
-    --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
-    --header 'Content-Type: application/json' \
-    --data '{"name":"Functions"}'
-
-*/

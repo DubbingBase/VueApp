@@ -24,7 +24,7 @@
 
 <script lang="ts" setup>
 import { PropType, toRefs } from 'vue';
-import { Movie } from '../model/movie';
+import { Movie } from '../../supabase/functions/_shared/movie';
 import { getImage } from '../utils';
 
 

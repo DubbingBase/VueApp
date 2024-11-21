@@ -37,21 +37,24 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import { ref } from 'vue';
-import type { TrendingResponse } from '../model/movie'
+import type { TrendingResponse } from '../../supabase/functions/_shared/movie'
 import { getImage } from '../utils'
 import movie from '../components/Movie.vue'
+import { supabase } from '../api/supabase'
 
 const trendingMovies = ref<TrendingResponse["results"]>([])
 const trendingSeries = ref<TrendingResponse["results"]>([])
 
 onMounted(async () => {
-    const trendingMovieResponseRaw = await fetch("http://localhost:8000/api/home/trending-movies")
-    const trendingMovieResponse = await trendingMovieResponseRaw.json() as TrendingResponse
-    trendingMovies.value = trendingMovieResponse.results
+    const trendingMovieResponseRaw = await supabase.functions.invoke('trending-movies')
 
-    const trendingSeriesResponseRaw = await fetch("http://localhost:8000/api/home/trending-series")
-    const trendingSeriesResponse = await trendingSeriesResponseRaw.json() as TrendingResponse
-    trendingSeries.value = trendingSeriesResponse.results
+    //  fetch("http://127.0.0.1:54321/functions/v1/trending-movies")
+    // const trendingMovieResponse = await trendingMovieResponseRaw.json() as TrendingResponse
+    trendingMovies.value = trendingMovieResponseRaw.data.results
+
+    const trendingSeriesResponseRaw = await supabase.functions.invoke('trending-movies')
+    // const trendingSeriesResponse = await trendingSeriesResponseRaw.json() as TrendingResponse
+    trendingSeries.value = trendingSeriesResponseRaw.data.results
 })
 </script>
 

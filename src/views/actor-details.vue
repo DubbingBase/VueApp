@@ -30,13 +30,14 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { getImage } from '../utils';
-import { Actor } from '../model/actor';
+import { Actor } from '../../supabase/functions/_shared/actor';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 import movie from '../components/Movie.vue';
 import serie from '../components/Serie.vue';
-import type { Serie } from '../model/serie';
-import type { Movie } from '../model/movie';
+import type { Serie } from '../../supabase/functions/_shared/serie';
+import type { Movie } from '../../supabase/functions/_shared/movie';
+import { supabase } from '../api/supabase';
 
 const route = useRoute()
 
@@ -64,10 +65,9 @@ const series = computed(() => {
 onMounted(async () => {
     const id = route.params.id
 
-    const actorResponseRaw = await fetch("http://localhost:8000/api/actor/" + id)
-    const actorResponse = await actorResponseRaw.json() as Actor
-    actor.value = actorResponse
-
+    const actorResponseRaw = await await supabase.functions.invoke('actor', { body: { id } })
+    const actorResponse = await actorResponseRaw.data as { actor: Actor}
+    actor.value = actorResponse.actor
 })
 
 

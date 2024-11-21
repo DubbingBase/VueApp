@@ -30,10 +30,20 @@ export interface Cast {
     character: string
 }
 
-export interface MovieWithCast extends Movie {
+export interface MovieWithCast {
     genres: Array<Genre>
     credits: {
         cast: Array<Cast>
+    }
+}
+
+export interface MovieWithExtrernalIds {
+    external_ids: {
+        imdb_id?: string
+        wikidata_id?: string
+        facebook_id?: string
+        instagram_id?: string
+        twitter_id?: string
     }
 }
 
@@ -44,13 +54,31 @@ export interface TrendingResponse {
     total_results : number
 }
 
-export interface VoiceActor {
-    va_lastname: string
-    va_firstname: string
-    tmdb_id_actor: number
+export interface VoiceActorDetails {
+    id: number
+    bio: any
+    awards: any
+    lastname: string
+    firstname: string
+    nationality: any
+    years_active: any
+    date_of_birth: any
+    social_media_links: any
+  }
+
+export interface WorkAndVoiceActor {
+    id: number
+    tmdb_content_id: number
+    actor_id: number
+    voice_actor_id: number
+    highlight: boolean
+    suggestions: any
+    status: string
+    source_id: any
+    voiceActorDetails: VoiceActorDetails
 }
 
 export interface MovieResponse {
-    movie: MovieWithCast
-    voiceActors: Array<VoiceActor>
+    movie: Movie & MovieWithCast & MovieWithExtrernalIds
+    voiceActors: Array<WorkAndVoiceActor>
 }

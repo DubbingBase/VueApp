@@ -1,5 +1,5 @@
-import { Movie } from "./movie"
-import { Serie } from "./serie"
+import { Movie } from "./movie.ts"
+import { Serie } from "./serie.ts"
 
 export interface ActorCredits {
     cast: Array<Movie|Serie>

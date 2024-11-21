@@ -28,19 +28,11 @@
                 <div class="character">
                     <div>{{ actor.character }}</div>
                 </div>
-                <div class="va-actor" v-if="getVoiceActorByTmdbId(actor.id)">
-                    <img
-                        class="profile-img"
-                        :src="`https://api.dicebear.com/7.x/initials/svg?seed=${getVoiceActorByTmdbId(actor.id)?.va_firstname}`"
-                        alt=""
-                    />
-                    <div>{{ getVoiceActorByTmdbId(actor.id)?.va_firstname }} {{ getVoiceActorByTmdbId(actor.id)?.va_lastname }}</div>
-                </div>
-                <div v-else class="va-actor" >
-                    Nope
-                </div>
+                <VoiceActor :model-value="getVoiceActorByTmdbId(actor.id)"></VoiceActor>
             </div>
         </div>
+
+        <Button class="fetch-infos-btn" @click="fetchInfos">Récupérer les informations</Button>
     </div>
 </template>
 
@@ -48,7 +40,9 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { getImage } from '../utils'
-import { MovieResponse, VoiceActor } from '../model/movie'
+import { MovieResponse, WorkAndVoiceActor } from '../../supabase/functions/_shared/movie'
+import { supabase } from '../api/supabase';
+import VoiceActor from '../components/VoiceActor.vue';
 
 const route = useRoute()
 
@@ -59,19 +53,40 @@ const actors = computed(() => {
     return movie.value?.credits.cast
 })
 
-const getVoiceActorByTmdbId = (tmdbId: number): VoiceActor | undefined => {
-    const va = voiceActors.value.find(v => v.tmdb_id_actor === tmdbId)
+const getVoiceActorByTmdbId = (tmdbId: number): WorkAndVoiceActor | undefined => {
+    const va = voiceActors.value.find(v => v.actor_id === tmdbId)
 
     return va
+}
+
+const fetchInfos = async () => {
+    const id = movie.value?.external_ids?.wikidata_id
+
+    if (!id) {
+        console.error('id is undefined')
+        return
+    }
+
+    console.log('id', id)
+    const movieResponseRaw = await supabase.functions.invoke('prepare_movie', {
+        body: {
+            wikiId: id,
+            tmdbId: route.params.id
+        }
+    })
+    const data = movieResponseRaw.data
+
+    console.log('data', data)
 }
 
 onMounted(async () => {
     const id = route.params.id
 
-    const movieResponseRaw = await fetch("http://localhost:8000/api/movie/" + id)
-    const movieResponse = await movieResponseRaw.json() as MovieResponse
-    movie.value = movieResponse.movie
-    voiceActors.value = movieResponse.voiceActors
+    const movieResponseRaw = await supabase.functions.invoke('movie', { body: { id } })
+    // const movieResponse = await movieResponseRaw.json() as MovieResponse
+    const data = movieResponseRaw.data as MovieResponse
+    movie.value = data.movie
+    voiceActors.value = data.voiceActors
 })
 </script>
 
@@ -112,5 +127,13 @@ onMounted(async () => {
             border-radius: 16px;
         }
     }
+}
+
+.fetch-infos-btn {
+    position: absolute;
+    bottom: 64px;
+    right: 16px;
+    padding: 4px;
+
 }
 </style>

@@ -23,7 +23,7 @@
     
     <script lang="ts" setup>
     import { PropType, toRefs } from 'vue';
-    import { Serie } from '../model/serie';
+    import { Serie } from '../../supabase/functions/_shared/serie';
     import { getImage } from '../utils';
     
     
