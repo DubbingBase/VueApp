@@ -62,7 +62,7 @@ export type Database = {
           date_of_birth: string | null
           firstname: string
           id: number
-          lastname: string | null
+          lastname: string
           nationality: string | null
           social_media_links: Json | null
           years_active: string | null
@@ -73,7 +73,7 @@ export type Database = {
           date_of_birth?: string | null
           firstname: string
           id?: number
-          lastname?: string | null
+          lastname: string
           nationality?: string | null
           social_media_links?: Json | null
           years_active?: string | null
@@ -84,7 +84,7 @@ export type Database = {
           date_of_birth?: string | null
           firstname?: string
           id?: number
-          lastname?: string | null
+          lastname?: string
           nationality?: string | null
           social_media_links?: Json | null
           years_active?: string | null
@@ -94,32 +94,38 @@ export type Database = {
       work: {
         Row: {
           actor_id: number
+          content_id: number
+          content_type: string | null
           highlight: boolean | null
           id: number
+          performance: string | null
           source_id: number | null
           status: string | null
           suggestions: string | null
-          tmdb_content_id: number
           voice_actor_id: number | null
         }
         Insert: {
           actor_id: number
+          content_id: number
+          content_type?: string | null
           highlight?: boolean | null
           id?: number
+          performance?: string | null
           source_id?: number | null
           status?: string | null
           suggestions?: string | null
-          tmdb_content_id: number
           voice_actor_id?: number | null
         }
         Update: {
           actor_id?: number
+          content_id?: number
+          content_type?: string | null
           highlight?: boolean | null
           id?: number
+          performance?: string | null
           source_id?: number | null
           status?: string | null
           suggestions?: string | null
-          tmdb_content_id?: number
           voice_actor_id?: number | null
         }
         Relationships: [

@@ -39,7 +39,7 @@ export interface VoiceActorDetails {
 
 export interface WorkAndVoiceActor {
     id: number
-    tmdb_content_id: number
+    content_id: number
     actor_id: number
     voice_actor_id: number
     highlight: boolean
@@ -47,6 +47,7 @@ export interface WorkAndVoiceActor {
     status: string
     source_id: any
     voiceActorDetails: VoiceActorDetails
+    performance?: string
 }
 
 export interface MovieResponse {

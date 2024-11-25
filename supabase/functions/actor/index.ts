@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
   // try {
   //   const { data, error } = await supabase.from('work')
   //     .select('*')
-  //     .eq('tmdb_content_id', id)
+  //     .eq('content_id', id)
   //   if (error) throw error
 
   //   va = data

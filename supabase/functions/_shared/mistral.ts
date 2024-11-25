@@ -6,4 +6,5 @@ export interface MistralMovieExtractItemOutput {
     actor: string
     voiceActorName: string
     voiceActorFirstname: string
+    performance?: string
 }

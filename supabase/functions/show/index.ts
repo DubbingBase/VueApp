@@ -53,14 +53,14 @@ Deno.serve(async (req) => {
       `)
       // .select(`
       //   id,
-      //   tmdb_content_id,
+      //   content_id,
       //   actor_id,
       //   voice_actors (
       //     id,
       //     name,
       //   )
       //   `)
-      .eq('tmdb_content_id', id)
+      .eq('content_id', id)
     if (error) throw error
 
     va = data

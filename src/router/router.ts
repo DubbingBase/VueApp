@@ -4,6 +4,7 @@ import Base from '../layouts/base.vue'
 import MovieDetails from '../views/movie-details.vue'
 import ActorDetails from '../views/actor-details.vue'
 import SerieDetails from '../views/serie-details.vue'
+import VoiceActorDetails from '../views/voice-actor-details.vue'
 import Search from '../views/search.vue'
 
 // 2. Define some routes
@@ -18,6 +19,7 @@ const routes: readonly RouteRecordRaw[] = [
       { name: 'MovieDetails', path: '/movie/:id', component: MovieDetails },
       { name: 'ActorDetails', path: '/actor/:id', component: ActorDetails },
       { name: 'SerieDetails', path: '/serie/:id', component: SerieDetails },
+      { name: 'VoiceActorDetails', path: '/voice-actor/:id', component: VoiceActorDetails },
       { name: 'Search', path: '/search', component: Search },
     ]
   },

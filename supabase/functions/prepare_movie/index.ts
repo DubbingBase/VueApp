@@ -9,6 +9,8 @@ import { supabase } from "../_shared/supabase.ts"
 import { getEntity, getWikipediaPage, getWikipediaPageSectionAsWikitext, wikipediaPageFindSections } from "../_shared/extract/constants.ts"
 import { MistralMovieExtractOutput } from "../_shared/mistral.ts";
 import { WithCast } from "../_shared/other.ts";
+import { Database } from "../_shared/database.types.ts";
+import { PostgrestError } from "jsr:@supabase/supabase-js";
 
 const insertVoiceActor = async (voiceActorFirstName: string, voiceActorLastName: string) => {
   console.log('upserting voice actor', {
@@ -24,17 +26,25 @@ const insertVoiceActor = async (voiceActorFirstName: string, voiceActorLastName:
   return insertResult
 }
 
-const insertVoiceActorWork = async (voiceActorId: number, tmdbId: number, actorId: number) => {
+const insertVoiceActorWork = async (
+  voiceActorId: number,
+  tmdbId: number,
+  actorId: number,
+  contentType: string,
+  performance?: string,
+) => {
   // TODO: add source
   console.log('inserting work', {
     voice_actor_id: voiceActorId,
-    tmdb_content_id: tmdbId,
+    content_id: tmdbId,
     actor_id: actorId,
   })
   const insertResult = await supabase.from('work').insert({
     voice_actor_id: voiceActorId,
-    tmdb_content_id: tmdbId,
+    content_id: tmdbId,
     actor_id: actorId,
+    performance,
+    content_type: contentType,
   }).select()
   return insertResult
 }
@@ -43,14 +53,34 @@ const insertVoiceActorAndWork = async (
   voiceActorFirstName: string,
   voiceActorLastName: string,
   tmdbId: number,
-  actorId: number
+  actorId: number,
+  contentType: string,
+  performance?: string
 ) => {
-  const { data: result, error } = await insertVoiceActor(voiceActorFirstName, voiceActorLastName)
-  console.log('insert voice actor result', result, error)
+  let result: Database['public']['Tables']['voice_actors']['Insert'][] | null
+  let error: PostgrestError | null
+  try {
+    const insertVoiceResult = await insertVoiceActor(voiceActorFirstName, voiceActorLastName)
+    result = insertVoiceResult.data
+    error = insertVoiceResult.error
+    console.log('insert voice actor result', result, error)
+  } catch (e) {
+    console.error('e', e)
+  }
   const voiceActorId = result?.[0]?.id
   if (voiceActorId) {
-    const { data: result2, error: error2 } = await insertVoiceActorWork(voiceActorId, tmdbId, actorId)
-    console.log('insert voice actor work result', result2, error2)
+    try {
+      const { data: result2, error: error2 } = await insertVoiceActorWork(
+        voiceActorId,
+        tmdbId,
+        actorId,
+        contentType,
+        performance
+      )
+      console.log('insert voice actor work result', result2, error2)
+    } catch (e) {
+      console.error('e', e)
+    }
   }
 }
 
@@ -166,7 +196,14 @@ Deno.serve(async (req) => {
 
         const { id: actorId } = foundActor
 
-        await insertVoiceActorAndWork(voiceActorFirstname, voiceActorName, tmdbId, actorId)
+        await insertVoiceActorAndWork(
+          voiceActorFirstname,
+          voiceActorName,
+          tmdbId,
+          actorId,
+          type,
+          entry.performance
+        )
       } else {
         console.error('mistral missing structure')
       }

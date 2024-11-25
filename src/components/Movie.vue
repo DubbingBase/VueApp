@@ -13,8 +13,8 @@
       <div class="poster">
         <img :src="getImage(value.poster_path)" alt="" />
       </div>
-      <div class="caption">{{ value.title }}</div>
     </router-link>
+    <div class="caption">{{ value.title }}</div>
   </div>
 </template>
 

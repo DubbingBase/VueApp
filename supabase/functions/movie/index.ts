@@ -15,6 +15,7 @@ Deno.serve(async (req) => {
   const { id } = await req.json()
 
   console.log('id', id)
+  console.log('typeof id', typeof id)
 
   let movie = undefined
 
@@ -40,28 +41,23 @@ Deno.serve(async (req) => {
       .select(`
         *,
         voiceActorDetails:voice_actors (
-          id,
-          firstname,
-          lastname,
-          bio,
-          nationality,
-          date_of_birth,
-          awards,
-          years_active,
-          social_media_links
+          *
         )
       `)
       // .select(`
       //   id,
-      //   tmdb_content_id,
+      //   content_id,
       //   actor_id,
       //   voice_actors (
       //     id,
       //     name,
       //   )
       //   `)
-      .eq('tmdb_content_id', id)
-    if (error) throw error
+      .eq('content_id', id)
+    if (error) {
+      console.error('error', error)
+      throw error
+    }
 
     va = data
   } catch (e) {

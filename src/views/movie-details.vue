@@ -28,7 +28,9 @@
                 <div class="character">
                     <div>{{ actor.character }}</div>
                 </div>
-                <VoiceActor :model-value="getVoiceActorByTmdbId(actor.id)"></VoiceActor>
+                <div class="voice-actors">
+                    <VoiceActor v-for="va in getVoiceActorByTmdbId(actor.id)" :key="va.id" :model-value="va"></VoiceActor>
+                </div>
             </div>
         </div>
 
@@ -53,8 +55,8 @@ const actors = computed(() => {
     return movie.value?.credits.cast
 })
 
-const getVoiceActorByTmdbId = (tmdbId: number): WorkAndVoiceActor | undefined => {
-    const va = voiceActors.value.find(v => v.actor_id === tmdbId)
+const getVoiceActorByTmdbId = (tmdbId: number): WorkAndVoiceActor[] => {
+    const va = voiceActors.value.filter(v => v.actor_id === tmdbId)
 
     return va
 }

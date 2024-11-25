@@ -11,8 +11,8 @@
       <div class="poster">
         <img :src="getImage(value.poster_path)" alt="" />
       </div>
-      <div class="caption">{{ value.name }}</div>
     </router-link>
+      <div class="caption">{{ value.name }}</div>
   </div>
 </template>
 
