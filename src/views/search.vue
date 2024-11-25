@@ -16,10 +16,11 @@
 import InputText from 'primevue/inputtext';
 import { supabase } from '../api/supabase';
 import { ref } from 'vue';
+import { useDebounceFn } from '@vueuse/core';
 
 const matches = ref([])
 
-const search = async(event: any) => {
+const search = useDebounceFn(async(event: any) => {
   console.log(event.target.value)
 
   const { data, error } = await supabase.functions.invoke('search', {
@@ -31,7 +32,7 @@ const search = async(event: any) => {
   console.log('data', data)
 
   matches.value = data.results
-}
+}, 500)
 
 const typeToRoute = (type: string) => {
   switch (type) {
