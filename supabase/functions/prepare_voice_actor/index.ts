@@ -6,11 +6,14 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { corsHeaders } from "../_shared/cors.ts"
 import { supabase } from "../_shared/supabase.ts"
+import { dubbingTerm } from "../_shared/extract/constants.ts"
 import { getEntity, getWikipediaPage, getWikipediaPageSectionAsWikitext, wikipediaPageFindSections } from "../_shared/extract/constants.ts"
 import { MistralMovieExtractOutput } from "../_shared/mistral.ts";
 import { WithCast } from "../_shared/other.ts";
 import { Database } from "../_shared/database.types.ts";
 import { PostgrestError } from "jsr:@supabase/supabase-js";
+import { flatTocToTree } from './toc.ts'
+import { exploreDubbingSectionChilds } from './extract.ts'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -19,9 +22,15 @@ Deno.serve(async (req) => {
 
   const lang = 'fr'
 
-  const { wikiId } = await req.json() as {
+  const rq = await req.json() as {
     wikiId: string
   }
+
+  console.log('rq', rq)
+
+  const { wikiId } = rq
+
+  console.log('wikiId', wikiId)
 
   const entityURL = getEntity(wikiId)
   const responseWikidata = await fetch(entityURL)
@@ -55,14 +64,23 @@ Deno.serve(async (req) => {
 
   console.log('wikipediaPageSections', wikipediaPageSections)
 
+  let sectionFound = false;
+  let results: unknown[] = []
   const toc = flatTocToTree(wikipediaPageSections.parse.sections);
-    for (const [sectionId, section] of toc) {
-      // find dubbing section
-      if (dubbingTerm.some((rx) => rx.test(section.line))) {
-        sectionFound = true;
-        await exploreDubbingSectionChilds(section.index, toc, element);
-      }
+  for (const [sectionId, section] of toc) {
+    // find dubbing section
+    if (dubbingTerm.some((rx) => rx.test(section.line))) {
+      sectionFound = true;
+      const _results = await exploreDubbingSectionChilds(section.index, toc, {
+        pageid: wikipediaLangPageId,
+        title: 'test',
+        ns: 0,
+      });
+      results.push(..._results);
     }
+  }
+
+  console.log('results', JSON.stringify(results, undefined, 2));
 
   return new Response(
     JSON.stringify({ stop: true }),

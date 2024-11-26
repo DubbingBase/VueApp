@@ -35,3 +35,18 @@ export const getImageFromFilename = (filename: string) => {
 }
 
 export const categories = [frenchMaleDubber, frenchFemaleDubber];
+export const dubbingTerm = [/doublage|voix|voxographie/gim];
+export const acceptedDubbingSubSectionMovie =
+    /film|film d'animation|t[eé]l[eé]film|t[eé]l[eé]film d'animation|longs[- ]m[eé]trage|courts[- ]m[eé]trage/i;
+export const acceptedDubbingSubSectionShows =
+    /t[eé]l[eé]vision|s[eé]ries t[eé]l[eé]vis[eé]e|s[eé]rie/i;
+export const acceptedDubbingSubSectionGames = /jeux? vid[eé]o/i;
+export const acceptedDubbingSubSectionGenericDubbing =
+    /doublage|cin[eé]ma|voix[ -]off|voix|clips|autres|voice[ -]over|documentaire|[eé]mission|radio|publicit[ée]|livres? audio|animation|spectacles|musique|romans/i;
+
+export const acceptedDubbingSubSections = [
+    acceptedDubbingSubSectionMovie,
+    acceptedDubbingSubSectionShows,
+    acceptedDubbingSubSectionGames,
+    acceptedDubbingSubSectionGenericDubbing,
+];
