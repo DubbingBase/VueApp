@@ -1,24 +1,25 @@
 <template>
     <div class="actor">
         <div class="header" v-if="voiceActor">
-            <img :src="getImage(voiceActor.profile_path)" alt="" />
+            <img :src="profilePicture" alt="" />
             <div class="actor-name">{{ voiceActor.firstname }} {{ voiceActor.lastname }}</div>
         </div>
 
         <div class="body" v-if="voiceActor">
             <TabView :activeIndex="active">
                 <TabPanel header="À propos">
-                    <p> Date de naissance :  {{ voiceActor.birthday }} </p>
-                    {{ voiceActor.biography }}
+                    <p> Date de naissance :  {{ voiceActor.date_of_birth }} </p>
+                    {{ voiceActor.bio }}
                 </TabPanel>
                 <TabPanel header="Films">
                     <div class="movies-wrapper">
-                        <movie v-for="movie in movies" :value="getMovie(movie)"></movie>
+                        <Movie v-for="movie in movies" :value="getMovie(movie)"></Movie>
                     </div>
                 </TabPanel>
                 <TabPanel header="Séries">
                     <div class="series-wrapper">
-                        <serie v-for="serie in series" :value="getSerie(serie)"></serie>
+                        <pre>length: {{ series?.length }}</pre>
+                        <Serie v-for="serie in series" :value="getSerie(serie)"></Serie>
                     </div>
                 </TabPanel>
             </TabView>
@@ -33,10 +34,10 @@ import { getImage } from '../utils';
 import { Actor } from '../../supabase/functions/_shared/actor';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
-import movie from '../components/Movie.vue';
-import serie from '../components/Serie.vue';
-import type { Serie } from '../../supabase/functions/_shared/serie';
-import type { Movie, MovieResponse } from '../../supabase/functions/_shared/movie';
+import Movie from '../components/Movie.vue';
+import Serie from '../components/Serie.vue';
+import type { Serie as SerieModel } from '../../supabase/functions/_shared/serie';
+import type { Movie as MovieModel, MovieResponse } from '../../supabase/functions/_shared/movie';
 import { supabase } from '../api/supabase';
 
 const route = useRoute()
@@ -52,11 +53,13 @@ type VoiceActorResponse = {
             content_id: string
         }[]
     }
-    medias: (MovieResponse | Serie)[]
+    profile_picture: string
+    medias: (MovieResponse | SerieModel)[]
 }
 
 const voiceActor = ref<VoiceActorResponse['voiceActor'] | undefined>()
 const medias = ref<VoiceActorResponse['medias'] | undefined>()
+const profilePicture = ref<VoiceActorResponse['profile_picture'] | undefined>()
 
 const active = ref(0)
 
@@ -76,13 +79,13 @@ const series = computed(() => {
     return voiceActor.value?.work.filter(isSerie)
 })
 
-const getMovie = (item: unknown): Serie => {
+const getMovie = (item: unknown): MovieModel => {
     return medias.value?.find(media => {
         return media.id === item.content_id;
     })
 }
 
-const getSerie = (item: unknown): Serie => {
+const getSerie = (item: unknown): SerieModel => {
     return medias.value?.find(media => {
         return media.id === item.content_id;
     })
@@ -100,6 +103,7 @@ onMounted(async () => {
     }
     voiceActor.value = voiceActorResponse.voiceActor
     medias.value = voiceActorResponse.medias
+    profilePicture.value = voiceActorResponse.profile_picture
 })
 
 
