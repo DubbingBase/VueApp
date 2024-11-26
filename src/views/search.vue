@@ -5,8 +5,13 @@
 
     <div class="results">
       <router-link :to="{ name: typeToRoute(match.media_type), params: { id: match.id } }" v-for="match in matches" :key="match.id" class="result">
+        <img
+                :src="getImage(match.backdrop_path)"
+                alt=""
+            />
         <div class="title">{{ match.name ?? match.title }}</div>
         <div class="overview">{{ match.media_type }}</div>
+        <div class="overview">{{ match.first_air_date	?? match.release_date }}</div>
       </router-link>
     </div>
   </div>
@@ -17,6 +22,7 @@ import InputText from 'primevue/inputtext';
 import { supabase } from '../api/supabase';
 import { ref } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
+import { getImage } from '../utils';
 
 const matches = ref([])
 
