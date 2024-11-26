@@ -1,0 +1,1 @@
+alter table "public"."voice_actors" add column "profile_picture" text;

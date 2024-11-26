@@ -23,6 +23,8 @@
                     </div>
                 </TabPanel>
             </TabView>
+
+            <Button @click="addWikiId">Saisir wikipedia id</Button>
         </div>
     </div>
 </template>
@@ -89,6 +91,10 @@ const getSerie = (item: unknown): SerieModel => {
     return medias.value?.find(media => {
         return media.id === item.content_id;
     })
+}
+
+const addWikiId = () => {
+    console.log('addWikiId')
 }
 
 onMounted(async () => {
