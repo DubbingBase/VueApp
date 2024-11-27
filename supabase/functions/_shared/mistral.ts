@@ -8,3 +8,15 @@ export interface MistralMovieExtractItemOutput {
     voiceActorFirstname: string
     performance?: string
 }
+
+
+export interface MistralVoiceActorExtractOutput {
+    items?: MistralVoiceActorExtractItemOutput[]
+}
+
+export interface MistralVoiceActorExtractItemOutput {
+    actor: string
+    performance?: string
+    production?: string
+    year?: number
+}

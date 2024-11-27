@@ -1,5 +1,5 @@
-html, body, #app {
-    margin: 0;
-    padding: 0;
-    height: 100%;
+.ellipsis {
+    white-space: nowrap;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
 }

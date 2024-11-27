@@ -8,7 +8,7 @@ import { corsHeaders } from "../_shared/cors.ts"
 import { supabase } from "../_shared/supabase.ts"
 import { dubbingTerm } from "../_shared/extract/constants.ts"
 import { getEntity, getWikipediaPage, getWikipediaPageSectionAsWikitext, wikipediaPageFindSections } from "../_shared/extract/constants.ts"
-import { MistralMovieExtractOutput } from "../_shared/mistral.ts";
+import { MistralMovieExtractOutput, MistralVoiceActorExtractOutput } from "../_shared/mistral.ts";
 import { WithCast } from "../_shared/other.ts";
 import { Database } from "../_shared/database.types.ts";
 import { PostgrestError } from "jsr:@supabase/supabase-js";
@@ -82,27 +82,20 @@ Deno.serve(async (req) => {
 
   console.log('results', JSON.stringify(results, undefined, 2));
 
-  return new Response(
-    JSON.stringify({ stop: true }),
-    {
-      headers: {
-        ...corsHeaders,
-        "Content-Type": "application/json"
-      }
-    },
-  )
+  // return new Response(
+  //   JSON.stringify({ stop: true }),
+  //   {
+  //     headers: {
+  //       ...corsHeaders,
+  //       "Content-Type": "application/json"
+  //     }
+  //   },
+  // )
 
-  const sectionIds = wikipediaPageSections.parse.sections.filter((section: any) => {
-    return section.line.match(/distribution/i)
-  })
+  // skip other than movie and show
+  const filteredResults = results.filter(x => x.type !== 'movie' && x.type !== 'show')
 
-  for (const section of sectionIds) {
-    console.log('section', section)
-
-    const sectionAsWikitextURL = getWikipediaPageSectionAsWikitext(wikipediaLangPageId, section.index)
-    const responseSectionActionWikitext = await fetch(sectionAsWikitextURL)
-    const wikitextJSON = await responseSectionActionWikitext.json()
-    const wikitext = wikitextJSON.parse.wikitext
+  for (const result of filteredResults.slice(0, 1)) {
 
     const mistralURL = 'https://api.mistral.ai/v1/agents/completions'
     const mistralJSONRequest = await fetch(mistralURL, {
@@ -116,10 +109,10 @@ Deno.serve(async (req) => {
         "messages": [
           {
             "role": "user",
-            "content": wikitext
+            "content": result.html
           }
         ],
-        "agent_id": "ag:4785a948:20241120:extracteur-page-film-wikipedia-doubleurs:31fc70f7",
+        "agent_id": "ag:4785a948:20241126:extracteur-page-acteur-wikipedia-doubleurs:249748fe",
         "response_format": {
           "type": "json_object"
         }
@@ -127,38 +120,37 @@ Deno.serve(async (req) => {
     })
 
     const mistralJSON = await mistralJSONRequest.json()
-
     const mistralSuggestion = mistralJSON.choices[0].message.content
-    const mistralSuggestionJSON = JSON.parse(mistralSuggestion) as MistralMovieExtractOutput
+    const mistralSuggestionJSON = JSON.parse(mistralSuggestion) as MistralVoiceActorExtractOutput
 
     console.log('mistralSuggestion', mistralSuggestionJSON)
 
-    for (const entry of mistralSuggestionJSON?.items ?? []) {
-      const { actor, voiceActorFirstname, voiceActorName } = entry
+    // for (const entry of mistralSuggestionJSON?.items ?? []) {
+    //   const { actor, voiceActorFirstname, voiceActorName } = entry
 
-      if (actor && voiceActorFirstname && voiceActorName) {
-        // get actor id from the movie cast
-        const foundActor = movie.credits.cast.find((cast) => cast.name === actor)
+    //   if (actor && voiceActorFirstname && voiceActorName) {
+    //     // get actor id from the movie cast
+    //     const foundActor = movie.credits.cast.find((cast) => cast.name === actor)
 
-        if (!foundActor) {
-          console.log(`actor from wikitext "${actor}" not found in tmdb cast`)
-          continue
-        }
+    //     if (!foundActor) {
+    //       console.log(`actor from wikitext "${actor}" not found in tmdb cast`)
+    //       continue
+    //     }
 
-        const { id: actorId } = foundActor
+    //     const { id: actorId } = foundActor
 
-        await insertVoiceActorAndWork(
-          voiceActorFirstname,
-          voiceActorName,
-          tmdbId,
-          actorId,
-          type,
-          entry.performance
-        )
-      } else {
-        console.error('mistral missing structure')
-      }
-    }
+    //     await insertVoiceActorAndWork(
+    //       voiceActorFirstname,
+    //       voiceActorName,
+    //       tmdbId,
+    //       actorId,
+    //       type,
+    //       entry.performance
+    //     )
+    //   } else {
+    //     console.error('mistral missing structure')
+    //   }
+    // }
   }
 
   const result = { ok: true }

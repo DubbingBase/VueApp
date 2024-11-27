@@ -1,57 +1,96 @@
 <template>
-  <div>
-    <h1>Search</h1>
-    <InputText @input="search" />
-
-    <div class="results">
-      <router-link :to="{ name: typeToRoute(match.media_type), params: { id: match.id } }" v-for="match in matches" :key="match.id" class="result">
-        <img
-                :src="getImage(match.backdrop_path)"
-                alt=""
-            />
-        <div class="title">{{ match.name ?? match.title }}</div>
-        <div class="overview">{{ match.media_type }}</div>
-        <div class="overview">{{ match.first_air_date	?? match.release_date }}</div>
-      </router-link>
-    </div>
-  </div>
+  <ion-page>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Search</ion-title>
+      </ion-toolbar>
+      <ion-toolbar>
+        <ion-searchbar
+          :debounce="1000"
+          @ionInput="search($event)"
+        ></ion-searchbar>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+    <ion-list>
+      <ion-item
+        :routerLink="{
+          name: typeToRoute(match.media_type),
+          params: { id: match.id },
+        }"
+        v-for="match in matches"
+        :key="match.id"
+      >
+        <ion-thumnail class="avatar" slot="start">
+          <img :src="getImage(match.poster_path	)" />
+        </ion-thumnail>
+        <ion-label>
+          <h3 class="title ellipsis">{{ match.name ?? match.title }}</h3>
+          <p class="subtitle">{{ date(match) }} <ion-chip>{{ match.media_type }}</ion-chip></p>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts" setup>
-import InputText from 'primevue/inputtext';
-import { supabase } from '../api/supabase';
-import { ref } from 'vue';
-import { useDebounceFn } from '@vueuse/core';
-import { getImage } from '../utils';
+import { supabase } from "../api/supabase";
+import { ref } from "vue";
+import { getImage } from "../utils";
+import {
+  IonHeader,
+  IonSearchbar,
+  IonTitle,
+  IonContent,
+  IonLabel,
+  IonItem,
+  IonList,
+  IonChip,
+  IonToolbar,
+  IonPage,
+  IonThumbnail,
+  SearchbarInputEventDetail,
+} from "@ionic/vue";
+import { IonSearchbarCustomEvent } from "@ionic/core";
+import { Movie } from "../../supabase/functions/_shared/movie";
+import { Serie } from "../../supabase/functions/_shared/serie";
+import { format, parse, parseISO } from 'date-fns'
 
-const matches = ref([])
+const matches = ref<(Movie | Serie)[]>([]);
 
-const search = useDebounceFn(async(event: any) => {
-  console.log(event.target.value)
+const date = (match: Movie | Serie) => {
+  return format(parseISO(match.first_air_date ?? match.release_date), 'yyyy')
+}
 
-  const { data, error } = await supabase.functions.invoke('search', {
+const search = async (
+  event: IonSearchbarCustomEvent<SearchbarInputEventDetail>
+) => {
+  console.log(event.target.value);
+
+  const { data, error } = await supabase.functions.invoke("search", {
     body: {
-      query: event.target.value
-    }
-  })
+      query: event.target.value,
+    },
+  });
 
-  console.log('data', data)
+  console.log("data", data);
 
-  matches.value = data.results
-}, 500)
+  matches.value = data.results;
+};
 
 const typeToRoute = (type: string) => {
   switch (type) {
-    case 'movie':
-      return 'MovieDetails'
-    case 'tv':
-      return 'SerieDetails'
-    case 'person':
-      return 'ActorDetails'
+    case "movie":
+      return "MovieDetails";
+    case "tv":
+      return "SerieDetails";
+    case "person":
+      return "ActorDetails";
     default:
-      return 'home'
+      return "home";
   }
-}
+};
 </script>
 
 <style lang="scss" scoped>
@@ -74,14 +113,24 @@ const typeToRoute = (type: string) => {
   border-radius: 5px;
   width: 100%;
 
-  .title {
-    font-size: 1.5rem;
-    font-weight: bold;
-  }
-
   .overview {
     font-size: 1rem;
     color: #666;
   }
+}
+
+.avatar {
+  --border-radius: 4px;
+  width: 48px;
+  height: auto;
+}
+
+.title {
+  width: 100%;
+}
+
+.subtitle {
+  display: flex;
+  align-items: center;
 }
 </style>

@@ -1,59 +1,82 @@
 <template>
-  <div class="base">
-    <div class="top-bar">
-      <div class="logo">DB_LOGO</div>
-    </div>
-    <div class="content">
-      <router-view />
-    </div>
-    <div class="menu">
-      <Tabs :value="active" class="tab-menu">
-        <TabList>
-          <Tab v-for="item in items" :key="item.label" :value="item.route">
-            <router-link
-              v-if="item.route"
-              v-slot="{ href, navigate }"
-              :to="item.route"
-              custom
-            >
-              <a
-                v-ripple
-                :href="href"
-                @click="navigate"
-                class="flex items-center gap-2 text-inherit"
-              >
-                <i :class="item.icon" />
-                <span>{{ item.label }}</span>
-              </a>
-            </router-link>
-          </Tab>
-        </TabList>
-      </Tabs>
-    </div>
-  </div>
+  <ion-page>
+    <ion-tabs>
+      <ion-router-outlet></ion-router-outlet>
+      <ion-tab-bar slot="bottom">
+        <ion-tab-button
+          v-for="item in items"
+          :key="item.route"
+          :tab="item.route"
+          :href="item.href"
+        >
+          <component :is="item.icon"></component>
+          <ion-label>{{ item.label }}</ion-label>
+        </ion-tab-button>
+      </ion-tab-bar>
+    </ion-tabs>
+  </ion-page>
+  <!-- <k-tabbar class="left-0 bottom-0 fixed">
+    <k-tabbar-link
+      v-for="item in items"
+      :active="active === item.route"
+      @click="onTabClick(item)"
+      :linkProps="{ to: item.route }"
+    >
+      <template #label> {{ item.label }} </template>
+      <template #icon>
+        <k-icon>
+          <i :class="item.icon" />
+        </k-icon>
+      </template>
+    </k-tabbar-link>
+  </k-tabbar> -->
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { IonPage, IonTabs, IonTabBar, IonTabButton, IonLabel, IonRouterOutlet } from "@ionic/vue";
+import SolarTvLinear from '~icons/solar/tv-linear'
+import SolarMagniferLinear from '~icons/solar/magnifer-linear'
+import SolarHome2Linear from '~icons/solar/home-2-linear'
+import SolarSettingsLinear from '~icons/solar/settings-linear'
 
-const active = ref(0);
+interface TabItem {
+  label: string;
+  icon: string;
+  route: string;
+}
+
+const router = useRouter();
+
+const active = ref<string>("home");
 const items = ref([
   {
     label: "Accueil",
-    icon: "pi pi-fw pi-home",
-    route: "/",
+    icon: SolarHome2Linear,
+    route: "Home",
+    href: "/tabs/home",
   },
   {
     label: "Recherche",
-    icon: "pi pi-fw pi-search",
-    route: "/search",
+    icon: SolarMagniferLinear,
+    route: "Search",
+    href: "/tabs/search",
   },
   {
     label: "Parametres",
-    icon: "pi pi-fw pi-cog",
-    route: "/settings",
+    icon: SolarSettingsLinear,
+    route: "Settings",
+    href: "/tabs/settings",
   },
 ]);
+
+const onTabClick = (item: TabItem) => {
+  active.value = item.route;
+  router.push({
+    name: item.route,
+  });
+};
 </script>
 
 <style scoped>

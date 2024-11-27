@@ -1,27 +1,18 @@
 <template>
-  <div
-      class="movie"
-  >
-    <router-link
-      :to="{
-        name: 'MovieDetails',
-        params: {
-          id: value.id,
-        },
-      }"
-    >
-      <div class="poster">
-        <img :src="getImage(value.poster_path)" alt="" />
-      </div>
-    </router-link>
+  <ion-text class="movie" @click="navigate">
+    <div class="poster">
+      <img :src="getImage(value.poster_path)" alt="" />
+    </div>
     <div class="caption">{{ value.title }}</div>
-  </div>
+  </ion-text>
 </template>
 
 <script lang="ts" setup>
 import { PropType, toRefs } from "vue";
 import { Movie } from "../../supabase/functions/_shared/movie";
 import { getImage } from "../utils";
+import { IonText } from "@ionic/vue";
+import { useRouter } from "vue-router";
 
 const props = defineProps({
   value: {
@@ -31,6 +22,17 @@ const props = defineProps({
 });
 
 const { value } = toRefs(props);
+
+const router = useRouter();
+
+const navigate = () => {
+  router.push({
+    name: "MovieDetails",
+    params: {
+      id: value.value.id,
+    },
+  });
+};
 </script>
 
 <style lang="scss" scoped>
