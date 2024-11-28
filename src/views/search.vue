@@ -21,12 +21,9 @@
         v-for="match in matches"
         :key="match.id"
       >
-        <ion-thumbnail class="avatar" slot="start">
-          <img v-if="match.poster_path" :src="getImage(match.poster_path)" />
-          <img v-else src="https://placehold.co/48x72?text=?" />
-        </ion-thumbnail>
+        <MediaThumbnail :path="matchToImage(match)"></MediaThumbnail>
         <ion-label>
-          <h3 class="title ellipsis">{{ match.name ?? match.title }}</h3>
+          <h3 class="title ellipsis">{{ matchToName(match) }}</h3>
           <p class="subtitle">{{ date(match) }} <ion-chip>{{ match.media_type }}</ion-chip></p>
         </ion-label>
       </ion-item>
@@ -38,7 +35,6 @@
 <script lang="ts" setup>
 import { supabase } from "../api/supabase";
 import { ref } from "vue";
-import { getImage } from "../utils";
 import {
   IonHeader,
   IonSearchbar,
@@ -50,18 +46,29 @@ import {
   IonChip,
   IonToolbar,
   IonPage,
-  IonThumbnail,
   SearchbarInputEventDetail,
 } from "@ionic/vue";
 import { IonSearchbarCustomEvent } from "@ionic/core";
 import { Movie } from "../../supabase/functions/_shared/movie";
 import { Serie } from "../../supabase/functions/_shared/serie";
-import { format, parse, parseISO } from 'date-fns'
+import { format, parseISO } from 'date-fns'
+import MediaThumbnail from "@/components/MediaThumbnail.vue";
 
 const matches = ref<(Movie | Serie)[]>([]);
 
+const matchToImage = (el: unknown) => {
+  return el.profile_path ?? el.poster_path
+}
+
+const matchToName = (el: unknown) => {
+  return el.name ?? el.title ?? (el.firstname ?? '') + ' ' + (el.lastname ?? '')
+}
+
 const date = (match: Movie | Serie) => {
-  return format(parseISO(match.first_air_date ?? match.release_date), 'yyyy')
+  const date = match.first_air_date ?? match.release_date
+  if (date) {
+    return format(parseISO(date), 'yyyy')
+  }
 }
 
 const search = async (
@@ -77,7 +84,7 @@ const search = async (
 
   console.log("data", data);
 
-  matches.value = data.results;
+  matches.value = data;
 };
 
 const typeToRoute = (type: string) => {
@@ -88,6 +95,8 @@ const typeToRoute = (type: string) => {
       return "SerieDetails";
     case "person":
       return "ActorDetails";
+    case "voice_actor":
+      return "VoiceActorDetails";
     default:
       return "home";
   }

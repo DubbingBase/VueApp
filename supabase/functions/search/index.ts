@@ -16,10 +16,9 @@ Deno.serve(async (req) => {
 
   console.log('query', query)
 
-  let resp = undefined
+  let resp = []
 
   try {
-
     const response = await fetch(`https://api.themoviedb.org/3/search/multi?query=${query}&page=1language=fr-FR`, {
       headers: {
         "Content-Type": "application/json",
@@ -28,9 +27,29 @@ Deno.serve(async (req) => {
       },
     })
 
-    resp = await response.json()
+    const res = await response.json()
+    resp.push(...res.results)
   } catch (e) {
     console.error('e', e)
+  }
+
+  try {
+    const supabaseQuery = query.split(' ').map(x => `'${x}'`).join(' | ')
+    console.log('supabaseQuery', supabaseQuery)
+    const { data, error } = await supabase
+      .from('voice_actors')
+      .select()
+      .textSearch('voice_actor_name', supabaseQuery)
+    console.log('data', data)
+    console.log('error', error)
+    if (data) {
+      resp.push(...data.map(x => ({
+        ...x,
+        media_type: 'voice_actor',
+      })))
+    }
+  } catch (e) {
+    console.log('e', e)
   }
 
   return new Response(

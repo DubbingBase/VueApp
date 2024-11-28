@@ -64,8 +64,10 @@ export type Database = {
           id: number
           lastname: string
           nationality: string | null
+          profile_picture: string | null
           social_media_links: Json | null
           years_active: string | null
+          voice_actor_name: string | null
         }
         Insert: {
           awards?: string | null
@@ -75,6 +77,7 @@ export type Database = {
           id?: number
           lastname: string
           nationality?: string | null
+          profile_picture?: string | null
           social_media_links?: Json | null
           years_active?: string | null
         }
@@ -86,6 +89,7 @@ export type Database = {
           id?: number
           lastname?: string
           nationality?: string | null
+          profile_picture?: string | null
           social_media_links?: Json | null
           years_active?: string | null
         }
@@ -150,7 +154,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      voice_actor_name: {
+        Args: {
+          "": unknown
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

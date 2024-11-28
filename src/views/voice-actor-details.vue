@@ -11,7 +11,16 @@
     <ion-content>
       <div class="actor">
         <div class="header" v-if="voiceActor">
-          <img :src="profilePicture" alt="" />
+          <MediaThumbnail
+            v-if="profilePicture"
+            :path="profilePicture"
+            raw-path
+          ></MediaThumbnail>
+          <MediaThumbnail
+            v-else
+            @click="uploadImage"
+            :path="profilePicture"
+          ></MediaThumbnail>
           <div class="actor-name">
             {{ voiceActor.firstname }} {{ voiceActor.lastname }}
           </div>
@@ -19,31 +28,28 @@
 
         <div class="body" v-if="voiceActor">
           <p>Date de naissance : {{ voiceActor.date_of_birth }}</p>
-          {{ voiceActor.bio }}
-          <!-- <div class="movies-wrapper">
-        <Movie v-for="movie in movies" :value="getMovie(movie)"></Movie>
-      </div>
-      <div class="series-wrapper">
-        <Serie v-for="serie in series" :value="getSerie(serie)"></Serie>
-      </div> -->
+          <p>{{ voiceActor.bio }}</p>
 
-          <div class="work" v-for="work in voiceActor.work">
+          <div class="work" v-for="work in enhancedWork" :key="work.media.id">
             <router-link
               :to="{
-                name: 'MovieDetails',
+                name:
+                  work.media.media_type === 'movie'
+                    ? 'MovieDetails'
+                    : 'SerieDetails',
                 params: {
-                  id: work.id,
+                  id: work.media.id,
                 },
               }"
             >
               <div class="poster">
-                <img :src="getImage(work.poster_path)" alt="" />
+                <MediaThumbnail :path="work.media.poster_path" />
               </div>
             </router-link>
-            <div class="caption">{{ work.title }}</div>
+            <div class="caption">{{ work.media.title ?? work.media.name }}</div>
           </div>
 
-          <Button @click="addWikiId">Saisir wikipedia id</Button>
+          <ion-button @click="addWikiId">Saisir wikipedia id</ion-button>
         </div>
       </div>
     </ion-content>
@@ -53,17 +59,21 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
-import { getImage } from "../utils";
-import { Actor } from "../../supabase/functions/_shared/actor";
-import Movie from "../components/Movie.vue";
-import Serie from "../components/Serie.vue";
 import type { Serie as SerieModel } from "../../supabase/functions/_shared/serie";
-import { IonPage, IonBackButton, IonButtons, IonTitle, IonToolbar, IonContent, IonHeader } from "@ionic/vue";
-import type {
-  Movie as MovieModel,
-  MovieResponse,
-} from "../../supabase/functions/_shared/movie";
+import {
+  IonPage,
+  IonButton,
+  IonBackButton,
+  IonButtons,
+  IonTitle,
+  IonToolbar,
+  IonContent,
+  IonHeader,
+} from "@ionic/vue";
+import type { Movie as MovieModel } from "../../supabase/functions/_shared/movie";
 import { supabase } from "../api/supabase";
+import MediaThumbnail from "@/components/MediaThumbnail.vue";
+import { useFileDialog } from "@vueuse/core";
 
 const route = useRoute();
 
@@ -75,46 +85,30 @@ type VoiceActorResponse = {
     work: {
       id: string;
       actor_id: string;
-      content_id: string;
+      content_id: number;
     }[];
   };
   profile_picture: string;
-  medias: (MovieResponse | SerieModel)[];
+  medias: (MovieModel | SerieModel)[];
 };
 
 const voiceActor = ref<VoiceActorResponse["voiceActor"] | undefined>();
-const medias = ref<VoiceActorResponse["medias"] | undefined>();
+const medias = ref<VoiceActorResponse["medias"]>([]);
 const profilePicture = ref<VoiceActorResponse["profile_picture"] | undefined>();
 
-const active = ref(0);
-
-const isMovie = (item: unknown): item is unknown => {
-  return item.content_type === "movie";
-};
-
-const isSerie = (item: unknown): item is unknown => {
-  return item.content_type === "tv";
-};
-
-const movies = computed(() => {
-  return voiceActor.value?.work.filter(isMovie);
+// mix work and medias
+const enhancedWork = computed(() => {
+  return voiceActor.value?.work
+    .map((work) => {
+      const media = medias.value.find((media) => {
+        console.log("media.id", media.id);
+        console.log("work.content_id", work.content_id);
+        return media.id === work.content_id;
+      });
+      return media ? { media, work } : null;
+    })
+    .filter((item) => item !== null);
 });
-
-const series = computed(() => {
-  return voiceActor.value?.work.filter(isSerie);
-});
-
-const getMovie = (item: unknown): MovieModel => {
-  return medias.value?.find((media) => {
-    return media.id === item.content_id;
-  });
-};
-
-const getSerie = (item: unknown): SerieModel => {
-  return medias.value?.find((media) => {
-    return media.id === item.content_id;
-  });
-};
 
 const addWikiId = () => {
   console.log("addWikiId");
@@ -136,7 +130,39 @@ onMounted(async () => {
   voiceActor.value = voiceActorResponse.voiceActor;
   medias.value = voiceActorResponse.medias;
   profilePicture.value = voiceActorResponse.profile_picture;
+
+  console.log("enhancedWork.value", enhancedWork.value);
 });
+
+const { files, open, reset, onCancel, onChange } = useFileDialog({
+  accept: "image/*", // Set to accept only image files
+  directory: false, // Select directories instead of files if set true
+});
+
+onChange(async (files) => {
+  const file = files?.[0];
+  if (!file) {
+    return;
+  }
+
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('voice_actor_id', voiceActor.value?.id)
+
+  const { data, error } = await supabase.functions.invoke('upload_profile_picture', {
+    body: formData
+  })
+
+  profilePicture.value = data.fullPath;
+});
+
+onCancel(() => {
+  /** do something on cancel */
+});
+
+const uploadImage = async () => {
+  open();
+};
 </script>
 
 <style scoped lang="scss">

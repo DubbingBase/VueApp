@@ -80,19 +80,20 @@ Deno.serve(async (req) => {
 
   console.log('apiURL', apiURL)
 
-  const oldImage = await supabase.storage.from('voice_actor_profile_pictures')
+  const oldImage = await supabase.storage
+    .from('voice_actor_profile_pictures')
     .getPublicUrl(va.profile_picture)
 
   console.log('Deno.env', Deno.env.toObject())
 
-  const image = `${apiURL}/storage/v1/object/public/voice_actor_profile_pictures/${va.profile_picture}`
+  const image = va.profile_picture ? `${apiURL}/storage/v1/object/public/voice_actor_profile_pictures/${va.profile_picture}` : undefined
 
   console.log('oldImage', oldImage)
   console.log('image', image)
 
   const result: {
     voiceActor: TODO_VoiceActorDbResponse;
-    profile_picture: string;
+    profile_picture: string | undefined;
     medias: (Movie | Serie)[];
   } = {
     voiceActor: va,

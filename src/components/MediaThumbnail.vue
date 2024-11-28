@@ -26,15 +26,20 @@ const props = defineProps({
     required: false,
     default: 48,
   },
+  rawPath: {
+    type: Boolean,
+    required: false,
+    default: false,
+  }
 });
 
-const { path, height, width } = toRefs(props);
+const { path, height, width, rawPath } = toRefs(props);
 
 const src = computed(() => {
   if (!path?.value) {
     return defaultSrc.value;
   }
-  return getImage(path.value);
+  return rawPath.value ? path.value : getImage(path.value);
 });
 
 const defaultSrc = computed(() => {
