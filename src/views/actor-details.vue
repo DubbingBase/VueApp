@@ -1,37 +1,54 @@
 <template>
   <ion-page>
-    <div class="actor">
-      <div class="header" v-if="actor">
-        <img :src="getImage(actor.profile_path)" alt="" />
-        <div class="actor-name">{{ actor.name }}</div>
-      </div>
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-back-button default-href="/" />
+        </ion-buttons>
+        <ion-title>Acteur</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <div class="actor">
+        <div class="header" v-if="actor">
+          <img :src="getImage(actor.profile_path)" alt="" />
+          <div class="actor-name">{{ actor.name }}</div>
+        </div>
 
-      <div class="body" v-if="actor">
-        <TabView :activeIndex="active">
-          <TabPanel header="À propos">
-            <p>Date de naissance : {{ actor.birthday }}</p>
-            {{ actor.biography }}
-          </TabPanel>
-          <TabPanel header="Films">
-            <div class="movies-wrapper">
-              <movie v-for="movie in movies" :value="movie"></movie>
-            </div>
-          </TabPanel>
-          <TabPanel header="Séries">
-            <div class="series-wrapper">
-              <serie v-for="serie in series" :value="serie"></serie>
-            </div>
-          </TabPanel>
-        </TabView>
+        <div class="body" v-if="actor">
+          <TabView :activeIndex="active">
+            <TabPanel header="À propos">
+              <p>Date de naissance : {{ actor.birthday }}</p>
+              {{ actor.biography }}
+            </TabPanel>
+            <TabPanel header="Films">
+              <div class="movies-wrapper">
+                <movie v-for="movie in movies" :value="movie"></movie>
+              </div>
+            </TabPanel>
+            <TabPanel header="Séries">
+              <div class="series-wrapper">
+                <serie v-for="serie in series" :value="serie"></serie>
+              </div>
+            </TabPanel>
+          </TabView>
+        </div>
       </div>
-    </div>
+    </ion-content>
   </ion-page>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
-import { IonPage } from "@ionic/vue";
+import {
+  IonPage,
+  IonBackButton,
+  IonButtons,
+  IonTitle,
+  IonToolbar,
+  IonHeader,
+} from "@ionic/vue";
 import { getImage } from "../utils";
 import { Actor } from "../../supabase/functions/_shared/actor";
 import movie from "../components/Movie.vue";
@@ -54,12 +71,22 @@ const isSerie = (item: Movie | Serie): item is Serie => {
   return item.media_type === "tv";
 };
 
+const credits = computed(() => {
+  return (
+    actor.value?.combined_credits ??
+    actor.value?.credits ?? {
+      cast: [],
+      crew: [],
+    }
+  );
+});
+
 const movies = computed(() => {
-  return actor.value?.combined_credits.cast.filter(isMovie);
+  return credits.value.cast.filter(isMovie);
 });
 
 const series = computed(() => {
-  return actor.value?.combined_credits.cast.filter(isSerie);
+  return credits.value.cast.filter(isSerie);
 });
 
 onMounted(async () => {

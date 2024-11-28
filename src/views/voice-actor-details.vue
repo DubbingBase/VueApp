@@ -1,42 +1,52 @@
 <template>
   <ion-page>
-    <div class="actor">
-      <div class="header" v-if="voiceActor">
-        <img :src="profilePicture" alt="" />
-        <div class="actor-name">
-          {{ voiceActor.firstname }} {{ voiceActor.lastname }}
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-back-button default-href="/" />
+        </ion-buttons>
+        <ion-title>Voix</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <div class="actor">
+        <div class="header" v-if="voiceActor">
+          <img :src="profilePicture" alt="" />
+          <div class="actor-name">
+            {{ voiceActor.firstname }} {{ voiceActor.lastname }}
+          </div>
         </div>
-      </div>
 
-      <div class="body" v-if="voiceActor">
-        <p>Date de naissance : {{ voiceActor.date_of_birth }}</p>
-        {{ voiceActor.bio }}
-        <!-- <div class="movies-wrapper">
+        <div class="body" v-if="voiceActor">
+          <p>Date de naissance : {{ voiceActor.date_of_birth }}</p>
+          {{ voiceActor.bio }}
+          <!-- <div class="movies-wrapper">
         <Movie v-for="movie in movies" :value="getMovie(movie)"></Movie>
       </div>
       <div class="series-wrapper">
         <Serie v-for="serie in series" :value="getSerie(serie)"></Serie>
       </div> -->
 
-        <div class="work" v-for="work in voiceActor.work">
-          <router-link
-            :to="{
-              name: 'MovieDetails',
-              params: {
-                id: work.id,
-              },
-            }"
-          >
-            <div class="poster">
-              <img :src="getImage(work.poster_path)" alt="" />
-            </div>
-          </router-link>
-          <div class="caption">{{ work.title }}</div>
-        </div>
+          <div class="work" v-for="work in voiceActor.work">
+            <router-link
+              :to="{
+                name: 'MovieDetails',
+                params: {
+                  id: work.id,
+                },
+              }"
+            >
+              <div class="poster">
+                <img :src="getImage(work.poster_path)" alt="" />
+              </div>
+            </router-link>
+            <div class="caption">{{ work.title }}</div>
+          </div>
 
-        <Button @click="addWikiId">Saisir wikipedia id</Button>
+          <Button @click="addWikiId">Saisir wikipedia id</Button>
+        </div>
       </div>
-    </div>
+    </ion-content>
   </ion-page>
 </template>
 
@@ -48,7 +58,7 @@ import { Actor } from "../../supabase/functions/_shared/actor";
 import Movie from "../components/Movie.vue";
 import Serie from "../components/Serie.vue";
 import type { Serie as SerieModel } from "../../supabase/functions/_shared/serie";
-import { IonPage } from "@ionic/vue";
+import { IonPage, IonBackButton, IonButtons, IonTitle, IonToolbar, IonContent, IonHeader } from "@ionic/vue";
 import type {
   Movie as MovieModel,
   MovieResponse,

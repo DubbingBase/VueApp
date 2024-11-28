@@ -1,10 +1,26 @@
 <template>
   <ion-page>
+    <ion-header class="header">
+      <ion-toolbar class="toolbar">
+        <ion-buttons slot="start">
+          <ion-back-button default-href="/home" />
+        </ion-buttons>
+        <ion-buttons slot="end">
+          <ion-button fill="clear">
+            <SolarSettingsMinimalisticOutline></SolarSettingsMinimalisticOutline>
+          </ion-button>
+          <ion-button fill="clear">
+            <SolarSettingsMinimalisticOutline>
+            </SolarSettingsMinimalisticOutline>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
     <ion-content>
       <div class="tabs">
-    <div class="summary">
-      <div v-if="show" class="show-title">{{ show.name }}</div>
-    </div>
+        <div class="summary">
+          <div v-if="show" class="show-title">{{ show.name }}</div>
+        </div>
         <ion-segment>
           <ion-segment-button value="details" content-id="details">
             <!-- <ion-icon :icon="playCircle" /> -->
@@ -25,11 +41,22 @@
           </ion-segment-content>
           <ion-segment-content class="segmented-content" id="seasons">
             <div class="seasons" v-if="show">
-              <div class="season" v-for="season in show.seasons" :key="season.id">
-                <div class="season-title">{{ season.name }}</div>
+              <div
+                expand="block"
+                @click="goToSeason(season.id, season.season_number)"
+                class="season"
+                v-for="season in show.seasons"
+                :key="season.id"
+              >
+                <MediaThumbnail :path="season.poster_path"></MediaThumbnail>
+                <div class="text">
+                  <div class="season-title">{{ season.name }}</div>
+                  <div class="season-subtitle">
+                    {{ season.air_date }} &sdot; {{ season.episode_count }} épisodes
+                  </div>
+                </div>
               </div>
             </div>
-
           </ion-segment-content>
           <ion-segment-content class="segmented-content" id="peoples">
             <div class="actors-list">
@@ -110,6 +137,10 @@ import {
   IonContent,
   IonButton,
   IonSegment,
+  IonHeader,
+  IonToolbar,
+  IonButtons,
+  IonBackButton,
   IonSegmentButton,
   IonSegmentContent,
   IonSegmentView,
@@ -122,6 +153,8 @@ import { getImage } from "../utils";
 import { SerieResponse } from "../../supabase/functions/_shared/serie";
 import { supabase } from "../api/supabase";
 import { WorkAndVoiceActor } from "../../supabase/functions/_shared/movie";
+import MediaThumbnail from "@/components/MediaThumbnail.vue";
+import SolarSettingsMinimalisticOutline from "~icons/solar/settings-minimalistic-outline";
 
 const route = useRoute();
 const router = useRouter();
@@ -137,6 +170,16 @@ const getVoiceActorByTmdbId = (tmdbId: number): WorkAndVoiceActor[] => {
   const va = voiceActors.value.filter((v) => v.actor_id === tmdbId);
 
   return va;
+};
+
+const goToSeason = (id: number, seasonNumber: number) => {
+  router.push({
+    name: "SeasonDetails",
+    params: {
+      id: id,
+      season: seasonNumber,
+    },
+  });
 };
 
 const goToActor = (id: number) => {
@@ -194,6 +237,9 @@ onMounted(async () => {
 
 <style scoped lang="scss">
 $coverHeight: 150px;
+$block: #f1f1f1;
+$background: #e9e9e9;
+$border: #c1c1c1;
 
 .show-title {
   text-align: center;
@@ -223,7 +269,7 @@ $coverHeight: 150px;
 
   .character {
     text-align: left;
-    color: #ccc;
+    color: #777;
   }
 
   .actor,
@@ -237,7 +283,7 @@ $coverHeight: 150px;
   flex-direction: column;
   padding: 8px;
   margin: 0 8px;
-  background-color: #333;
+  background-color: #{$block};
   border-radius: 0.5rem;
   gap: 0.5rem;
 
@@ -273,16 +319,15 @@ $coverHeight: 150px;
 .tabs {
   z-index: 1;
   position: relative;
-  padding-top: $coverHeight;
+  padding-top: calc(#{$coverHeight} - 44px);
 }
 
 .summary {
-background-color: #222;
+  background-color: #{$block};
 }
 
 .actors-list {
   .inner-list {
-    background-color: #000;
     display: flex;
     gap: 8px;
     flex-direction: column;
@@ -292,11 +337,46 @@ background-color: #222;
 }
 
 ion-segment {
-  --background: #222;
+  --background: #{$block};
   border-radius: 0;
 }
 
 .segmented-content {
-  background-color: #222;
+  background-color: #{$background};
+}
+
+.seasons {
+  margin: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .season {
+    --background: #{$block};
+    --color: #000;
+    --padding-bottom: 0;
+    --padding-top: 0;
+    --padding-end: 0;
+    --padding-start: 0;
+
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    background-color: #{$block};
+    border-radius: 8px;
+    border: 2px solid #{$border};
+    padding: 8px;
+
+    &::part(native) {
+      .button-inner {
+        width: 100%;
+      }
+    }
+  }
+}
+
+.toolbar {
+  --background: transparent !important;
+  --border-width: 0 !important;
 }
 </style>
