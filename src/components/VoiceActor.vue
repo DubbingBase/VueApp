@@ -16,11 +16,15 @@
       <div>
         {{ firstname }}
         {{ lastname }}
-        {{  performance }}
+        {{ performance }}
       </div>
     </router-link>
   </div>
-  <div v-else class="va-actor">Nope</div>
+  <div v-else class="va-actor">
+    <ion-thumbnail class="avatar" slot="start">
+      <img src="https://placehold.co/48x72?text=?" />
+    </ion-thumbnail>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -52,4 +56,11 @@ const fullName = computed(() => {
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.avatar {
+  --border-radius: 4px;
+  width: 48px;
+  height: auto;
+  min-height: 72px;
+}
+</style>

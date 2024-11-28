@@ -6,7 +6,7 @@
       </ion-toolbar>
       <ion-toolbar>
         <ion-searchbar
-          :debounce="1000"
+          :debounce="300"
           @ionInput="search($event)"
         ></ion-searchbar>
       </ion-toolbar>
@@ -21,9 +21,10 @@
         v-for="match in matches"
         :key="match.id"
       >
-        <ion-thumnail class="avatar" slot="start">
-          <img :src="getImage(match.poster_path	)" />
-        </ion-thumnail>
+        <ion-thumbnail class="avatar" slot="start">
+          <img v-if="match.poster_path" :src="getImage(match.poster_path)" />
+          <img v-else src="https://placehold.co/48x72?text=?" />
+        </ion-thumbnail>
         <ion-label>
           <h3 class="title ellipsis">{{ match.name ?? match.title }}</h3>
           <p class="subtitle">{{ date(match) }} <ion-chip>{{ match.media_type }}</ion-chip></p>
@@ -123,6 +124,7 @@ const typeToRoute = (type: string) => {
   --border-radius: 4px;
   width: 48px;
   height: auto;
+  min-height: 72px;
 }
 
 .title {

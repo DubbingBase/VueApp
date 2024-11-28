@@ -1,56 +1,130 @@
 <template>
   <ion-page>
-    <div class="show">
-      <div class="header" v-if="show">
-        <img :src="getImage(show.backdrop_path)" alt="" />
-        <div class="show-title">{{ show.title }}</div>
-      </div>
-
-      <div class="body">
-        <div class="actor-wrapper" v-for="actor in actors">
-          <router-link
-            class="actor"
-            :to="{
-              name: 'ActorDetails',
-              params: {
-                id: actor.id,
-              },
-            }"
-          >
-            <img
-              class="profile-img"
-              :src="getImage(actor.profile_path)"
-              alt=""
-            />
-            <div>{{ actor.name }}</div>
-          </router-link>
-          <div class="character">
-            <div>{{ actor.character }}</div>
-          </div>
-          <VoiceActor
-            :model-value="getVoiceActorByTmdbId(actor.id)"
-          ></VoiceActor>
-        </div>
-      </div>
-
-      <Button class="fetch-infos-btn" @click="fetchInfos"
-        >Récupérer les informations</Button
-      >
+    <ion-content>
+      <div class="tabs">
+    <div class="summary">
+      <div v-if="show" class="show-title">{{ show.name }}</div>
     </div>
+        <ion-segment>
+          <ion-segment-button value="details" content-id="details">
+            <!-- <ion-icon :icon="playCircle" /> -->
+            Détail
+          </ion-segment-button>
+          <ion-segment-button value="seasons" content-id="seasons">
+            <!-- <ion-icon :icon="radio" /> -->
+            Saisons
+          </ion-segment-button>
+          <ion-segment-button value="peoples" content-id="peoples">
+            <!-- <ion-icon :icon="search" /> -->
+            Personnes
+          </ion-segment-button>
+        </ion-segment>
+        <ion-segment-view>
+          <ion-segment-content class="segmented-content" id="details">
+            <div class="example-content">Listen now content</div>
+          </ion-segment-content>
+          <ion-segment-content class="segmented-content" id="seasons">
+            <div class="seasons" v-if="show">
+              <div class="season" v-for="season in show.seasons" :key="season.id">
+                <div class="season-title">{{ season.name }}</div>
+              </div>
+            </div>
+
+          </ion-segment-content>
+          <ion-segment-content class="segmented-content" id="peoples">
+            <div class="actors-list">
+              <div class="inner-list">
+                <div
+                  v-for="actor in actors"
+                  :key="actor.id"
+                  class="actor-wrapper"
+                >
+                  <div
+                    class="actor"
+                    @click="goToActor(actor.id)"
+                    :routerLink="{
+                      name: 'ActorDetails',
+                      params: {
+                        id: actor.id,
+                      },
+                    }"
+                  >
+                    <ion-thumbnail class="avatar">
+                      <img
+                        v-if="actor.profile_path"
+                        :src="getImage(actor.profile_path)"
+                      />
+                      <img v-else src="https://placehold.co/48x72?text=?" />
+                    </ion-thumbnail>
+                    <ion-label class="line-label">
+                      <span class="ellipsis label actor">{{ actor.name }}</span>
+                      <span class="ellipsis label character"
+                        >as {{ actor.character }}</span
+                      >
+                    </ion-label>
+                  </div>
+                  <div
+                    class="voice-actor"
+                    @click="goToVoiceActor(item.voiceActorDetails.id)"
+                    v-for="item in getVoiceActorByTmdbId(actor.id)"
+                    :key="item.voiceActorDetails.id"
+                  >
+                    <ion-thumbnail class="avatar">
+                      <img
+                        v-if="item.voiceActorDetails.profile_picture"
+                        :src="getImage(item.voiceActorDetails.profile_picture)"
+                      />
+                      <img v-else src="https://placehold.co/48x72?text=?" />
+                    </ion-thumbnail>
+                    <ion-label class="line-label">
+                      <span class="ellipsis label voice-actor">
+                        {{ item.voiceActorDetails.firstname }}
+                        {{ item.voiceActorDetails.lastname }}
+                      </span>
+                      <span class="ellipsis label performance">
+                        {{ item.performance }}
+                      </span>
+                    </ion-label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ion-segment-content>
+        </ion-segment-view>
+      </div>
+
+      <div class="background">
+        <img v-if="show" :src="getImage(show.backdrop_path)" alt="" />
+      </div>
+
+      <ion-button class="fetch-infos-btn" @click="fetchInfos"
+        >Récupérer les informations</ion-button
+      >
+    </ion-content>
   </ion-page>
 </template>
 
 <script setup lang="ts">
-import { IonPage } from "@ionic/vue";
+import {
+  IonPage,
+  IonContent,
+  IonButton,
+  IonSegment,
+  IonSegmentButton,
+  IonSegmentContent,
+  IonSegmentView,
+  IonLabel,
+  IonThumbnail,
+} from "@ionic/vue";
 import { computed, onMounted, ref } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { getImage } from "../utils";
 import { SerieResponse } from "../../supabase/functions/_shared/serie";
 import { supabase } from "../api/supabase";
-import VoiceActor from "../components/VoiceActor.vue";
 import { WorkAndVoiceActor } from "../../supabase/functions/_shared/movie";
 
 const route = useRoute();
+const router = useRouter();
 
 const show = ref<SerieResponse["serie"] | undefined>();
 const voiceActors = ref<SerieResponse["voiceActors"]>([]);
@@ -59,12 +133,28 @@ const actors = computed(() => {
   return show.value?.credits.cast;
 });
 
-const getVoiceActorByTmdbId = (
-  tmdbId: number
-): WorkAndVoiceActor | undefined => {
-  const va = voiceActors.value.find((v) => v.actor_id === tmdbId);
+const getVoiceActorByTmdbId = (tmdbId: number): WorkAndVoiceActor[] => {
+  const va = voiceActors.value.filter((v) => v.actor_id === tmdbId);
 
   return va;
+};
+
+const goToActor = (id: number) => {
+  router.push({
+    name: "ActorDetails",
+    params: {
+      id,
+    },
+  });
+};
+
+const goToVoiceActor = (id: number) => {
+  router.push({
+    name: "VoiceActorDetails",
+    params: {
+      id,
+    },
+  });
 };
 
 const fetchInfos = async () => {
@@ -103,52 +193,110 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
+$coverHeight: 150px;
+
 .show-title {
   text-align: center;
 }
 
-.header > img {
-  object-fit: cover;
-  width: 100%;
-}
-.actor-wrapper {
-  margin: 16px 0;
-  display: flex;
-  background-color: rgb(48, 48, 48);
-  border-radius: 25px;
-  align-items: center;
-
-  .actor,
-  .va-actor,
-  .character {
-    flex: 1;
-    text-decoration: none;
-    color: inherit;
-  }
-
-  .character {
-    text-align: center;
-  }
-
-  .va-actor,
-  .actor {
-    text-align: center;
-    margin: 8px 0;
-  }
-
-  .actor,
-  .va-actor {
-    .profile-img {
-      width: 50%;
-      border-radius: 16px;
-    }
-  }
-}
-
 .fetch-infos-btn {
-  position: absolute;
-  bottom: 64px;
-  right: 16px;
+  position: fixed;
+  bottom: 0px;
+  right: 4px;
   padding: 4px;
+  z-index: 1;
+}
+
+.avatar {
+  --border-radius: 4px;
+  width: 48px;
+  height: auto;
+  min-height: 72px;
+}
+
+.line-label {
+  margin-left: 8px;
+  .label {
+    width: 100%;
+    display: block;
+  }
+
+  .character {
+    text-align: left;
+    color: #ccc;
+  }
+
+  .actor,
+  .voice-actor {
+    font-weight: bold;
+  }
+}
+
+.actor-wrapper {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  margin: 0 8px;
+  background-color: #333;
+  border-radius: 0.5rem;
+  gap: 0.5rem;
+
+  .actor {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+  }
+
+  .voice-actor {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+  }
+}
+
+.background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: $coverHeight;
+
+  img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.tabs {
+  z-index: 1;
+  position: relative;
+  padding-top: $coverHeight;
+}
+
+.summary {
+background-color: #222;
+}
+
+.actors-list {
+  .inner-list {
+    background-color: #000;
+    display: flex;
+    gap: 8px;
+    flex-direction: column;
+    border-radius: 2rem;
+    padding-top: 8px;
+  }
+}
+
+ion-segment {
+  --background: #222;
+  border-radius: 0;
+}
+
+.segmented-content {
+  background-color: #222;
 }
 </style>

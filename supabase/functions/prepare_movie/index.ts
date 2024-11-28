@@ -182,6 +182,8 @@ Deno.serve(async (req) => {
 
     console.log('mistralSuggestion', mistralSuggestionJSON)
 
+    console.log('movie', movie)
+
     for (const entry of mistralSuggestionJSON?.items ?? []) {
       const { actor, voiceActorFirstname, voiceActorName } = entry
 
