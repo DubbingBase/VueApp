@@ -1,25 +1,29 @@
 /// <reference types="vitest" />
 
-import legacy from '@vitejs/plugin-legacy'
-import vue from '@vitejs/plugin-vue'
-import path from 'path'
-import { defineConfig } from 'vite'
-import Icons from 'unplugin-icons/vite'
+import legacy from "@vitejs/plugin-legacy";
+import vue from "@vitejs/plugin-vue";
+import path from "path";
+import { defineConfig, loadEnv } from "vite";
+import Icons from "unplugin-icons/vite";
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [
-    vue(),
-    legacy(),
-    Icons({ compiler: 'vue3' }),
-  ],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
+export default ({ mode }) => {
+  const env = loadEnv(mode, process.cwd());
+  console.log("env", env);
+  return defineConfig({
+    plugins: [
+      vue(),
+      legacy(),
+      Icons({ compiler: "vue3" }),
+    ],
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+      },
     },
-  },
-  test: {
-    globals: true,
-    environment: 'jsdom'
-  }
-})
+    test: {
+      globals: true,
+      environment: "jsdom",
+    },
+  });
+};
