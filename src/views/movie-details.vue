@@ -70,9 +70,10 @@
         <div v-if="movie" class="movie-title">{{ movie.title }}</div>
       </div>
 
-      <ion-button class="fetch-infos-btn" @click="fetchInfos"
-        >Récupérer les informations</ion-button
-      >
+      <ion-button v-if="hasWikidataId && !hasData" class="fetch-infos-btn" @click="fetchInfos">
+        <ion-spinner v-if="isFetching"></ion-spinner>
+        <span v-else>Récupérer les informations</span>
+      </ion-button>
     </ion-content>
   </ion-page>
 </template>
@@ -88,6 +89,7 @@ import {
   IonToolbar,
   IonHeader,
   IonLabel,
+  IonSpinner,
   IonThumbnail,
 } from "@ionic/vue";
 import { computed, onMounted, ref } from "vue";
@@ -131,8 +133,20 @@ const goToVoiceActor = (id: number) => {
   });
 };
 
+const wikiDataId = computed(() => {
+  return movie.value?.external_ids?.wikidata_id;
+});
+
+const hasWikidataId = computed(() => {
+  return !!wikiDataId.value;
+});
+
+const hasData = computed(() => {
+  return voiceActors.value.length > 0;
+});
+
 const fetchInfos = async () => {
-  const id = movie.value?.external_ids?.wikidata_id;
+  const id = wikiDataId.value;
 
   if (!id) {
     console.error("id is undefined");
@@ -140,6 +154,7 @@ const fetchInfos = async () => {
   }
 
   console.log("id", id);
+  isFetching.value = true;
   const movieResponseRaw = await supabase.functions.invoke("prepare_movie", {
     body: {
       wikiId: id,
