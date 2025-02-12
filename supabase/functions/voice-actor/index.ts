@@ -103,7 +103,7 @@ Deno.serve(async (req) => {
   for (const work of va.work) {
     try {
       console.log('work', work)
-      const response = await fetch(`https://api.themoviedb.org/3/${work.content_type}/${work.content_id}?append_to_response=external_ids&language=fr-FR`, {
+      const response = await fetch(`https://api.themoviedb.org/3/${work.content_type}/${work.content_id}?append_to_response=credits,external_ids&language=fr-FR`, {
         headers: {
           "Content-Type": "application/json",
           'Authorization': `Bearer ${Deno.env.get('TMDB_API_KEY')}`,
@@ -115,7 +115,10 @@ Deno.serve(async (req) => {
 
       // console.log('tmdbMedia', tmdbMedia)
 
-      result.medias.push(tmdbMedia)
+      result.medias.push({
+        ...tmdbMedia,
+        media_type: work.content_type
+      })
     } catch (e) {
       console.error('e', e)
     }

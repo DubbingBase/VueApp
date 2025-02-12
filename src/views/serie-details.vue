@@ -124,9 +124,10 @@
         <img v-if="show" :src="getImage(show.backdrop_path)" alt="" />
       </div>
 
-      <ion-button class="fetch-infos-btn" @click="fetchInfos"
-        >Récupérer les informations</ion-button
-      >
+      <ion-button :disabled="isFetching" v-if="hasWikidataId && !hasData" class="fetch-infos-btn" @click="fetchInfos">
+        <ion-spinner v-if="isFetching"></ion-spinner>
+        <span v-else>Récupérer les informations {{ wikiDataId }} {{ hasData }}</span>
+      </ion-button>
     </ion-content>
   </ion-page>
 </template>
@@ -145,6 +146,7 @@ import {
   IonSegmentContent,
   IonSegmentView,
   IonLabel,
+  IonSpinner,
   IonThumbnail,
 } from "@ionic/vue";
 import { computed, onMounted, ref } from "vue";
@@ -200,8 +202,22 @@ const goToVoiceActor = (id: number) => {
   });
 };
 
+const wikiDataId = computed(() => {
+  return show.value?.external_ids?.wikidata_id;
+});
+
+const hasWikidataId = computed(() => {
+  return !!wikiDataId.value;
+});
+
+const hasData = computed(() => {
+  return voiceActors.value.length > 0;
+});
+
+const isFetching = ref(false);
+
 const fetchInfos = async () => {
-  const id = show.value?.external_ids?.wikidata_id;
+  const id = wikiDataId.value;
 
   if (!id) {
     console.error("id is undefined");
@@ -209,6 +225,7 @@ const fetchInfos = async () => {
   }
 
   console.log("id", id);
+  isFetching.value = true;
   const showResponseRaw = await supabase.functions.invoke("prepare_movie", {
     body: {
       wikiId: id,
@@ -237,9 +254,9 @@ onMounted(async () => {
 
 <style scoped lang="scss">
 $coverHeight: 150px;
-$block: #f1f1f1;
-$background: #e9e9e9;
-$border: #c1c1c1;
+$block: #3f3f3f;
+$background: #292929;
+$border: #1b1b1b;
 
 .show-title {
   text-align: center;

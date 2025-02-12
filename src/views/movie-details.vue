@@ -70,9 +70,9 @@
         <div v-if="movie" class="movie-title">{{ movie.title }}</div>
       </div>
 
-      <ion-button v-if="hasWikidataId && !hasData" class="fetch-infos-btn" @click="fetchInfos">
+      <ion-button :disabled="isFetching" v-if="hasWikidataId && !hasData" class="fetch-infos-btn" @click="fetchInfos">
         <ion-spinner v-if="isFetching"></ion-spinner>
-        <span v-else>Récupérer les informations</span>
+        <span v-else>Récupérer les informations {{ wikiDataId }} {{ hasData }}</span>
       </ion-button>
     </ion-content>
   </ion-page>
@@ -144,6 +144,8 @@ const hasWikidataId = computed(() => {
 const hasData = computed(() => {
   return voiceActors.value.length > 0;
 });
+
+const isFetching = ref(false);
 
 const fetchInfos = async () => {
   const id = wikiDataId.value;

@@ -1,5 +1,10 @@
 {
     "deno.enablePaths": [
         "./supabase"
-    ]
+    ],
+    "debug.javascript.defaultRuntimeExecutable": {
+        "pwa-node": "/home/armaldio/.local/share/mise/shims/node"
+    },
+    "deno.path": "/home/armaldio/.local/share/mise/shims/deno",
+    "deno.enable": true
 }
