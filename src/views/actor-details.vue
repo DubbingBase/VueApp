@@ -33,6 +33,37 @@
             </TabPanel>
           </TabView>
         </div>
+        <div v-if="actor && actor.voice_roles && actor.voice_roles.length" class="voice-roles-section">
+          <h3>Rôles de doublage</h3>
+          <div class="actors-list">
+            <div class="inner-list">
+              <div
+                v-for="role in actor.voice_roles"
+                :key="role.voice_actor_id"
+                class="voice-actor"
+                @click="goToVoiceActor(role.voice_actor_id)"
+                aria-label="Voir les détails de la voix de {{ role.voiceActorDetails?.name || role.voiceActorDetails?.firstname + ' ' + role.voiceActorDetails?.lastname }}"
+              >
+                <ion-thumbnail class="avatar">
+                  <img
+                    v-if="role.voiceActorDetails?.profile_picture"
+                    :src="getImage(role.voiceActorDetails.profile_picture)"
+                    :alt="role.voiceActorDetails?.name || role.voiceActorDetails?.firstname + ' ' + role.voiceActorDetails?.lastname"
+                  />
+                  <img v-else src="https://placehold.co/48x72?text=VA" alt="?" />
+                </ion-thumbnail>
+                <ion-label class="line-label">
+                  <span class="ellipsis label voice-actor">
+                    {{ role.voiceActorDetails?.firstname }} {{ role.voiceActorDetails?.lastname }}
+                  </span>
+                  <span class="ellipsis label performance">
+                    {{ role.performance }}
+                  </span>
+                </ion-label>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </ion-content>
   </ion-page>
@@ -98,6 +129,18 @@ onMounted(async () => {
   const actorResponse = (await actorResponseRaw.data) as { actor: Actor };
   actor.value = actorResponse.actor;
 });
+function goToVoiceActor(id: number) {
+  // Use the router to navigate to the voice actor details page
+  // (Assumes you are using vue-router and have a VoiceActorDetails route)
+  // @ts-ignore: router is not typed here, but is globally available in setup
+  // If using <script setup>, import useRouter from 'vue-router' and use it
+  const { push } = useRouter();
+  push({ name: 'VoiceActorDetails', params: { id } });
+}
+
+function hasVoiceRoles(actor: any): actor is { voice_roles: any[] } {
+  return actor && Array.isArray(actor.voice_roles);
+}
 </script>
 
 <style scoped lang="scss">

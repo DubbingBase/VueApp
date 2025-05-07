@@ -11,69 +11,109 @@
     <ion-content>
       <div class="actors-list">
         <div class="inner-list">
-          <div v-for="actor in actors" :key="actor.id" class="actor-wrapper">
-            <div
-              class="actor"
-              @click="goToActor(actor.id)"
-              :routerLink="{
-                name: 'ActorDetails',
-                params: {
-                  id: actor.id,
-                },
-              }"
-            >
-              <ion-thumbnail class="avatar">
-                <img
-                  v-if="actor.profile_path"
-                  :src="getImage(actor.profile_path)"
-                />
-                <img v-else src="https://placehold.co/48x72?text=?" />
-              </ion-thumbnail>
-              <ion-label class="line-label">
-                <span class="ellipsis label actor">{{ actor.name }}</span>
-                <span class="ellipsis label character"
-                  >as {{ actor.character }}</span
-                >
-              </ion-label>
-            </div>
-            <div class="voice-actor-list">
+          <template v-if="actors && actors.length">
+            <div v-for="actor in actors" :key="actor.id" class="actor-wrapper">
               <div
-                class="voice-actor"
-                @click="goToVoiceActor(item.voiceActorDetails.id)"
-                v-for="item in getVoiceActorByTmdbId(actor.id)"
-                :key="item.voiceActorDetails.id"
+                class="actor"
+                @click="goToActor(actor.id)"
+                :routerLink="{
+                  name: 'ActorDetails',
+                  params: { id: actor.id },
+                }"
+                tabindex="0"
+                role="button"
+                aria-label="Go to details for {{ actor.name }}"
               >
                 <ion-thumbnail class="avatar">
                   <img
-                    v-if="item.voiceActorDetails.profile_picture"
-                    :src="getImage(item.voiceActorDetails.profile_picture)"
+                    v-if="actor.profile_path"
+                    :src="getImage(actor.profile_path)"
+                    :alt="actor.name + ' photo'"
                   />
-                  <img v-else src="https://placehold.co/48x72?text=?" />
+                  <img v-else src="https://placehold.co/48x72?text=?" alt="No photo" />
                 </ion-thumbnail>
                 <ion-label class="line-label">
-                  <span class="ellipsis label voice-actor">
-                    {{ item.voiceActorDetails.firstname }}
-                    {{ item.voiceActorDetails.lastname }}
-                  </span>
-                  <span class="ellipsis label performance">
-                    {{ item.performance }}
-                  </span>
+                  <span class="ellipsis label actor">{{ actor.name }}</span>
+                  <span class="ellipsis label character">as {{ actor.character }}</span>
                 </ion-label>
               </div>
+              <div class="voice-actor-list">
+                <template v-if="getVoiceActorByTmdbId(actor.id).length">
+                  <div
+                    class="voice-actor"
+                    @click="goToVoiceActor(item.voiceActorDetails.id)"
+                    v-for="item in getVoiceActorByTmdbId(actor.id)"
+                    :key="item.voiceActorDetails.id"
+                    tabindex="0"
+                    role="button"
+                    aria-label="Go to details for {{ item.voiceActorDetails.firstname }} {{ item.voiceActorDetails.lastname }}"
+                  >
+                    <ion-thumbnail class="avatar">
+                      <img
+                        v-if="item.voiceActorDetails.profile_picture"
+                        :src="getImage(item.voiceActorDetails.profile_picture)"
+                        :alt="item.voiceActorDetails.firstname + ' ' + item.voiceActorDetails.lastname + ' photo'"
+                      />
+                      <img v-else src="https://placehold.co/48x72?text=?" alt="No photo" />
+                    </ion-thumbnail>
+                    <ion-label class="line-label">
+                      <span class="ellipsis label voice-actor">
+                        {{ item.voiceActorDetails.firstname }} {{ item.voiceActorDetails.lastname }}
+                      </span>
+                      <span class="ellipsis label performance">
+                        {{ item.performance }}
+                      </span>
+                    </ion-label>
+                  </div>
+                </template>
+                <div v-else class="no-voice-actor">No voice actor found.</div>
+              </div>
             </div>
-          </div>
+          </template>
+          <div v-else class="no-actors">No actors found for this movie.</div>
         </div>
       </div>
 
       <div class="background">
-        <img v-if="movie" :src="getImage(movie.backdrop_path)" alt="" />
-        <div v-if="movie" class="movie-title">{{ movie.title }}</div>
+        <img v-if="movie" :src="getImage(movie.backdrop_path)" alt="Movie background image" />
+        <div class="background-overlay"></div>
+      </div>
+
+      <div v-if="movie" class="movie-info-card">
+        <img
+          v-if="movie.poster_path"
+          class="movie-poster"
+          :src="getImage(movie.poster_path)"
+          :alt="movie.title + ' poster'"
+        />
+        <div class="movie-info">
+          <div class="movie-title-row">
+            <h2 class="movie-title">{{ movie.title }}</h2>
+            <span v-if="movie.release_date" class="movie-year">{{ movie.release_date.slice(0, 4) }}</span>
+          </div>
+          <div v-if="movie.genres && movie.genres.length" class="movie-genres">
+            <span v-for="genre in movie.genres" :key="genre.id" class="movie-genre-chip">{{ genre.name }}</span>
+          </div>
+          <div v-if="movie.vote_average" class="movie-rating">
+            ⭐ {{ movie.vote_average.toFixed(1) }}
+          </div>
+          <div v-if="movie.overview" class="movie-overview">
+            {{ movie.overview }}
+          </div>
+          <div class="movie-meta">
+            <span v-if="movie.runtime">⏱ {{ movie.runtime }} min</span>
+            <span v-if="movie.original_language">🌐 {{ movie.original_language.toUpperCase() }}</span>
+            <span v-if="movie.release_date">📅 {{ movie.release_date }}</span>
+          </div>
+        </div>
       </div>
 
       <ion-button :disabled="isFetching" v-if="hasWikidataId && !hasData" class="fetch-infos-btn" @click="fetchInfos">
         <ion-spinner v-if="isFetching"></ion-spinner>
-        <span v-else>Récupérer les informations {{ wikiDataId }} {{ hasData }}</span>
+        <span v-else>Récupérer les informations</span>
       </ion-button>
+      <div v-if="fetchError" class="fetch-error">{{ fetchError }}</div>
+      <ion-spinner v-if="isLoading" class="main-spinner"></ion-spinner>
     </ion-content>
   </ion-page>
 </template>
@@ -146,6 +186,8 @@ const hasData = computed(() => {
 });
 
 const isFetching = ref(false);
+const isLoading = ref(true);
+const fetchError = ref<string | null>(null);
 
 const fetchInfos = async () => {
   const id = wikiDataId.value;
@@ -172,14 +214,20 @@ const fetchInfos = async () => {
 
 onMounted(async () => {
   const id = route.params.id;
-
-  const movieResponseRaw = await supabase.functions.invoke("movie", {
-    body: { id },
-  });
-  // const movieResponse = await movieResponseRaw.json() as MovieResponse
-  const data = movieResponseRaw.data as MovieResponse;
-  movie.value = data.movie;
-  voiceActors.value = data.voiceActors;
+  isLoading.value = true;
+  fetchError.value = null;
+  try {
+    const movieResponseRaw = await supabase.functions.invoke("movie", {
+      body: { id },
+    });
+    const data = movieResponseRaw.data as MovieResponse;
+    movie.value = data.movie;
+    voiceActors.value = data.voiceActors;
+  } catch (e: any) {
+    fetchError.value = 'Failed to load movie details.';
+  } finally {
+    isLoading.value = false;
+  }
 });
 </script>
 
@@ -272,7 +320,107 @@ onMounted(async () => {
   left: 0;
   width: 100%;
   height: 210px;
+  overflow: hidden;
 }
+.background img {
+  width: 100vw;
+  height: 210px;
+  object-fit: cover;
+  filter: blur(2px) brightness(0.6);
+}
+.background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 210px;
+  background: rgba(0,0,0,0.5);
+  z-index: 1;
+}
+
+.movie-info-card {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  background: rgba(20,20,20,0.95);
+  margin: 0 auto 16px auto;
+  border-radius: 1rem;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.3);
+  max-width: 700px;
+  padding: 16px;
+  position: relative;
+  top: -80px;
+  z-index: 2;
+}
+.movie-poster {
+  width: 120px;
+  height: 180px;
+  border-radius: 0.5rem;
+  object-fit: cover;
+  margin-right: 16px;
+  background: #222;
+}
+.movie-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.movie-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.movie-title {
+  font-size: 1.6rem;
+  font-weight: bold;
+  margin: 0;
+}
+.movie-year {
+  color: #ccc;
+  font-size: 1.1rem;
+}
+.movie-genres {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.movie-genre-chip {
+  background: #444;
+  color: #fff;
+  border-radius: 1rem;
+  padding: 2px 10px;
+  font-size: 0.9rem;
+}
+.movie-rating {
+  font-size: 1.2rem;
+  color: gold;
+}
+.movie-overview {
+  font-size: 1rem;
+  color: #eee;
+}
+.movie-meta {
+  display: flex;
+  gap: 18px;
+  color: #aaa;
+  font-size: 0.95rem;
+}
+.main-spinner {
+  display: block;
+  margin: 32px auto;
+}
+.fetch-error {
+  color: #ff6666;
+  text-align: center;
+  margin-top: 16px;
+}
+.no-actors, .no-voice-actor {
+  color: #bbb;
+  text-align: center;
+  margin: 12px 0;
+}
+
 
 .actors-list {
   z-index: 1;

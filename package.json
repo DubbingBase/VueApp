@@ -41,7 +41,7 @@
     "jsdom": "^22.1.0",
     "postcss": "^8.4.49",
     "sass": "^1.81.0",
-    "supabase": "^2.12.1",
+    "supabase": "^2.22.12",
     "terser": "^5.4.0",
     "typescript": "^5.7.3",
     "unplugin-icons": "^0.20.1",

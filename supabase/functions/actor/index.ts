@@ -33,26 +33,52 @@ Deno.serve(async (req) => {
     console.error('e', e)
   }
 
-  let va = []
+  // Fetch all voice actor roles for this actor
+  let voiceRoles = [];
+  try {
+    const { data, error } = await supabase
+      .from('work')
+      .select(`id, performance, actor_id, voice_actor_id, highlight, suggestions, status, source_id, voice_actors(id, firstname, lastname, profile_picture, bio, awards, nationality, years_active, date_of_birth, social_media_links)`) // join
+      .eq('actor_id', id)
+      .not('voice_actor_id', 'is', null);
+    if (error) throw error;
 
-  // try {
-  //   const { data, error } = await supabase.from('work')
-  //     .select('*')
-  //     .eq('content_id', id)
-  //   if (error) throw error
+    // Count occurrences per voice_actor_id
+    const counts = {};
+    for (const row of data) {
+      if (!row.voice_actor_id) continue;
+      counts[row.voice_actor_id] = (counts[row.voice_actor_id] || 0) + 1;
+    }
+    // Sort by count and get top 3
+    const sortedIds = Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([id]) => Number(id));
+    const top3 = sortedIds.slice(0, 3);
 
-  //   va = data
-
-  // } catch (e) {
-  //   console.error('e', e)
-  // }
-
-  console.log('movie', actor)
-  console.log('va', va)
+    // Map data to output format, add highlight if in top3
+    voiceRoles = data.map(row => ({
+      ...row,
+      highlight: top3.includes(row.voice_actor_id),
+      voiceActorDetails: row.voice_actors ? {
+        id: row.voice_actors.id,
+        firstname: row.voice_actors.firstname,
+        lastname: row.voice_actors.lastname,
+        profile_picture: row.voice_actors.profile_picture,
+        bio: row.voice_actors.bio,
+        awards: row.voice_actors.awards,
+        nationality: row.voice_actors.nationality,
+        years_active: row.voice_actors.years_active,
+        date_of_birth: row.voice_actors.date_of_birth,
+        social_media_links: row.voice_actors.social_media_links,
+      } : null
+    }));
+  } catch (e) {
+    console.error('voice_roles error', e);
+  }
 
   const result = {
-    actor: actor,
-    voiceActors: va,
+    actor: { ...actor, voice_roles: voiceRoles },
+    voiceActors: voiceRoles,
   }
 
   return new Response(

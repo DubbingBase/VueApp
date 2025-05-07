@@ -3,21 +3,67 @@
     <ion-header class="header">
       <ion-toolbar class="toolbar">
         <ion-buttons slot="start">
-          <ion-back-button default-href="/home" />
+          <ion-back-button default-href="/tabs/home" />
         </ion-buttons>
+        <ion-title>{{ show?.name || 'Détails de la série' }}</ion-title>
         <ion-buttons slot="end">
-          <ion-button fill="clear">
-            <SolarSettingsMinimalisticOutline></SolarSettingsMinimalisticOutline>
-          </ion-button>
-          <ion-button fill="clear">
-            <SolarSettingsMinimalisticOutline>
-            </SolarSettingsMinimalisticOutline>
+          <ion-button fill="clear" aria-label="Paramètres">
+            <SolarSettingsMinimalisticOutline />
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
     <ion-content>
-      <div class="tabs">
+      <!-- Banner with backdrop and metadata -->
+      <div class="banner" v-if="show">
+        <img
+          class="banner-backdrop"
+          :src="getImage(show.backdrop_path)"
+          alt="Backdrop"
+          v-if="show.backdrop_path"
+        />
+        <div class="banner-overlay"></div>
+        <div class="banner-meta">
+          <div class="banner-title">{{ show.name }}</div>
+          <div class="banner-genres" v-if="show.genres && show.genres.length">
+            <span v-for="genre in show.genres" :key="genre.id" class="genre-chip">{{ genre.name }}</span>
+          </div>
+          <div class="banner-stats">
+            <span v-if="show.vote_average">⭐ {{ show.vote_average.toFixed(1) }}</span>
+            <span v-if="show.status">• {{ show.status }}</span>
+            <span v-if="show.first_air_date">• {{ show.first_air_date }}<span v-if="show.last_air_date && show.last_air_date !== show.first_air_date"> – {{ show.last_air_date }}</span></span>
+          </div>
+          <div class="banner-overview" v-if="show.overview">{{ show.overview }}</div>
+          <div class="external-links">
+            <a v-if="show.external_ids?.imdb_id" :href="`https://www.imdb.com/title/${show.external_ids.imdb_id}`" target="_blank" rel="noopener" aria-label="Lien IMDb">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg" alt="IMDb" height="18" style="vertical-align:middle;" />
+            </a>
+            <a v-if="show.external_ids?.wikidata_id" :href="`https://www.wikidata.org/wiki/${show.external_ids.wikidata_id}`" target="_blank" rel="noopener" aria-label="Lien Wikidata">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/6/66/Wikidata-logo.svg" alt="Wikidata" height="18" style="vertical-align:middle;" />
+            </a>
+            <a v-if="show.external_ids?.tvdb_id" :href="`https://thetvdb.com/series/${show.external_ids.tvdb_id}`" target="_blank" rel="noopener" aria-label="Lien TVDb">
+              TVDb
+            </a>
+            <a v-if="show.external_ids?.facebook_id" :href="`https://facebook.com/${show.external_ids.facebook_id}`" target="_blank" rel="noopener" aria-label="Lien Facebook">
+              Facebook
+            </a>
+            <a v-if="show.external_ids?.instagram_id" :href="`https://instagram.com/${show.external_ids.instagram_id}`" target="_blank" rel="noopener" aria-label="Lien Instagram">
+              Instagram
+            </a>
+            <a v-if="show.external_ids?.twitter_id" :href="`https://twitter.com/${show.external_ids.twitter_id}`" target="_blank" rel="noopener" aria-label="Lien Twitter">
+              Twitter
+            </a>
+            <a v-if="show.external_ids?.tmdb_id" :href="`https://www.themoviedb.org/tv/${show.external_ids.tmdb_id}`" target="_blank" rel="noopener" aria-label="Lien TMDb">
+              TMDb
+            </a>
+          </div>
+        </div>
+      </div>
+      <div v-else class="banner banner-placeholder">
+        <div class="banner-title">Chargement…</div>
+      </div>
+      <ion-spinner v-if="isLoading" class="loading-spinner" name="crescent"></ion-spinner>
+      <div class="tabs" v-show="!isLoading">
         <div class="summary">
           <div v-if="show" class="show-title">{{ show.name }}</div>
         </div>
@@ -43,7 +89,7 @@
             <div class="seasons" v-if="show">
               <div
                 expand="block"
-                @click="goToSeason(season.id, season.season_number)"
+                @click="goToSeason(show.id, season.season_number)"
                 class="season"
                 v-for="season in show.seasons"
                 :key="season.id"
@@ -71,39 +117,40 @@
                     @click="goToActor(actor.id)"
                     :routerLink="{
                       name: 'ActorDetails',
-                      params: {
-                        id: actor.id,
-                      },
+                      params: { id: actor.id },
                     }"
+                    aria-label="Voir les détails de l'acteur {{ actor.name }}"
                   >
                     <ion-thumbnail class="avatar">
                       <img
                         v-if="actor.profile_path"
                         :src="getImage(actor.profile_path)"
+                        :alt="actor.name"
                       />
-                      <img v-else src="https://placehold.co/48x72?text=?" />
+                      <img v-else src="https://placehold.co/48x72?text=?" alt="?" />
                     </ion-thumbnail>
                     <ion-label class="line-label">
                       <span class="ellipsis label actor">{{ actor.name }}</span>
-                      <span class="ellipsis label character"
-                        >as {{ actor.character }}</span
-                      >
+                      <span class="ellipsis label character">as {{ actor.character }}</span>
                     </ion-label>
                   </div>
-                  <div
-                    class="voice-actor"
-                    @click="goToVoiceActor(item.voiceActorDetails.id)"
-                    v-for="item in getVoiceActorByTmdbId(actor.id)"
-                    :key="item.voiceActorDetails.id"
-                  >
-                    <ion-thumbnail class="avatar">
-                      <img
-                        v-if="item.voiceActorDetails.profile_picture"
-                        :src="getImage(item.voiceActorDetails.profile_picture)"
-                      />
-                      <img v-else src="https://placehold.co/48x72?text=?" />
-                    </ion-thumbnail>
-                    <ion-label class="line-label">
+                  <template v-if="getVoiceActorByTmdbId(actor.id).length">
+                    <div
+                      class="voice-actor"
+                      v-for="item in getVoiceActorByTmdbId(actor.id)"
+                      :key="item.voiceActorDetails.id"
+                      @click="goToVoiceActor(item.voiceActorDetails.id)"
+                      aria-label="Voir les détails de la voix de {{ item.voiceActorDetails.name }}"
+                    >
+                      <ion-thumbnail class="avatar">
+                        <img
+                          v-if="item.voiceActorDetails.profile_picture"
+                          :src="getImage(item.voiceActorDetails.profile_picture)"
+                          :alt="item.voiceActorDetails.name"
+                        />
+                        <img v-else src="https://placehold.co/48x72?text=VA" alt="?" />
+                      </ion-thumbnail>
+                      <ion-label class="line-label">
                       <span class="ellipsis label voice-actor">
                         {{ item.voiceActorDetails.firstname }}
                         {{ item.voiceActorDetails.lastname }}
@@ -111,8 +158,12 @@
                       <span class="ellipsis label performance">
                         {{ item.performance }}
                       </span>
-                    </ion-label>
-                  </div>
+                      </ion-label>
+                    </div>
+                  </template>
+                  <template v-else>
+                    <div class="voice-actor no-voice-actor">Aucun doubleur trouvé</div>
+                  </template>
                 </div>
               </div>
             </div>
@@ -163,10 +214,9 @@ const router = useRouter();
 
 const show = ref<SerieResponse["serie"] | undefined>();
 const voiceActors = ref<SerieResponse["voiceActors"]>([]);
+const isLoading = ref(true);
 
-const actors = computed(() => {
-  return show.value?.credits.cast;
-});
+const actors = computed(() => show.value?.credits.cast || []);
 
 const getVoiceActorByTmdbId = (tmdbId: number): WorkAndVoiceActor[] => {
   const va = voiceActors.value.filter((v) => v.actor_id === tmdbId);
@@ -240,15 +290,20 @@ const fetchInfos = async () => {
 };
 
 onMounted(async () => {
+  isLoading.value = true;
   const id = route.params.id;
-
-  const showResponseRaw = await supabase.functions.invoke("show", {
-    body: { id },
-  });
-  // const showResponse = await showResponseRaw.json() as SerieResponse
-  const data = showResponseRaw.data as SerieResponse;
-  show.value = data.serie;
-  voiceActors.value = data.voiceActors;
+  try {
+    const showResponseRaw = await supabase.functions.invoke("show", {
+      body: { id },
+    });
+    const data = showResponseRaw.data as SerieResponse;
+    show.value = data.serie;
+    voiceActors.value = data.voiceActors;
+  } catch (e) {
+    console.error(e);
+  } finally {
+    isLoading.value = false;
+  }
 });
 </script>
 
