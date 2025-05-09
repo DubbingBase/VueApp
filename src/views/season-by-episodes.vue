@@ -9,6 +9,10 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
+      <ion-button :disabled="isFetching" v-if="hasWikidataId && !hasData" class="fetch-infos-btn" @click="fetchEpisodeInfos">
+        <ion-spinner v-if="isFetching"></ion-spinner>
+        <span v-else>Récupérer les informations de l'épisode</span>
+      </ion-button>
       <ion-spinner v-if="isLoading" class="loading-spinner" name="crescent" />
       <div v-if="error" class="error">{{ error }}</div>
       <div v-if="episode && !isLoading" class="episode-detail">
@@ -105,9 +109,39 @@ const error = ref("");
 const episode = ref<any>(null);
 const dbVoiceActors = ref<any[]>([]);
 
+const wikiDataId = computed(() => episode.value?.external_ids?.wikidata_id);
+const hasWikidataId = computed(() => !!wikiDataId.value);
+const hasData = computed(() => dbVoiceActors.value.length > 0);
+const isFetching = ref(false);
+
 const backHref = computed(() => {
   return router.resolve({ name: 'SeasonDetails', params: { id: route.params.id, season: route.params.season } }).href;
 });
+
+async function fetchEpisodeInfos() {
+  const id = wikiDataId.value;
+  if (!id || !episode.value) {
+    console.error("id or episode is undefined");
+    return;
+  }
+  isFetching.value = true;
+  try {
+    await supabase.functions.invoke("prepare_movie", {
+      body: {
+        wikiId: id,
+        tmdbId: route.params.id,
+        type: "episode",
+        seasonNumber: route.params.season,
+        episodeNumber: episode.value.episode_number,
+      },
+    });
+    location.reload();
+  } catch (e) {
+    console.error(e);
+  } finally {
+    isFetching.value = false;
+  }
+}
 
 function frenchActors(cast: any[]) {
   return cast.filter(a => a.known_for_department === 'Acting' && (!a.original_language || a.original_language === 'fr'));

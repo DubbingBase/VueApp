@@ -44,15 +44,6 @@ Deno.serve(async (req) => {
           *
         )
       `)
-      // .select(`
-      //   id,
-      //   content_id,
-      //   actor_id,
-      //   voice_actors (
-      //     id,
-      //     name,
-      //   )
-      //   `)
       .eq('content_id', id)
     if (error) {
       console.error('error', error)

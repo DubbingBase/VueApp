@@ -9,8 +9,11 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
+      <ion-button :disabled="isFetching" v-if="hasWikidataId && !hasData" class="fetch-infos-btn" @click="fetchInfos">
+        <ion-spinner v-if="isFetching"></ion-spinner>
+        <span v-else>Récupérer les informations</span>
+      </ion-button>
       <ion-spinner v-if="isLoading" class="loading-spinner" name="crescent" />
-      <div v-if="error" class="error">{{ error }}</div>
       <div v-if="season && !isLoading" class="season-details">
         <div class="banner">
           <img v-if="season.poster_path" :src="getImage(season.poster_path)" class="poster" :alt="season.name" />
@@ -37,7 +40,8 @@
         <div v-else-if="activeTab === 'episodes'">
           <!-- Episodes Tab Content -->
           <ion-list v-if="season.episodes && season.episodes.length">
-            <ion-item v-for="ep in season.episodes" :key="ep.id" class="episode-item" @click="goToEpisode(ep.episode_number)">
+            <ion-item v-for="ep in season.episodes" :key="ep.id" class="episode-item"
+              @click="goToEpisode(ep.episode_number)">
               <ion-thumbnail slot="start" v-if="ep.still_path">
                 <img :src="getImage(ep.still_path)" :alt="ep.name" />
               </ion-thumbnail>
@@ -52,139 +56,102 @@
         </div>
         <div v-else-if="activeTab === 'voices'">
           <!-- Voices Tab Content -->
-          <div v-if="!selectedEpisode">
+          <div v-if="season && season.credits && season.credits.cast && season.credits.cast.length">
             <h3>Voix françaises de la saison</h3>
-            <div v-if="season && season.credits && season.credits.cast && season.credits.cast.length">
-  <div class="actors-list">
-    <div class="inner-list">
-      <div
-        v-for="origActor in season.credits.cast"
-        :key="origActor.id"
-        class="actor-wrapper"
-      >
-        <div
-          class="actor"
-          aria-label="Voir les détails de l'acteur {{ origActor.name }}"
-        >
-          <ion-thumbnail class="avatar">
-            <img
-              v-if="origActor.profile_path"
-              :src="getImage(origActor.profile_path)"
-              :alt="origActor.name"
-            />
-            <img v-else src="https://placehold.co/48x72?text=?" alt="?" />
-          </ion-thumbnail>
-          <ion-label class="line-label">
-            <span class="ellipsis label actor">{{ origActor.name }}</span>
-            <span class="ellipsis label character">{{ origActor.character }}</span>
-          </ion-label>
-        </div>
-        <template v-if="matchedVoiceActors && matchedVoiceActors(origActor).length">
-          <div
-            class="voice-actor"
-            v-for="va in matchedVoiceActors(origActor)"
-            :key="va.voiceActorDetails ? va.voiceActorDetails.id : va.id"
-            @click="goToVoiceActor(va.voiceActorDetails ? va.voiceActorDetails.id : va.id)"
-            aria-label="Voir les détails de la voix de {{ va.voiceActorDetails ? (va.voiceActorDetails.firstname + ' ' + va.voiceActorDetails.lastname) : va.id }}"
-            style="cursor:pointer"
-          >
-            <ion-thumbnail class="avatar">
-              <img
-                v-if="va.voiceActorDetails && va.voiceActorDetails.profile_picture"
-                :src="getImage(va.voiceActorDetails.profile_picture)"
-                :alt="va.voiceActorDetails.firstname + ' ' + va.voiceActorDetails.lastname"
-              />
-              <img v-else src="https://placehold.co/48x72?text=VA" alt="?" />
-            </ion-thumbnail>
-            <ion-label class="line-label">
-              <span class="ellipsis label voice-actor">
-                {{ va.voiceActorDetails ? (va.voiceActorDetails.firstname + ' ' + va.voiceActorDetails.lastname) : (va.firstname && va.lastname ? va.firstname + ' ' + va.lastname : va.id) }}
-              </span>
-              <span class="ellipsis label performance">
-                {{ va.performance }}
-              </span>
-            </ion-label>
-          </div>
-        </template>
-        <template v-else>
-          <span class="no-voice-actor">Aucun comédien de doublage trouvé pour ce personnage.</span>
-        </template>
-      </div>
-    </div>
-  </div>
-</div>
-<div v-else>Aucun comédien de doublage trouvé.</div>
-            <div v-else>Aucun comédien de doublage trouvé.</div>
+            <div>
+              <div class="actors-list">
+                <div class="inner-list">
+                  <div v-for="origActor in season.credits.cast" :key="origActor.id" class="actor-wrapper">
+                    <div class="actor" aria-label="Voir les détails de l'acteur {{ origActor.name }}">
+                      <ion-thumbnail class="avatar">
+                        <img v-if="origActor.profile_path" :src="getImage(origActor.profile_path)"
+                          :alt="origActor.name" />
+                        <img v-else src="https://placehold.co/48x72?text=?" alt="?" />
+                      </ion-thumbnail>
+                      <ion-label class="line-label">
+                        <span class="ellipsis label actor">{{ origActor.name }}</span>
+                        <span class="ellipsis label character">{{ origActor.character }}</span>
+                      </ion-label>
+                    </div>
+                    <template v-if="matchedVoiceActors && matchedVoiceActors(origActor).length">
+                      <div class="voice-actor" v-for="va in matchedVoiceActors(origActor)"
+                        :key="va.voiceActorDetails ? va.voiceActorDetails.id : va.id"
+                        @click="goToVoiceActor(va.voiceActorDetails ? va.voiceActorDetails.id : va.id)"
+                        aria-label="Voir les détails de la voix de {{ va.voiceActorDetails ? (va.voiceActorDetails.firstname + ' ' + va.voiceActorDetails.lastname) : va.id }}"
+                        style="cursor:pointer">
+                        <ion-thumbnail class="avatar">
+                          <img v-if="va.voiceActorDetails && va.voiceActorDetails.profile_picture"
+                            :src="getImage(va.voiceActorDetails.profile_picture)"
+                            :alt="va.voiceActorDetails.firstname + ' ' + va.voiceActorDetails.lastname" />
+                          <img v-else src="https://placehold.co/48x72?text=VA" alt="?" />
+                        </ion-thumbnail>
+                        <ion-label class="line-label">
+                          <span class="ellipsis label voice-actor">
+                            {{ va.voiceActorDetails ? (va.voiceActorDetails.firstname + ' ' +
+                              va.voiceActorDetails.lastname) : (va.firstname && va.lastname ? va.firstname + ' ' +
+                            va.lastname : va.id) }}
+                          </span>
+                          <span class="ellipsis label performance">
+                            {{ va.performance }}
+                          </span>
+                        </ion-label>
+                      </div>
+                    </template>
+                    <template v-else>
+                      <span class="no-voice-actor">Aucun comédien de doublage trouvé pour ce personnage.</span>
+                    </template>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div v-else>
             <h3>Voix françaises de l'épisode</h3>
             <div v-if="episodeCredits && episodeCredits.cast && episodeCredits.cast.length">
-  <div class="actors-list">
-    <div class="inner-list">
-      <div
-        v-for="origActor in frenchActors(episodeCredits.cast)"
-        :key="origActor.id"
-        class="actor-wrapper"
-      >
-        <div class="actor">
-          <ion-thumbnail class="avatar">
-            <img v-if="origActor.profile_path"
-                 :src="getImage(origActor.profile_path)"
-                 :alt="origActor.name" />
-            <img v-else src="https://placehold.co/48x72?text=?" alt="?" />
-          </ion-thumbnail>
-          <ion-label class="line-label">
-            <span class="ellipsis label actor">{{ origActor.name }}</span>
-            <span class="ellipsis label character">{{ origActor.character }}</span>
-          </ion-label>
-        </div>
-        <template v-if="dbVoiceActors && dbVoiceActors.length">
-          <div
-            class="voice-actor"
-            v-for="va in dbVoiceActors.filter(v => v.original_actor_id === origActor.id || v.actor_id === origActor.id)"
-            :key="va.voiceActorDetails ? va.voiceActorDetails.id : va.id"
-            @click="goToVoiceActor(va.voiceActorDetails ? va.voiceActorDetails.id : va.id)"
-            aria-label="Voir les détails de la voix de {{ va.voiceActorDetails ? (va.voiceActorDetails.firstname + ' ' + va.voiceActorDetails.lastname) : va.id }}"
-            style="cursor:pointer"
-          >
-            <ion-thumbnail class="avatar">
-              <img
-                v-if="va.voiceActorDetails && va.voiceActorDetails.profile_picture"
-                :src="getImage(va.voiceActorDetails.profile_picture)"
-                :alt="va.voiceActorDetails.firstname + ' ' + va.voiceActorDetails.lastname"
-              />
-              <img v-else src="https://placehold.co/48x72?text=VA" alt="?" />
-            </ion-thumbnail>
-            <ion-label class="line-label">
-              <span class="ellipsis label voice-actor">
-                {{ va.voiceActorDetails ? (va.voiceActorDetails.firstname + ' ' + va.voiceActorDetails.lastname) : (va.firstname && va.lastname ? va.firstname + ' ' + va.lastname : va.id) }}
-              </span>
-              <span class="ellipsis label performance">
-                {{ va.performance }}
-              </span>
-            </ion-label>
-          </div>
-        </template>
-      </div>
-    </div>
-  </div>
-</div>
-            <div v-else>Aucun comédien de doublage trouvé pour cet épisode.</div>
-          </div>
-        </div>
-        <div v-if="selectedEpisode && activeTab !== 'voices'" class="episode-detail">
-          <h3>Détails de l'épisode</h3>
-          <div v-if="selectedEpisode">
-            <div class="banner">
-              <img v-if="selectedEpisode.still_path" :src="getImage(selectedEpisode.still_path)" class="poster" :alt="selectedEpisode.name" />
-              <div class="meta">
-                <h2>{{ selectedEpisode.name }}</h2>
-                <div class="subtitle">
-                  <span v-if="selectedEpisode.air_date">Diffusé le {{ selectedEpisode.air_date }}</span>
+              <div class="actors-list">
+                <div class="inner-list">
+                  <div v-for="origActor in frenchActors(episodeCredits.cast)" :key="origActor.id" class="actor-wrapper">
+                    <div class="actor">
+                      <ion-thumbnail class="avatar">
+                        <img v-if="origActor.profile_path" :src="getImage(origActor.profile_path)"
+                          :alt="origActor.name" />
+                        <img v-else src="https://placehold.co/48x72?text=?" alt="?" />
+                      </ion-thumbnail>
+                      <ion-label class="line-label">
+                        <span class="ellipsis label actor">{{ origActor.name }}</span>
+                        <span class="ellipsis label character">{{ origActor.character }}</span>
+                      </ion-label>
+                    </div>
+                    <template v-if="dbVoiceActors && dbVoiceActors.length">
+                      <div class="voice-actor"
+                        v-for="va in dbVoiceActors.filter(v => v.original_actor_id === origActor.id || v.actor_id === origActor.id)"
+                        :key="va.voiceActorDetails ? va.voiceActorDetails.id : va.id"
+                        @click="goToVoiceActor(va.voiceActorDetails ? va.voiceActorDetails.id : va.id)"
+                        aria-label="Voir les détails de la voix de {{ va.voiceActorDetails ? (va.voiceActorDetails.firstname + ' ' + va.voiceActorDetails.lastname) : va.id }}"
+                        style="cursor:pointer">
+                        <ion-thumbnail class="avatar">
+                          <img v-if="va.voiceActorDetails && va.voiceActorDetails.profile_picture"
+                            :src="getImage(va.voiceActorDetails.profile_picture)"
+                            :alt="va.voiceActorDetails.firstname + ' ' + va.voiceActorDetails.lastname" />
+                          <img v-else src="https://placehold.co/48x72?text=VA" alt="?" />
+                        </ion-thumbnail>
+                        <ion-label class="line-label">
+                          <span class="ellipsis label voice-actor">
+                            {{ va.voiceActorDetails ? (va.voiceActorDetails.firstname + ' ' +
+                              va.voiceActorDetails.lastname) : (va.firstname && va.lastname ? va.firstname + ' ' +
+                            va.lastname : va.id) }}
+                          </span>
+                          <span class="ellipsis label performance">
+                            {{ va.performance }}
+                          </span>
+                        </ion-label>
+                      </div>
+                    </template>
+                  </div>
                 </div>
-                <div class="overview" v-if="selectedEpisode.overview">{{ selectedEpisode.overview }}</div>
               </div>
             </div>
+            <div v-else>Aucun comédien de doublage trouvé pour cet épisode.</div>
           </div>
         </div>
       </div>
@@ -204,14 +171,44 @@ const router = useRouter();
 const isLoading = ref(true);
 const error = ref("");
 const season = ref<any>(null);
-const episode = ref<any>(null);
 const seasonCredits = ref<any>(null);
 const seasonVoiceActors = ref<any[]>([]);
 const dbVoiceActors = ref<any[]>([]);
 const episodeCredits = ref<any>(null);
 const activeTab = ref("details");
 
-const selectedEpisode = computed(() => episode.value);
+const wikiDataId = computed(() => {
+  return season.value?.external_ids?.wikidata_id;
+});
+const hasWikidataId = computed(() => !!wikiDataId.value);
+const hasData = computed(() => {
+  return dbVoiceActors.value.length > 0;
+});
+const isFetching = ref(false);
+
+async function fetchInfos() {
+  const id = wikiDataId.value;
+  if (!id) {
+    console.error("id is undefined");
+    return;
+  }
+  isFetching.value = true;
+  try {
+    await supabase.functions.invoke("prepare_movie", {
+      body: {
+        wikiId: id,
+        tmdbId: route.params.id,
+        type: "season",
+        seasonNumber: route.params.season,
+      },
+    });
+    location.reload();
+  } catch (e) {
+    console.error(e);
+  } finally {
+    isFetching.value = false;
+  }
+}
 
 function matchedVoiceActors(origActor: any) {
   // Try to match by actor_id or fallback to known field
@@ -247,17 +244,6 @@ async function fetchData() {
     const { data } = await supabase.functions.invoke("season", { body: { id: serieId, season_number: seasonNumber } });
     season.value = data.season;
     dbVoiceActors.value = data.db_voice_actors || [];
-
-    // If there's an episode param, fetch episode details from the new endpoint
-    const episodeNumber = route.params.episode || route.query.episode;
-    if (episodeNumber !== undefined) {
-      const { data: epData } = await supabase.functions.invoke("episode", { body: { id: serieId, season_number: seasonNumber, episode_number: episodeNumber } });
-      episode.value = epData.episode;
-      episodeCredits.value = epData.episode_credits;
-    } else {
-      episode.value = null;
-      episodeCredits.value = null;
-    }
     if (!season.value) error.value = "Saison introuvable.";
   } catch (e: any) {
     error.value = e.message || "Erreur lors du chargement.";
@@ -277,36 +263,45 @@ watch(() => route.query.episode, fetchData);
     gap: 16px;
     align-items: flex-start;
     margin-bottom: 1.5rem;
+
     .poster {
       width: 120px;
       border-radius: 8px;
       box-shadow: 0 2px 8px #0003;
     }
+
     .meta {
       flex: 1;
+
       h2 {
         margin: 0 0 0.5rem 0;
       }
+
       .subtitle {
         color: #888;
         font-size: 0.95em;
         margin-bottom: 0.5rem;
-        span + span {
+
+        span+span {
           margin-left: 1em;
         }
       }
+
       .overview {
         margin-top: 0.5rem;
       }
     }
   }
+
   .episode-item {
     margin-bottom: 0.5rem;
   }
 }
+
 .actors-list {
   list-style: none;
   padding: 0;
+
   .inner-list {
     display: flex;
     gap: 8px;
@@ -349,6 +344,7 @@ watch(() => route.query.episode, fetchData);
 
 .line-label {
   margin-left: 8px;
+
   .label {
     width: 100%;
     display: block;
