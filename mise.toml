@@ -3,4 +3,4 @@ deno = "2.1.9"
 node = "22"
 
 [env]
-_.file = '.env'
+_.file = '.env.development'

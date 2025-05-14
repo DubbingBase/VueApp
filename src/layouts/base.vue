@@ -50,6 +50,8 @@ interface TabItem {
 const router = useRouter();
 
 const active = ref<string>("home");
+import { supabase } from '@/api/supabase';
+
 const items = ref([
   {
     label: "Accueil",
@@ -70,6 +72,23 @@ const items = ref([
     href: "/tabs/settings",
   },
 ]);
+
+// On mount, check if user is admin and add Admin tab
+import { onMounted } from 'vue';
+onMounted(async () => {
+  const user = supabase.auth.getUser ? (await supabase.auth.getUser()).data.user : supabase.auth.user();
+  if (user && (user.app_metadata?.role === 'admin' || user.role === 'admin')) {
+    // Avoid duplicate admin tab
+    if (!items.value.some(item => item.route === 'Admin')) {
+      items.value.push({
+        label: 'Admin',
+        icon: SolarSettingsLinear, // You can use a different icon if you want
+        route: 'Admin',
+        href: '/admin',
+      });
+    }
+  }
+});
 
 const onTabClick = (item: TabItem) => {
   active.value = item.route;

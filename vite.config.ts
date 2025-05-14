@@ -8,6 +8,7 @@ import Icons from "unplugin-icons/vite";
 
 // https://vitejs.dev/config/
 export default ({ mode }) => {
+  console.log("mode", mode);
   const env = loadEnv(mode, process.cwd());
   console.log("env", env);
   return defineConfig({
