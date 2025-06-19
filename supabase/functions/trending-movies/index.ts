@@ -6,8 +6,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { corsHeaders } from "../_shared/cors.ts"
 
-console.log("Hello from Functions!")
-
 Deno.serve(async (req) => {
   console.log('req.method', req.method)
   if (req.method === 'OPTIONS') {

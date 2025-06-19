@@ -4,3 +4,18 @@ node = "22"
 
 [env]
 _.file = '.env.development'
+
+[tasks.install]
+run = "pnpm install"
+
+[tasks.backend]
+depends = ["install"]
+run = "pnpm supabase start"
+
+[tasks.functions]
+depends = ["install"]
+run = "pnpm supabase functions serve"
+
+[tasks.dev]
+depends = ["install", "backend"]
+run = "pnpm run dev"

@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 /**
  * CLI script to update a user's app_metadata.role in Supabase
- * Usage: deno run --allow-env --allow-net update_user_role.ts <user_id> <new_role>
+ * Usage: deno run --allow-env --allow-net --allow-read --env-file=.env update_user_role.ts 51c51584-e89c-4e70-9b22-8c4e5efc60a8 admin
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
