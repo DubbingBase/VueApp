@@ -16,6 +16,10 @@ run = "pnpm supabase start"
 depends = ["install"]
 run = "pnpm supabase functions serve"
 
+[tasks.function-deploy]
+depends = ["install"]
+run = "pnpm supabase functions deploy"
+
 [tasks.dev]
 depends = ["install", "backend"]
 run = "pnpm run dev"
