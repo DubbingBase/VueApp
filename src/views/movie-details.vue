@@ -71,7 +71,19 @@
                     </ion-label>
                   </div>
                 </template>
-                <div v-else class="no-voice-actor">No voice actor found.</div>
+                <div v-else class="no-voice-actor">
+                  <span>No voice actor found.</span>
+                  <ion-button 
+                    v-if="isAdmin" 
+                    fill="clear" 
+                    size="small" 
+                    @click.stop="openVoiceActorSearch(actor)"
+                    class="add-voice-actor-btn"
+                  >
+                    <ion-icon :icon="personAddOutline" slot="start"></ion-icon>
+                    Add Voice Actor
+                  </ion-button>
+                </div>
               </div>
             </div>
           </template>
@@ -120,6 +132,59 @@
       <div v-if="fetchError" class="fetch-error">{{ fetchError }}</div>
       <ion-spinner v-if="isLoading" class="main-spinner"></ion-spinner>
     </ion-content>
+
+    <!-- Voice Actor Search Modal -->
+    <ion-modal :is-open="showVoiceActorSearch" @didDismiss="showVoiceActorSearch = false">
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Select Voice Actor</ion-title>
+          <ion-buttons slot="end">
+            <ion-button @click="showVoiceActorSearch = false">
+              <ion-icon :icon="closeCircle"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+        <ion-toolbar>
+          <ion-searchbar
+            v-model="searchTerm"
+            @ionInput="searchVoiceActors"
+            placeholder="Search voice actors..."
+            animated
+            :debounce="300"
+          ></ion-searchbar>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-list>
+          <ion-item v-if="isSearching" class="ion-text-center">
+            <ion-spinner></ion-spinner>
+          </ion-item>
+          <ion-item v-else-if="searchError" class="ion-text-center">
+            <ion-text color="danger">{{ searchError }}</ion-text>
+          </ion-item>
+          <ion-item v-else-if="!searchResults.length && searchTerm" class="ion-text-center">
+            <ion-text>No voice actors found</ion-text>
+          </ion-item>
+          <ion-item 
+            v-for="actor in searchResults" 
+            :key="actor.id"
+            button
+            @click="linkVoiceActor(actor)"
+          >
+            <ion-avatar slot="start" v-if="actor.profile_picture">
+              <img :src="actor.profile_picture" :alt="actor.firstname + ' ' + actor.lastname" />
+            </ion-avatar>
+            <ion-avatar slot="start" v-else>
+              <img src="https://placehold.co/40?text=VA" :alt="actor.firstname + ' ' + actor.lastname" />
+            </ion-avatar>
+            <ion-label>
+              <h3>{{ actor.firstname }} {{ actor.lastname }}</h3>
+              <p v-if="actor.nationality">{{ actor.nationality }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ion-modal>
   </ion-page>
 </template>
 
@@ -136,10 +201,12 @@ import {
   IonLabel,
   IonSpinner,
   IonThumbnail,
+  IonSearchbar,
+  IonModal,
 } from "@ionic/vue";
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { pencil } from 'ionicons/icons';
+import { pencil, personAddOutline, searchOutline, closeCircle } from 'ionicons/icons';
 import { getImage } from "../utils";
 import { MovieResponse } from "../../supabase/functions/_shared/movie";
 import { supabase } from "../api/supabase";
@@ -168,6 +235,89 @@ const goToEditPage = () => {
       name: 'AddVoiceCast',
       params: { id: movie.value.id }
     });
+  }
+};
+
+// Search modal state
+const showVoiceActorSearch = ref(false);
+const searchTerm = ref('');
+const searchResults = ref<any[]>([]);
+const isSearching = ref(false);
+const searchError = ref('');
+let currentActor: any = null;
+
+// Open search modal for voice actors
+const openVoiceActorSearch = (actor: any) => {
+  currentActor = actor;
+  searchTerm.value = '';
+  searchResults.value = [];
+  searchError.value = '';
+  showVoiceActorSearch.value = true;
+};
+
+// Search for voice actors
+const searchVoiceActors = async () => {
+  if (!searchTerm.value.trim()) {
+    searchResults.value = [];
+    return;
+  }
+
+  isSearching.value = true;
+  searchError.value = '';
+
+  try {
+    const { data, error } = await supabase
+      .from('voice_actors')
+      .select('*')
+      .or(`firstname.ilike.%${searchTerm.value}%,lastname.ilike.%${searchTerm.value}%`)
+      .limit(10);
+
+    if (error) throw error;
+    searchResults.value = data || [];
+  } catch (err) {
+    console.error('Error searching voice actors:', err);
+    searchError.value = 'Failed to search voice actors';
+  } finally {
+    isSearching.value = false;
+  }
+};
+
+// Link selected voice actor to the cast member
+const linkVoiceActor = async (voiceActor: any) => {
+  if (!movie.value?.id || !currentActor) return;
+
+  try {
+    const { error } = await supabase.from('works').insert({
+      movie_id: movie.value.id,
+      actor_id: currentActor.id,
+      voice_actor_id: voiceActor.id,
+      performance: 'Voice',
+      character: currentActor.character
+    });
+
+    if (error) throw error;
+
+    // Refresh voice actors data
+    await fetchMovieData();
+    showVoiceActorSearch.value = false;
+    
+    // Show success message
+    const toast = await toastController.create({
+      message: 'Voice actor linked successfully',
+      duration: 2000,
+      color: 'success',
+      position: 'top'
+    });
+    await toast.present();
+  } catch (err) {
+    console.error('Error linking voice actor:', err);
+    const toast = await toastController.create({
+      message: 'Failed to link voice actor',
+      duration: 2000,
+      color: 'danger',
+      position: 'top'
+    });
+    await toast.present();
   }
 };
 
@@ -448,11 +598,30 @@ onMounted(async () => {
   margin-top: 16px;
 }
 .no-actors, .no-voice-actor {
-  color: #bbb;
+  color: var(--ion-color-medium);
+  font-style: italic;
+  padding: 10px 0;
   text-align: center;
-  margin: 12px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
 }
 
+.add-voice-actor-btn {
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+  font-size: 0.85rem;
+  height: auto;
+  margin-top: 4px;
+}
+
+.add-voice-actor-btn ion-icon {
+  margin-right: 4px;
+}
 
 .actors-list {
   z-index: 1;
