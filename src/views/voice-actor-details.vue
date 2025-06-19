@@ -6,6 +6,11 @@
           <ion-back-button default-href="/" />
         </ion-buttons>
         <ion-title>Voix</ion-title>
+        <ion-buttons slot="end" v-if="isAdmin">
+          <router-link :to="{ name: 'EditVoiceActor', params: { id: voiceActor?.id } }">
+            <ion-button size="small" color="primary">Edit</ion-button>
+          </router-link>
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
     <ion-content>
@@ -89,6 +94,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
+// Admin check: get user from supabase.auth and check for admin role
 import type { Serie as SerieModel } from "../../supabase/functions/_shared/serie";
 import {
   IonPage,
@@ -106,6 +112,27 @@ import MediaThumbnail from "@/components/MediaThumbnail.vue";
 import { useFileDialog } from "@vueuse/core";
 
 const route = useRoute();
+
+// Local admin check using Supabase auth
+const user = ref<any>(null);
+
+const isAdmin = ref(false);
+
+// Check if current user is admin
+const checkAdminStatus = async () => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      isAdmin.value = user.role === 'admin' || user.app_metadata?.role === 'admin';
+    }
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+  }
+};
+
+onMounted(async () => {
+  checkAdminStatus();
+})
 
 type VoiceActorResponse = {
   voiceActor: {

@@ -19,3 +19,11 @@ run = "pnpm supabase functions serve"
 [tasks.dev]
 depends = ["install", "backend"]
 run = "pnpm run dev"
+
+[tasks.migrate-up]
+depends = ["install"]
+run = "pnpm supabase migration up"
+
+[tasks.migrate-down]
+depends = ["install"]
+run = "pnpm supabase migration down"

@@ -10,6 +10,8 @@ import Search from '../views/search.vue'
 import SeasonDetails from '@/views/season-details.vue';
 import SeasonByEpisode from '@/views/season-by-episodes.vue';
 import Login from '../views/login.vue';
+import AddVoiceCast from '@/views/admin/AddVoiceCast.vue';
+import EditVoiceActor from '@/views/admin/EditVoiceActor.vue';
 
 // 2. Define some routes
 // Each route should map to a component.
@@ -42,6 +44,8 @@ const routes: readonly RouteRecordRaw[] = [
   { name: 'SeasonDetails', path: '/serie/:id/season/:season', component: SeasonDetails },
   { name: 'SeasonByEpisodes', path: '/serie/:id/season/:season/details/:episode', component: SeasonByEpisode },
   { name: 'Admin', path: '/admin', component: Admin, meta: { requiresAdmin: true } },
+  { name: 'AddVoiceCast', path: '/admin/add-voice-cast/:id', component: AddVoiceCast, meta: { requiresAdmin: true } },
+  { name: 'EditVoiceActor', path: '/admin/edit-voice-actor/:id', component: EditVoiceActor, meta: { requiresAdmin: true } },
 ]
 
 // 3. Create the router instance and pass the `routes` option

@@ -6,6 +6,11 @@
           <ion-back-button default-href="/" />
         </ion-buttons>
         <ion-title>Voix</ion-title>
+        <ion-buttons slot="end" v-if="isAdmin">
+          <ion-button @click="goToEditPage">
+            <ion-icon :icon="pencil"></ion-icon>
+          </ion-button>
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
     <ion-content>
@@ -134,6 +139,7 @@ import {
 } from "@ionic/vue";
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { pencil } from 'ionicons/icons';
 import { getImage } from "../utils";
 import { MovieResponse } from "../../supabase/functions/_shared/movie";
 import { supabase } from "../api/supabase";
@@ -141,6 +147,29 @@ import { WorkAndVoiceActor } from "../../supabase/functions/_shared/movie";
 
 const route = useRoute();
 const router = useRouter();
+const isAdmin = ref(false);
+
+// Check if current user is admin
+const checkAdminStatus = async () => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      isAdmin.value = user.role === 'admin' || user.app_metadata?.role === 'admin';
+    }
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+  }
+};
+
+// Navigate to edit page
+const goToEditPage = () => {
+  if (movie.value?.id) {
+    router.push({
+      name: 'AddVoiceCast',
+      params: { id: movie.value.id }
+    });
+  }
+};
 
 const movie = ref<MovieResponse["movie"] | undefined>();
 const voiceActors = ref<MovieResponse["voiceActors"]>([]);
@@ -212,6 +241,7 @@ const fetchInfos = async () => {
   location.reload();
 };
 
+// Check admin status when component mounts
 onMounted(async () => {
   const id = route.params.id;
   isLoading.value = true;
@@ -228,6 +258,8 @@ onMounted(async () => {
   } finally {
     isLoading.value = false;
   }
+
+  await checkAdminStatus();
 });
 </script>
 

@@ -16,10 +16,12 @@ Deno.serve(async (req) => {
 
   console.log('query', query)
 
+  const trimmedQuery = query.trim()
+
   let resp = []
 
   try {
-    const response = await fetch(`https://api.themoviedb.org/3/search/multi?query=${query}&page=1language=fr-FR`, {
+    const response = await fetch(`https://api.themoviedb.org/3/search/multi?query=${trimmedQuery}&page=1language=fr-FR`, {
       headers: {
         "Content-Type": "application/json",
         'Authorization': `Bearer ${Deno.env.get('TMDB_API_KEY')}`,
@@ -34,7 +36,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabaseQuery = query.split(' ').map(x => `'${x}'`).join(' | ')
+    const supabaseQuery = trimmedQuery.split(' ').map(x => `'${x}'`).join(' | ')
     console.log('supabaseQuery', supabaseQuery)
     const { data, error } = await supabase
       .from('voice_actors')
