@@ -23,6 +23,7 @@ import './style.css';
 import App from './App.vue'
 
 import { router } from './router/router'
+import { createPinia } from 'pinia';
 
 
 /**
@@ -42,7 +43,8 @@ import './theme/variables.css';
 
 const app = createApp(App)
   .use(IonicVue)
-  .use(router);
+  .use(router)
+  .use(createPinia());
 
 router.isReady().then(() => {
   app.mount('#app');

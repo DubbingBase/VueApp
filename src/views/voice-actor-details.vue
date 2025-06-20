@@ -110,29 +110,15 @@ import type { Movie as MovieModel } from "../../supabase/functions/_shared/movie
 import { supabase } from "../api/supabase";
 import MediaThumbnail from "@/components/MediaThumbnail.vue";
 import { useFileDialog } from "@vueuse/core";
+import { storeToRefs } from 'pinia';
+import { useAuthStore } from '@/stores/auth';
 
+const authStore = useAuthStore();
 const route = useRoute();
 
 // Local admin check using Supabase auth
-const user = ref<any>(null);
 
-const isAdmin = ref(false);
-
-// Check if current user is admin
-const checkAdminStatus = async () => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      isAdmin.value = user.role === 'admin' || user.app_metadata?.role === 'admin';
-    }
-  } catch (error) {
-    console.error('Error checking admin status:', error);
-  }
-};
-
-onMounted(async () => {
-  checkAdminStatus();
-})
+const { isAdmin } = storeToRefs(authStore);
 
 type VoiceActorResponse = {
   voiceActor: {

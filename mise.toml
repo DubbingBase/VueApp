@@ -6,28 +6,35 @@ node = "22"
 _.file = '.env.development'
 
 [tasks.install]
+description = "Installs dependencies"
 run = "pnpm install"
 
 [tasks.backend]
+description = "Starts the Supabase backend"
 depends = ["install"]
 run = "pnpm supabase start"
 
 [tasks.functions]
+description = "Starts the Supabase functions"
 depends = ["install"]
 run = "pnpm supabase functions serve"
 
 [tasks.function-deploy]
+description = "Deploys the Supabase functions"
 depends = ["install"]
 run = "pnpm supabase functions deploy"
 
 [tasks.dev]
+description = "Runs the development server"
 depends = ["install", "backend"]
 run = "pnpm run dev"
 
 [tasks.migrate-up]
+description = "Runs the database migration"
 depends = ["install"]
 run = "pnpm supabase migration up"
 
 [tasks.migrate-down]
+description = "Reverts the database migration"
 depends = ["install"]
 run = "pnpm supabase migration down"

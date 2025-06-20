@@ -18,23 +18,12 @@
         <div class="inner-list">
           <template v-if="actors && actors.length">
             <div v-for="actor in actors" :key="actor.id" class="actor-wrapper">
-              <div
-                class="actor"
-                @click="goToActor(actor.id)"
-                :routerLink="{
-                  name: 'ActorDetails',
-                  params: { id: actor.id },
-                }"
-                tabindex="0"
-                role="button"
-                aria-label="Go to details for {{ actor.name }}"
-              >
+              <div class="actor" @click="goToActor(actor.id)" :routerLink="{
+                name: 'ActorDetails',
+                params: { id: actor.id },
+              }" tabindex="0" role="button" aria-label="Go to details for {{ actor.name }}">
                 <ion-thumbnail class="avatar">
-                  <img
-                    v-if="actor.profile_path"
-                    :src="getImage(actor.profile_path)"
-                    :alt="actor.name + ' photo'"
-                  />
+                  <img v-if="actor.profile_path" :src="getImage(actor.profile_path)" :alt="actor.name + ' photo'" />
                   <img v-else src="https://placehold.co/48x72?text=?" alt="No photo" />
                 </ion-thumbnail>
                 <ion-label class="line-label">
@@ -45,21 +34,14 @@
               <div class="voice-actor-list">
                 <template v-if="getVoiceActorByTmdbId(actor.id).length">
                   <div class="voice-actor-container">
-                    <div
-                      class="voice-actor"
-                      @click="goToVoiceActor(item.voiceActorDetails.id)"
-                      v-for="item in getVoiceActorByTmdbId(actor.id)"
-                      :key="item.voiceActorDetails.id"
-                      tabindex="0"
+                    <div class="voice-actor" @click="goToVoiceActor(item.voiceActorDetails.id)"
+                      v-for="item in getVoiceActorByTmdbId(actor.id)" :key="item.voiceActorDetails.id" tabindex="0"
                       role="button"
-                      aria-label="Go to details for {{ item.voiceActorDetails.firstname }} {{ item.voiceActorDetails.lastname }}"
-                    >
+                      aria-label="Go to details for {{ item.voiceActorDetails.firstname }} {{ item.voiceActorDetails.lastname }}">
                       <ion-thumbnail class="avatar">
-                        <img
-                          v-if="item.voiceActorDetails.profile_picture"
+                        <img v-if="item.voiceActorDetails.profile_picture"
                           :src="getImage(item.voiceActorDetails.profile_picture)"
-                          :alt="item.voiceActorDetails.firstname + ' ' + item.voiceActorDetails.lastname + ' photo'"
-                        />
+                          :alt="item.voiceActorDetails.firstname + ' ' + item.voiceActorDetails.lastname + ' photo'" />
                         <img v-else src="https://placehold.co/48x72?text=?" alt="No photo" />
                       </ion-thumbnail>
                       <ion-label class="line-label">
@@ -70,39 +52,27 @@
                           {{ item.performance }}
                         </span>
                       </ion-label>
+
+                      <div class="voice-actor-actions" v-if="isAdmin">
+                        <ion-button fill="clear" size="small" @click.stop="editVoiceActorLink(item)"
+                          aria-label="Edit voice actor link">
+                          <ion-icon :icon="createOutline"></ion-icon>
+                        </ion-button>
+                        <ion-button fill="clear" size="small" @click.stop="confirmDeleteVoiceActorLink(item)"
+                          color="danger" aria-label="Delete voice actor link">
+                          <ion-icon :icon="trashOutline"></ion-icon>
+                        </ion-button>
+                      </div>
                     </div>
-                    <div class="voice-actor-actions" v-if="isAdmin">
-                      <ion-button 
-                        fill="clear" 
-                        size="small" 
-                        @click.stop="editVoiceActorLink(item)"
-                        aria-label="Edit voice actor link"
-                      >
-                        <ion-icon :icon="createOutline"></ion-icon>
-                      </ion-button>
-                      <ion-button 
-                        fill="clear" 
-                        size="small" 
-                        @click.stop="confirmDeleteVoiceActorLink(item)"
-                        color="danger"
-                        aria-label="Delete voice actor link"
-                      >
-                        <ion-icon :icon="trashOutline"></ion-icon>
-                      </ion-button>
-                    </div>
+
                   </div>
                 </template>
                 <div v-else class="no-voice-actor">
                   <span>No voice actor found.</span>
-                  <ion-button 
-                    v-if="isAdmin" 
-                    fill="clear" 
-                    size="small" 
-                    @click.stop="openVoiceActorSearch(actor)"
-                    class="add-voice-actor-btn"
-                  >
+                  <ion-button v-if="isAdmin" fill="clear" size="small" @click.stop="openVoiceActorSearch(actor)"
+                    class="add-voice-actor-btn">
                     <ion-icon :icon="personAddOutline" slot="start"></ion-icon>
-                    Add Voice Actor
+                    Add
                   </ion-button>
                 </div>
               </div>
@@ -118,12 +88,8 @@
       </div>
 
       <div v-if="movie" class="movie-info-card">
-        <img
-          v-if="movie.poster_path"
-          class="movie-poster"
-          :src="getImage(movie.poster_path)"
-          :alt="movie.title + ' poster'"
-        />
+        <img v-if="movie.poster_path" class="movie-poster" :src="getImage(movie.poster_path)"
+          :alt="movie.title + ' poster'" />
         <div class="movie-info">
           <div class="movie-title-row">
             <h2 class="movie-title">{{ movie.title }}</h2>
@@ -166,13 +132,8 @@
           </ion-buttons>
         </ion-toolbar>
         <ion-toolbar>
-          <ion-searchbar
-            v-model="searchTerm"
-            @ionInput="searchVoiceActors"
-            placeholder="Search voice actors..."
-            animated
-            :debounce="300"
-          ></ion-searchbar>
+          <ion-searchbar v-model="searchTerm" @ionInput="searchVoiceActors" placeholder="Search voice actors..."
+            animated :debounce="300"></ion-searchbar>
         </ion-toolbar>
       </ion-header>
       <ion-content class="ion-padding">
@@ -186,21 +147,17 @@
           <ion-item v-else-if="!searchResults.length && searchTerm" class="ion-text-center">
             <ion-text>No voice actors found</ion-text>
           </ion-item>
-          <ion-item 
-            v-for="actor in searchResults" 
-            :key="actor.id"
-            button
-            @click="linkVoiceActor(actor)"
-          >
-            <ion-avatar slot="start" v-if="actor.profile_picture">
-              <img :src="actor.profile_picture" :alt="actor.firstname + ' ' + actor.lastname" />
+          <ion-item v-for="va in searchResults" :key="va.id" button
+            @click="linkVoiceActor(va, route.params.id as string)">
+            <ion-avatar slot="start" v-if="va.profile_picture">
+              <img :src="va.profile_picture" :alt="va.firstname + ' ' + va.lastname" />
             </ion-avatar>
             <ion-avatar slot="start" v-else>
-              <img src="https://placehold.co/40?text=VA" :alt="actor.firstname + ' ' + actor.lastname" />
+              <img src="https://placehold.co/40?text=VA" :alt="va.firstname + ' ' + va.lastname" />
             </ion-avatar>
             <ion-label>
-              <h3>{{ actor.firstname }} {{ actor.lastname }}</h3>
-              <p v-if="actor.nationality">{{ actor.nationality }}</p>
+              <h3>{{ va.firstname }} {{ va.lastname }}</h3>
+              <p v-if="va.nationality">{{ va.nationality }}</p>
             </ion-label>
           </ion-item>
         </ion-list>
@@ -212,166 +169,73 @@
 <script setup lang="ts">
 import {
   IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
   IonContent,
-  IonButton,
   IonBackButton,
   IonButtons,
-  IonTitle,
-  IonToolbar,
-  IonHeader,
+  IonButton,
+  IonIcon,
+  IonThumbnail,
   IonLabel,
   IonSpinner,
-  IonThumbnail,
-  IonSearchbar,
   IonModal,
+  IonSearchbar,
+  IonList,
+  IonItem,
+  IonText,
+  IonAvatar,
+  alertController,
+  toastController
 } from "@ionic/vue";
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useIonRouter } from '@ionic/vue';
 import { pencil, personAddOutline, searchOutline, closeCircle, createOutline, trashOutline } from 'ionicons/icons';
-import { getImage } from "../utils";
 import { MovieResponse } from "../../supabase/functions/_shared/movie";
 import { supabase } from "../api/supabase";
 import { WorkAndVoiceActor } from "../../supabase/functions/_shared/movie";
+import { useVoiceActorManagement } from '@/composables/useVoiceActorManagement';
+import { storeToRefs } from 'pinia';
+import { useAuthStore } from '@/stores/auth';
+
+const authStore = useAuthStore();
+const { isAdmin } = storeToRefs(authStore);
 
 const route = useRoute();
 const router = useRouter();
-const isAdmin = ref(false);
+const ionRouter = useIonRouter();
 
-// Check if current user is admin
-const checkAdminStatus = async () => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      isAdmin.value = user.role === 'admin' || user.app_metadata?.role === 'admin';
-    }
-  } catch (error) {
-    console.error('Error checking admin status:', error);
-  }
-};
+// Initialize voice actor management
+const {
+  // State
+  showVoiceActorSearch,
+  searchTerm,
+  searchResults,
+  isSearching,
+  searchError,
+  voiceActors,
+  isLoading,
+  error: voiceActorError,
 
-// Navigate to edit page
-const goToEditPage = () => {
-  if (movie.value?.id) {
-    router.push({
-      name: 'AddVoiceCast',
-      params: { id: movie.value.id }
-    });
-  }
-};
-
-// Search modal state
-const showVoiceActorSearch = ref(false);
-const searchTerm = ref('');
-const searchResults = ref<any[]>([]);
-const isSearching = ref(false);
-const searchError = ref('');
-let currentActor: any = null;
-
-// Open search modal for voice actors
-const openVoiceActorSearch = (actor: any) => {
-  currentActor = actor;
-  searchTerm.value = '';
-  searchResults.value = [];
-  searchError.value = '';
-  showVoiceActorSearch.value = true;
-};
-
-// Search for voice actors
-const searchVoiceActors = async () => {
-  if (!searchTerm.value.trim()) {
-    searchResults.value = [];
-    return;
-  }
-
-  isSearching.value = true;
-  searchError.value = '';
-
-  try {
-    const { data, error } = await supabase
-      .from('voice_actors')
-      .select('*')
-      .or(`firstname.ilike.%${searchTerm.value}%,lastname.ilike.%${searchTerm.value}%`)
-      .limit(10);
-
-    if (error) throw error;
-    searchResults.value = data || [];
-  } catch (err) {
-    console.error('Error searching voice actors:', err);
-    searchError.value = 'Failed to search voice actors';
-  } finally {
-    isSearching.value = false;
-  }
-};
-
-// Link selected voice actor to the cast member
-const linkVoiceActor = async (voiceActor: any) => {
-  if (!movie.value?.id || !currentActor) return;
-
-  try {
-    const { error } = await supabase.from('works').insert({
-      movie_id: movie.value.id,
-      actor_id: currentActor.id,
-      voice_actor_id: voiceActor.id,
-      performance: 'Voice',
-      character: currentActor.character
-    });
-
-    if (error) throw error;
-
-    // Refresh voice actors data
-    await fetchMovieData();
-    showVoiceActorSearch.value = false;
-    
-    // Show success message
-    const toast = await toastController.create({
-      message: 'Voice actor linked successfully',
-      duration: 2000,
-      color: 'success',
-      position: 'top'
-    });
-    await toast.present();
-  } catch (err) {
-    console.error('Error linking voice actor:', err);
-    const toast = await toastController.create({
-      message: 'Failed to link voice actor',
-      duration: 2000,
-      color: 'danger',
-      position: 'top'
-    });
-    await toast.present();
-  }
-};
+  // Methods
+  getImage,
+  getVoiceActorByTmdbId,
+  openVoiceActorSearch,
+  searchVoiceActors,
+  linkVoiceActor,
+  editVoiceActorLink,
+  confirmDeleteVoiceActorLink,
+  deleteVoiceActorLink,
+  goToVoiceActor,
+  loadVoiceActors
+} = useVoiceActorManagement('movie');
 
 const movie = ref<MovieResponse["movie"] | undefined>();
-const voiceActors = ref<MovieResponse["voiceActors"]>([]);
-
 const actors = computed(() => {
   return movie.value?.credits.cast;
 });
-
-const getVoiceActorByTmdbId = (tmdbId: number): WorkAndVoiceActor[] => {
-  const va = voiceActors.value.filter((v) => v.actor_id === tmdbId);
-
-  return va;
-};
-
-const goToActor = (id: number) => {
-  router.push({
-    name: "ActorDetails",
-    params: {
-      id,
-    },
-  });
-};
-
-const goToVoiceActor = (id: number) => {
-  router.push({
-    name: "VoiceActorDetails",
-    params: {
-      id,
-    },
-  });
-};
 
 const wikiDataId = computed(() => {
   return movie.value?.external_ids?.wikidata_id;
@@ -386,8 +250,7 @@ const hasData = computed(() => {
 });
 
 const isFetching = ref(false);
-const isLoading = ref(true);
-const fetchError = ref<string | null>(null);
+const fetchError = ref('');
 
 const fetchInfos = async () => {
   const id = wikiDataId.value;
@@ -420,6 +283,7 @@ const fetchMovieData = async () => {
     });
     const data = movieResponseRaw.data as MovieResponse;
     movie.value = data.movie;
+    console.log("data.voiceActors", data.voiceActors);
     voiceActors.value = data.voiceActors;
   } catch (e: any) {
     console.error('Error fetching movie data:', e);
@@ -427,71 +291,81 @@ const fetchMovieData = async () => {
   }
 };
 
-// Edit voice actor link
-const editVoiceActorLink = (workItem: any) => {
-  if (!movie.value?.id) return;
-  
-  router.push({
-    name: 'AddVoiceCast',
-    params: { 
-      movieId: movie.value.id,
-      actorId: workItem.actor_id,
-      workId: workItem.id
-    }
-  });
-};
-
-// Confirm before deleting a voice actor link
-const confirmDeleteVoiceActorLink = async (workItem: any) => {
-  const alert = await alertController.create({
-    header: 'Confirm Delete',
-    message: `Are you sure you want to remove ${workItem.voiceActorDetails.firstname} ${workItem.voiceActorDetails.lastname} as the voice for ${workItem.character}?`,
-    buttons: [
-      {
-        text: 'Cancel',
-        role: 'cancel'
-      },
-      {
-        text: 'Delete',
-        role: 'destructive',
-        handler: () => deleteVoiceActorLink(workItem.id)
-      }
-    ]
-  });
-  await alert.present();
-};
-
-// Delete a voice actor link
-const deleteVoiceActorLink = async (workId: number) => {
-  try {
-    const { error } = await supabase
-      .from('works')
-      .delete()
-      .eq('id', workId);
-
-    if (error) throw error;
-
-    // Refresh the data
-    await fetchMovieData();
-    
-    const toast = await toastController.create({
-      message: 'Voice actor link removed',
-      duration: 2000,
-      color: 'success',
-      position: 'top'
+// Navigate to edit page
+const goToEditPage = () => {
+  if (movie.value?.id) {
+    router.push({
+      name: 'AddVoiceCast',
+      params: { id: movie.value.id }
     });
-    await toast.present();
-  } catch (err) {
-    console.error('Error deleting voice actor link:', err);
-    const toast = await toastController.create({
-      message: 'Failed to remove voice actor link',
-      duration: 2000,
-      color: 'danger',
-      position: 'top'
-    });
-    await toast.present();
   }
 };
+
+// // Edit voice actor link
+// const editVoiceActorLink = (workItem: any) => {
+//   if (!movie.value?.id) return;
+
+//   router.push({
+//     name: 'AddVoiceCast',
+//     params: { 
+//       movieId: movie.value.id,
+//       actorId: workItem.actor_id,
+//       workId: workItem.id
+//     }
+//   });
+// };
+
+// Confirm before deleting a voice actor link
+// const confirmDeleteVoiceActorLink = async (workItem: any) => {
+//   const alert = await alertController.create({
+//     header: 'Confirm Delete',
+//     message: `Are you sure you want to remove ${workItem.voiceActorDetails.firstname} ${workItem.voiceActorDetails.lastname} as the voice for ${workItem.character}?`,
+//     buttons: [
+//       {
+//         text: 'Cancel',
+//         role: 'cancel'
+//       },
+//       {
+//         text: 'Delete',
+//         role: 'destructive',
+//         handler: () => deleteVoiceActorLink(workItem.id)
+//       }
+//     ]
+//   });
+//   await alert.present();
+// };
+
+// Delete a voice actor link
+// const deleteVoiceActorLink = async (workId: number) => {
+//   try {
+//     const { error } = await supabase
+//       .from('works')
+//       .delete()
+//       .eq('id', workId);
+
+//     if (error) throw error;
+
+//     // Refresh the data
+//     await fetchMovieData();
+
+//     const toast = await toastController.create({
+//       message: 'Voice actor link removed',
+//       duration: 2000,
+//       color: 'success',
+//       position: 'top'
+//     });
+//     await toast.present();
+//   } catch (err) {
+//     console.error('Error deleting voice actor link:', err);
+//     const toast = await toastController.create({
+//       message: 'Failed to remove voice actor link',
+//       duration: 2000,
+//       color: 'danger',
+//       position: 'top'
+//     });
+//     await toast.present();
+//   }
+// };
 
 // Check admin status when component mounts
 onMounted(async () => {
@@ -506,8 +380,6 @@ onMounted(async () => {
   } finally {
     isLoading.value = false;
   }
-
-  await checkAdminStatus();
 });
 </script>
 
@@ -516,7 +388,7 @@ onMounted(async () => {
   text-align: center;
 }
 
-.header > img {
+.header>img {
   object-fit: cover;
   width: 100%;
 }
@@ -540,6 +412,7 @@ onMounted(async () => {
 .line-label {
   margin-left: 8px;
   width: 100%;
+
   .label {
     width: 100%;
     display: block;
@@ -563,7 +436,7 @@ onMounted(async () => {
   margin: 0 8px;
   background-color: #333;
   border-radius: 0.5rem;
-  gap:0.5rem;
+  gap: 0.5rem;
 
   .actor {
     width: 100%;
@@ -582,10 +455,14 @@ onMounted(async () => {
     overflow-y: hidden;
   }
 
+  .voice-actor-container {
+    width: 100%;
+  }
+
   .voice-actor {
     background-color: #666;
-    flex: 1 0  auto;
-    width: 90%;
+    flex: 1 0 auto;
+    width: 100%;
     display: flex;
     flex-direction: row;
     gap: 4px;
@@ -602,19 +479,21 @@ onMounted(async () => {
   height: 210px;
   overflow: hidden;
 }
+
 .background img {
   width: 100vw;
   height: 210px;
   object-fit: cover;
   filter: blur(2px) brightness(0.6);
 }
+
 .background-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 210px;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   z-index: 1;
 }
 
@@ -622,16 +501,17 @@ onMounted(async () => {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  background: rgba(20,20,20,0.95);
+  background: rgba(20, 20, 20, 0.95);
   margin: 0 auto 16px auto;
   border-radius: 1rem;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
   max-width: 700px;
   padding: 16px;
   position: relative;
   top: -80px;
   z-index: 2;
 }
+
 .movie-poster {
   width: 120px;
   height: 180px;
@@ -640,31 +520,37 @@ onMounted(async () => {
   margin-right: 16px;
   background: #222;
 }
+
 .movie-info {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
+
 .movie-title-row {
   display: flex;
   align-items: baseline;
   gap: 8px;
 }
+
 .movie-title {
   font-size: 1.6rem;
   font-weight: bold;
   margin: 0;
 }
+
 .movie-year {
   color: #ccc;
   font-size: 1.1rem;
 }
+
 .movie-genres {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
 }
+
 .movie-genre-chip {
   background: #444;
   color: #fff;
@@ -672,36 +558,44 @@ onMounted(async () => {
   padding: 2px 10px;
   font-size: 0.9rem;
 }
+
 .movie-rating {
   font-size: 1.2rem;
   color: gold;
 }
+
 .movie-overview {
   font-size: 1rem;
   color: #eee;
 }
+
 .movie-meta {
   display: flex;
   gap: 18px;
   color: #aaa;
   font-size: 0.95rem;
 }
+
 .main-spinner {
   display: block;
   margin: 32px auto;
 }
+
 .fetch-error {
   color: #ff6666;
   text-align: center;
   margin-top: 16px;
 }
-.no-actors, .no-voice-actor {
+
+.no-actors,
+.no-voice-actor {
   color: var(--ion-color-medium);
   font-style: italic;
   padding: 10px 0;
   text-align: center;
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  flex-direction: row;
   align-items: center;
   gap: 8px;
   width: 100%;

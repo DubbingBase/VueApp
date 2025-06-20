@@ -135,35 +135,65 @@
                     </ion-label>
                   </div>
                   <template v-if="getVoiceActorByTmdbId(actor.id).length">
-                    <div
-                      class="voice-actor"
-                      v-for="item in getVoiceActorByTmdbId(actor.id)"
-                      :key="item.voiceActorDetails.id"
-                      @click="goToVoiceActor(item.voiceActorDetails.id)"
-                      aria-label="Voir les détails de la voix de {{ item.voiceActorDetails.name }}"
-                    >
-                      <ion-thumbnail class="avatar">
-                        <img
-                          v-if="item.voiceActorDetails.profile_picture"
-                          :src="getImage(item.voiceActorDetails.profile_picture)"
-                          :alt="item.voiceActorDetails.name"
-                        />
-                        <img v-else src="https://placehold.co/48x72?text=VA" alt="?" />
-                      </ion-thumbnail>
-                      <ion-label class="line-label">
-                      <span class="ellipsis label voice-actor">
-                        {{ item.voiceActorDetails.firstname }}
-                        {{ item.voiceActorDetails.lastname }}
-                      </span>
-                      <span class="ellipsis label performance">
-                        {{ item.performance }}
-                      </span>
-                      </ion-label>
+                    <div class="voice-actor-container">
+                      <div
+                        class="voice-actor"
+                        v-for="item in getVoiceActorByTmdbId(actor.id)"
+                        :key="item.voiceActorDetails.id"
+                        @click="goToVoiceActor(item.voiceActorDetails.id)"
+                        aria-label="Voir les détails de la voix de {{ item.voiceActorDetails.firstname }} {{ item.voiceActorDetails.lastname }}"
+                      >
+                        <ion-thumbnail class="avatar">
+                          <img
+                            v-if="item.voiceActorDetails.profile_picture"
+                            :src="getImage(item.voiceActorDetails.profile_picture)"
+                            :alt="item.voiceActorDetails.firstname + ' ' + item.voiceActorDetails.lastname"
+                          />
+                          <img v-else src="https://placehold.co/48x72?text=VA" :alt="item.voiceActorDetails.firstname + ' ' + item.voiceActorDetails.lastname" />
+                        </ion-thumbnail>
+                        <ion-label class="line-label">
+                          <span class="ellipsis label voice-actor">
+                            {{ item.voiceActorDetails.firstname }} {{ item.voiceActorDetails.lastname }}
+                          </span>
+                          <span class="ellipsis label performance">
+                            {{ item.performance }}
+                          </span>
+                        </ion-label>
+                      </div>
+                      <div class="voice-actor-actions" v-if="isAdmin">
+                        <ion-button 
+                          fill="clear" 
+                          size="small" 
+                          @click.stop="editVoiceActorLink(item)"
+                          aria-label="Modifier le doubleur"
+                        >
+                          <ion-icon :icon="createOutline"></ion-icon>
+                        </ion-button>
+                        <ion-button 
+                          fill="clear" 
+                          size="small" 
+                          @click.stop="confirmDeleteVoiceActorLink(item)"
+                          color="danger"
+                          aria-label="Supprimer le doubleur"
+                        >
+                          <ion-icon :icon="trashOutline"></ion-icon>
+                        </ion-button>
+                      </div>
                     </div>
                   </template>
-                  <template v-else>
-                    <div class="voice-actor no-voice-actor">Aucun doubleur trouvé</div>
-                  </template>
+                  <div v-else class="no-voice-actor">
+                    <span>No voice actor found.</span>
+                    <ion-button 
+                      v-if="isAdmin" 
+                      fill="clear" 
+                      size="small" 
+                      @click.stop="openVoiceActorSearch(actor)"
+                      class="add-voice-actor-btn"
+                    >
+                      <ion-icon :icon="personAddOutline" slot="start"></ion-icon>
+                      Add
+                    </ion-button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -199,58 +229,68 @@ import {
   IonLabel,
   IonSpinner,
   IonThumbnail,
+  IonIcon,
+  IonModal,
+  IonSearchbar,
+  IonList,
+  IonItem,
+  IonText,
+  IonAvatar,
+  alertController,
+  toastController,
 } from "@ionic/vue";
-import { computed, onMounted, ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { getImage } from "../utils";
-import { SerieResponse } from "../../supabase/functions/_shared/serie";
-import { supabase } from "../api/supabase";
-import { WorkAndVoiceActor } from "../../supabase/functions/_shared/movie";
-import MediaThumbnail from "@/components/MediaThumbnail.vue";
+import { ref, computed, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useIonRouter } from '@ionic/vue';
+import MediaThumbnail from '@/components/MediaThumbnail.vue';
+import { useVoiceActorManagement } from '@/composables/useVoiceActorManagement';
+import { personAddOutline, createOutline, trashOutline, closeCircle } from 'ionicons/icons';
 import SolarSettingsMinimalisticOutline from "~icons/solar/settings-minimalistic-outline";
+import { storeToRefs } from 'pinia';
+import { useAuthStore } from '@/stores/auth';
+
+const authStore = useAuthStore();
+const { isAdmin } = storeToRefs(authStore);
 
 const route = useRoute();
 const router = useRouter();
+const ionRouter = useIonRouter();
 
-const show = ref<SerieResponse["serie"] | undefined>();
-const voiceActors = ref<SerieResponse["voiceActors"]>([]);
+const show = ref<any>(null);
 const isLoading = ref(true);
+const isFetching = ref(false);
+const error = ref('');
 
-const actors = computed(() => show.value?.credits.cast || []);
+// Initialize voice actor management
+const {
+  // State
+  showVoiceActorSearch,
+  searchTerm,
+  searchResults,
+  isSearching,
+  searchError,
+  voiceActors,
+  isLoading: isLoadingVoiceActors,
+  error: voiceActorError,
+  
+  // Methods
+  getImage,
+  getVoiceActorByTmdbId,
+  openVoiceActorSearch,
+  searchVoiceActors,
+  linkVoiceActor,
+  editVoiceActorLink,
+  confirmDeleteVoiceActorLink,
+  deleteVoiceActorLink,
+  goToVoiceActor,
+  loadVoiceActors
+} = useVoiceActorManagement('serie');
 
-const getVoiceActorByTmdbId = (tmdbId: number): WorkAndVoiceActor[] => {
-  const va = voiceActors.value.filter((v) => v.actor_id === tmdbId);
+const actors = computed(() => {
+  return show.value?.credits?.cast || [];
+});
 
-  return va;
-};
-
-const goToSeason = (id: number, seasonNumber: number) => {
-  router.push({
-    name: "SeasonDetails",
-    params: {
-      id: id,
-      season: seasonNumber,
-    },
-  });
-};
-
-const goToActor = (id: number) => {
-  router.push({
-    name: "ActorDetails",
-    params: {
-      id,
-    },
-  });
-};
-
-const goToVoiceActor = (id: number) => {
-  router.push({
-    name: "VoiceActorDetails",
-    params: {
-      id,
-    },
-  });
-};
+// Voice actor methods are now provided by the composable
 
 const wikiDataId = computed(() => {
   return show.value?.external_ids?.wikidata_id;
@@ -264,7 +304,6 @@ const hasData = computed(() => {
   return voiceActors.value.length > 0;
 });
 
-const isFetching = ref(false);
 
 const fetchInfos = async () => {
   const id = wikiDataId.value;
@@ -293,18 +332,35 @@ onMounted(async () => {
   isLoading.value = true;
   const id = route.params.id;
   try {
-    const showResponseRaw = await supabase.functions.invoke("show", {
-      body: { id },
-    });
-    const data = showResponseRaw.data as SerieResponse;
-    show.value = data.serie;
-    voiceActors.value = data.voiceActors;
-  } catch (e) {
-    console.error(e);
+    const response = await getSerie(id as string);
+    show.value = response.data;
+    // Load voice actors for this serie
+    await loadVoiceActors(parseInt(id as string));
+  } catch (err) {
+    console.error('Error fetching serie:', err);
+    error.value = 'Failed to load serie details';
   } finally {
     isLoading.value = false;
   }
 });
+
+// Navigation methods
+const goToSeason = (id: number, seasonNumber: number) => {
+  router.push({
+    name: "SeasonDetails",
+    params: {
+      id: id,
+      season: seasonNumber,
+    },
+  });
+};
+
+const goToActor = (id: number) => {
+  router.push({
+    name: "ActorDetails",
+    params: { id },
+  });
+};
 </script>
 
 <style scoped lang="scss">
@@ -450,5 +506,18 @@ ion-segment {
 .toolbar {
   --background: transparent !important;
   --border-width: 0 !important;
+}
+
+.no-actors, .no-voice-actor {
+  color: var(--ion-color-medium);
+  font-style: italic;
+  padding: 10px 0;
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
 }
 </style>

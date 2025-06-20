@@ -5,6 +5,7 @@ import vue from "@vitejs/plugin-vue";
 import path from "path";
 import { defineConfig, loadEnv } from "vite";
 import Icons from "unplugin-icons/vite";
+import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vitejs.dev/config/
 export default ({ mode }) => {
@@ -19,6 +20,7 @@ export default ({ mode }) => {
       vue(),
       legacy(),
       Icons({ compiler: "vue3" }),
+      vueDevTools(),
     ],
     resolve: {
       alias: {
