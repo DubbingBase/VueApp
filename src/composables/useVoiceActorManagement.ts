@@ -216,30 +216,6 @@ export function useVoiceActorManagement(workType: 'movie' | 'tv' | 'season' | 'e
     });
   };
 
-  // Load voice actors for the current work
-  const loadVoiceActors = async (workId: number) => {
-    if (!workId) return;
-    
-    isLoading.value = true;
-    error.value = '';
-    
-    try {
-      const response = await supabase.functions.invoke('get_voice_actors', {
-        body: {
-          work_id: workId,
-          work_type: workType
-        }
-      });
-      
-      voiceActors.value = response.data;
-    } catch (err) {
-      console.error(`Error loading voice actors for ${workType}:`, err);
-      error.value = 'Failed to load voice actors';
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
   watch(voiceActors, (newVal) => {
     console.log('voiceActors changed:', newVal);
   });
@@ -266,6 +242,5 @@ export function useVoiceActorManagement(workType: 'movie' | 'tv' | 'season' | 'e
     confirmDeleteVoiceActorLink,
     deleteVoiceActorLink,
     goToVoiceActor,
-    loadVoiceActors
   };
 }

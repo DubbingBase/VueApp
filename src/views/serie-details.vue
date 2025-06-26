@@ -62,7 +62,9 @@
       <div v-else class="banner banner-placeholder">
         <div class="banner-title">Chargement…</div>
       </div>
+
       <ion-spinner v-if="isLoading" class="loading-spinner" name="crescent"></ion-spinner>
+      
       <div class="tabs" v-show="!isLoading">
         <div class="summary">
           <div v-if="show" class="show-title">{{ show.name }}</div>
@@ -182,17 +184,23 @@
                     </div>
                   </template>
                   <div v-else class="no-voice-actor">
-                    <span>No voice actor found.</span>
-                    <ion-button 
-                      v-if="isAdmin" 
-                      fill="clear" 
-                      size="small" 
-                      @click.stop="openVoiceActorSearch(actor)"
-                      class="add-voice-actor-btn"
-                    >
-                      <ion-icon :icon="personAddOutline" slot="start"></ion-icon>
-                      Add
-                    </ion-button>
+                    <div class="voice-actor-container">
+                      <div class="voice-actor">
+                        <ion-thumbnail class="avatar">
+                          <img src="https://placehold.co/48x72?text=?" alt="No photo" />
+                        </ion-thumbnail>
+                        <ion-label class="line-label">
+                          <span class="ellipsis label">
+                            No voice actor found.
+                          </span>
+                          <ion-button v-if="isAdmin" fill="clear" size="small" @click.stop="openVoiceActorSearch(actor)"
+                            class="add-voice-actor-btn">
+                            <ion-icon :icon="personAddOutline" slot="start"></ion-icon>
+                            Add
+                          </ion-button>
+                        </ion-label>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -201,14 +209,54 @@
         </ion-segment-view>
       </div>
 
-      <div class="background">
-        <img v-if="show" :src="getImage(show.backdrop_path)" alt="" />
-      </div>
-
       <ion-button :disabled="isFetching" v-if="hasWikidataId && !hasData" class="fetch-infos-btn" @click="fetchInfos">
         <ion-spinner v-if="isFetching"></ion-spinner>
         <span v-else>Récupérer les informations {{ wikiDataId }} {{ hasData }}</span>
       </ion-button>
+
+      <!-- Voice Actor Search Modal -->
+    <ion-modal :is-open="showVoiceActorSearch" @didDismiss="showVoiceActorSearch = false">
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Select Voice Actor</ion-title>
+          <ion-buttons slot="end">
+            <ion-button @click="showVoiceActorSearch = false">
+              <ion-icon :icon="closeCircle"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+        <ion-toolbar>
+          <ion-searchbar v-model="searchTerm" @ionInput="searchVoiceActors" placeholder="Search voice actors..."
+            animated :debounce="300"></ion-searchbar>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-list>
+          <ion-item v-if="isSearching" class="ion-text-center">
+            <ion-spinner></ion-spinner>
+          </ion-item>
+          <ion-item v-else-if="searchError" class="ion-text-center">
+            <ion-text color="danger">{{ searchError }}</ion-text>
+          </ion-item>
+          <ion-item v-else-if="!searchResults.length && searchTerm" class="ion-text-center">
+            <ion-text>No voice actors found</ion-text>
+          </ion-item>
+          <ion-item v-for="va in searchResults" :key="va.id" button
+            @click="linkVoiceActor(va, route.params.id as string)">
+            <ion-avatar slot="start" v-if="va.profile_picture">
+              <img :src="va.profile_picture" :alt="va.firstname + ' ' + va.lastname" />
+            </ion-avatar>
+            <ion-avatar slot="start" v-else>
+              <img src="https://placehold.co/40?text=VA" :alt="va.firstname + ' ' + va.lastname" />
+            </ion-avatar>
+            <ion-label>
+              <h3>{{ va.firstname }} {{ va.lastname }}</h3>
+              <p v-if="va.nationality">{{ va.nationality }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ion-modal>
     </ion-content>
   </ion-page>
 </template>
@@ -248,6 +296,7 @@ import { personAddOutline, createOutline, trashOutline, closeCircle } from 'ioni
 import SolarSettingsMinimalisticOutline from "~icons/solar/settings-minimalistic-outline";
 import { storeToRefs } from 'pinia';
 import { useAuthStore } from '@/stores/auth';
+import { supabase } from "@/api/supabase";
 
 const authStore = useAuthStore();
 const { isAdmin } = storeToRefs(authStore);
@@ -283,8 +332,7 @@ const {
   confirmDeleteVoiceActorLink,
   deleteVoiceActorLink,
   goToVoiceActor,
-  loadVoiceActors
-} = useVoiceActorManagement('serie');
+} = useVoiceActorManagement('tv');
 
 const actors = computed(() => {
   return show.value?.credits?.cast || [];
@@ -304,6 +352,19 @@ const hasData = computed(() => {
   return voiceActors.value.length > 0;
 });
 
+
+const getSerie = async (id: string) => {
+  try {
+    const response = await supabase.functions.invoke("show", {
+      body: { id },
+    });
+    return response;
+  } catch (e: any) {
+    console.error('Error fetching series data:', e);
+    error.value = 'Failed to load series details.';
+    throw e;
+  }
+};
 
 const fetchInfos = async () => {
   const id = wikiDataId.value;
@@ -333,9 +394,11 @@ onMounted(async () => {
   const id = route.params.id;
   try {
     const response = await getSerie(id as string);
-    show.value = response.data;
+    show.value = response.data.serie || response.data.show; // Handle both response formats
     // Load voice actors for this serie
-    await loadVoiceActors(parseInt(id as string));
+    if (response.data.voiceActors) {
+      voiceActors.value = response.data.voiceActors;
+    }
   } catch (err) {
     console.error('Error fetching serie:', err);
     error.value = 'Failed to load serie details';
@@ -365,7 +428,7 @@ const goToActor = (id: number) => {
 
 <style scoped lang="scss">
 $coverHeight: 150px;
-$block: #3f3f3f;
+$block: #dbdbdb;
 $background: #292929;
 $border: #1b1b1b;
 

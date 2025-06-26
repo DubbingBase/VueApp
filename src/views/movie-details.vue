@@ -14,6 +14,36 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
+      <div class="background">
+        <img v-if="movie" :src="getImage(movie.backdrop_path)" alt="Movie background image" />
+        <div class="background-overlay"></div>
+      </div>
+
+      <div v-if="movie" class="movie-info-card">
+        <img v-if="movie.poster_path" class="movie-poster" :src="getImage(movie.poster_path)"
+          :alt="movie.title + ' poster'" />
+        <div class="movie-info">
+          <div class="movie-title-row">
+            <h2 class="movie-title">{{ movie.title }}</h2>
+            <span v-if="movie.release_date" class="movie-year">{{ movie.release_date.slice(0, 4) }}</span>
+          </div>
+          <div v-if="movie.genres && movie.genres.length" class="movie-genres">
+            <span v-for="genre in movie.genres" :key="genre.id" class="movie-genre-chip">{{ genre.name }}</span>
+          </div>
+          <div v-if="movie.vote_average" class="movie-rating">
+            ⭐ {{ movie.vote_average.toFixed(1) }}
+          </div>
+          <div v-if="movie.overview" class="movie-overview">
+            {{ movie.overview }}
+          </div>
+          <div class="movie-meta">
+            <span v-if="movie.runtime">⏱ {{ movie.runtime }} min</span>
+            <span v-if="movie.original_language">🌐 {{ movie.original_language.toUpperCase() }}</span>
+            <span v-if="movie.release_date">📅 {{ movie.release_date }}</span>
+          </div>
+        </div>
+      </div>
+
       <div class="actors-list">
         <div class="inner-list">
           <template v-if="actors && actors.length">
@@ -64,16 +94,26 @@
                         </ion-button>
                       </div>
                     </div>
-
                   </div>
                 </template>
                 <div v-else class="no-voice-actor">
-                  <span>No voice actor found.</span>
-                  <ion-button v-if="isAdmin" fill="clear" size="small" @click.stop="openVoiceActorSearch(actor)"
-                    class="add-voice-actor-btn">
-                    <ion-icon :icon="personAddOutline" slot="start"></ion-icon>
-                    Add
-                  </ion-button>
+                  <div class="voice-actor-container">
+                    <div class="voice-actor">
+                      <ion-thumbnail class="avatar">
+                        <img src="https://placehold.co/48x72?text=?" alt="No photo" />
+                      </ion-thumbnail>
+                      <ion-label class="line-label">
+                        <span class="ellipsis label">
+                          No voice actor found.
+                        </span>
+                        <ion-button v-if="isAdmin" fill="clear" size="small" @click.stop="openVoiceActorSearch(actor)"
+                          class="add-voice-actor-btn">
+                          <ion-icon :icon="personAddOutline" slot="start"></ion-icon>
+                          Add
+                        </ion-button>
+                      </ion-label>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -82,35 +122,7 @@
         </div>
       </div>
 
-      <div class="background">
-        <img v-if="movie" :src="getImage(movie.backdrop_path)" alt="Movie background image" />
-        <div class="background-overlay"></div>
-      </div>
 
-      <div v-if="movie" class="movie-info-card">
-        <img v-if="movie.poster_path" class="movie-poster" :src="getImage(movie.poster_path)"
-          :alt="movie.title + ' poster'" />
-        <div class="movie-info">
-          <div class="movie-title-row">
-            <h2 class="movie-title">{{ movie.title }}</h2>
-            <span v-if="movie.release_date" class="movie-year">{{ movie.release_date.slice(0, 4) }}</span>
-          </div>
-          <div v-if="movie.genres && movie.genres.length" class="movie-genres">
-            <span v-for="genre in movie.genres" :key="genre.id" class="movie-genre-chip">{{ genre.name }}</span>
-          </div>
-          <div v-if="movie.vote_average" class="movie-rating">
-            ⭐ {{ movie.vote_average.toFixed(1) }}
-          </div>
-          <div v-if="movie.overview" class="movie-overview">
-            {{ movie.overview }}
-          </div>
-          <div class="movie-meta">
-            <span v-if="movie.runtime">⏱ {{ movie.runtime }} min</span>
-            <span v-if="movie.original_language">🌐 {{ movie.original_language.toUpperCase() }}</span>
-            <span v-if="movie.release_date">📅 {{ movie.release_date }}</span>
-          </div>
-        </div>
-      </div>
 
       <ion-button :disabled="isFetching" v-if="hasWikidataId && !hasData" class="fetch-infos-btn" @click="fetchInfos">
         <ion-spinner v-if="isFetching"></ion-spinner>
@@ -229,7 +241,6 @@ const {
   confirmDeleteVoiceActorLink,
   deleteVoiceActorLink,
   goToVoiceActor,
-  loadVoiceActors
 } = useVoiceActorManagement('movie');
 
 const movie = ref<MovieResponse["movie"] | undefined>();
@@ -412,6 +423,8 @@ onMounted(async () => {
 .line-label {
   margin-left: 8px;
   width: 100%;
+  display: flex;
+  justify-content: space-between;
 
   .label {
     width: 100%;
@@ -469,32 +482,6 @@ onMounted(async () => {
     border-radius: 4px;
     padding: 4px;
   }
-}
-
-.background {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 210px;
-  overflow: hidden;
-}
-
-.background img {
-  width: 100vw;
-  height: 210px;
-  object-fit: cover;
-  filter: blur(2px) brightness(0.6);
-}
-
-.background-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 210px;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 1;
 }
 
 .movie-info-card {
@@ -591,7 +578,6 @@ onMounted(async () => {
 .no-voice-actor {
   color: var(--ion-color-medium);
   font-style: italic;
-  padding: 10px 0;
   text-align: center;
   display: flex;
   justify-content: space-between;
@@ -618,7 +604,6 @@ onMounted(async () => {
 .actors-list {
   z-index: 1;
   position: relative;
-  padding-top: 200px;
 
   .inner-list {
     background-color: #000;

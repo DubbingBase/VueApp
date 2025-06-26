@@ -228,7 +228,6 @@ onMounted(async () => {
   flex-direction: column;
   padding: 8px;
   margin: 0 8px;
-  background-color: #3f3f3f;
   border-radius: 0.5rem;
   gap: 0.5rem;
 
