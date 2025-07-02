@@ -1,4 +1,5 @@
-import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
+import { RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { supabase } from '@/api/supabase';
 import type { RouteLocationNormalized, NavigationGuardNext } from 'vue-router';
 
