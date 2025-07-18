@@ -7,6 +7,8 @@ function normalizeName(str: string): string {
     .normalize('NFD')
     .replace(/\p{Diacritic}/gu, '')
     .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ') // replace any non-alphanum (including dashes) with space
+    .replace(/\s+/g, ' ')        // collapse multiple spaces
     .trim();
 }
 
