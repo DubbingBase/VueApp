@@ -98,7 +98,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { IonPage, IonHeader, IonToolbar, IonButtons, IonBackButton, IonTitle, IonContent, IonSpinner } from "@ionic/vue";
+import { IonPage, IonHeader, IonToolbar, IonButtons, IonBackButton, IonTitle, IonContent, IonSpinner, toastController } from "@ionic/vue";
 import { getImage } from "../utils";
 import { supabase } from "../api/supabase";
 
@@ -126,7 +126,7 @@ async function fetchEpisodeInfos() {
   }
   isFetching.value = true;
   try {
-    await supabase.functions.invoke("prepare_movie", {
+    const data = await supabase.functions.invoke("prepare_movie", {
       body: {
         wikiId: id,
         tmdbId: route.params.id,
@@ -135,7 +135,21 @@ async function fetchEpisodeInfos() {
         episodeNumber: episode.value.episode_number,
       },
     });
+    if (data.ok) {
     location.reload();
+  } else {
+    toastController.create({
+      message: data.error,
+      duration: 2000,
+      position: 'top',
+      color: 'danger',
+    }).then((toast) => {
+      toast.present();
+    });
+    isFetching.value = false;
+    isLoading.value = false;
+
+  }
   } catch (e) {
     console.error(e);
   } finally {

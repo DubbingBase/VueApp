@@ -113,12 +113,21 @@ Deno.serve(async (req) => {
   const responseWikidata = await fetch(entityURL)
   const entity = await responseWikidata.json()
 
-  const wikipediaPageTitle = entity.entities[wikiId].sitelinks[lang + 'wiki'].title
+  const wikipediaPageTitle = entity.entities[wikiId]?.sitelinks?.[lang + 'wiki']?.title
+
+  console.log('wikipediaPageTitle', wikipediaPageTitle)
 
   if (!wikipediaPageTitle) {
     console.error('wikipediaPageTitle is undefined')
-    return new Response(
-      JSON.stringify({ ok: false, error: 'wikipediaPageTitle is undefined' }),
+    return Response.json(
+      {
+        ok: false, 
+        error: 'wikipediaPageTitle is undefined',
+        lang,
+        wikiId,
+        tmdbId,
+        type,
+      },
       {
         headers: {
           ...corsHeaders,
@@ -213,13 +222,10 @@ Deno.serve(async (req) => {
   }
 
   const result = { ok: true }
-  return new Response(
-    JSON.stringify(result),
-    {
-      headers: {
-        ...corsHeaders,
-        "Content-Type": "application/json"
-      }
-    },
-  )
+  return Response.json(result, {
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "application/json"
+    }
+  })
 })

@@ -42,9 +42,13 @@ import './theme/variables.css';
 
 import { supabase } from '@/api/supabase';
 
-const x = await supabase.auth.signInAnonymously();
-console.log(x);
+let user = await supabase.auth.getUser();
+console.log(user);
 
+if (!user) {
+  const x = await supabase.auth.signInAnonymously();
+  console.log(x);
+}
 
 const app = createApp(App)
   .use(IonicVue)

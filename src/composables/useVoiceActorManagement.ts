@@ -167,6 +167,7 @@ export function useVoiceActorManagement(workType: 'movie' | 'tv' | 'season' | 'e
   };
 
   const confirmDeleteVoiceActorLink = async (workItem: WorkAndVoiceActor) => {
+    console.log('workItem', workItem);
     const alert = await alertController.create({
       header: 'Confirm Delete',
       message: `Are you sure you want to remove ${workItem.voiceActorDetails.firstname} ${workItem.voiceActorDetails.lastname}?`,

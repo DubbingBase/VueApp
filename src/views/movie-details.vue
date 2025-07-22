@@ -284,7 +284,23 @@ const fetchInfos = async () => {
   const data = movieResponseRaw.data;
 
   console.log("data", data);
-  location.reload();
+
+  if (data.ok) {
+    location.reload();
+  } else {
+    toastController.create({
+      message: data.error,
+      duration: 2000,
+      position: 'top',
+      color: 'danger',
+    }).then((toast) => {
+      toast.present();
+    });
+    isFetching.value = false;
+    fetchError.value = data.error;
+    isLoading.value = false;
+
+  }
 };
 
 const fetchMovieData = async () => {
