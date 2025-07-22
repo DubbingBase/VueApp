@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { ref, computed, onUnmounted } from 'vue';
 import { supabase } from '@/api/supabase';
+import { useIonRouter } from '@ionic/vue';
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -10,7 +11,10 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Getters
   const isAuthenticated = computed(() => !!user.value);
-  const isAdmin = computed(() => user.value?.app_metadata?.role === 'admin');
+  const isAdmin = computed(() => user.value?.app_metadata?.role === 'admin' || 
+                     user.value?.user_metadata?.role === 'admin' ||
+                     user.value?.role === 'admin');
+                     
   const currentUser = computed(() => user.value);
 
   // Actions
@@ -35,10 +39,37 @@ export const useAuthStore = defineStore('auth', () => {
       if (signInError) throw signInError;
       
       user.value = data.user;
-      return data.user;
+      return { user: data.user, error: null };
     } catch (err: any) {
-      error.value = err.message || 'Failed to sign in';
-      throw err;
+      const errorMessage = err.message || 'Failed to sign in';
+      error.value = errorMessage;
+      return { user: null, error: new Error(errorMessage) };
+    } finally {
+      isLoading.value = false;
+    }
+  };
+  
+  const signUp = async (email: string, password: string) => {
+    try {
+      isLoading.value = true;
+      error.value = null;
+      
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (signUpError) throw signUpError;
+      
+      if (data.user) {
+        user.value = data.user;
+      }
+      
+      return { user: data.user, error: null };
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to sign up';
+      error.value = errorMessage;
+      return { user: null, error: new Error(errorMessage) };
     } finally {
       isLoading.value = false;
     }
@@ -75,19 +106,51 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   // Initialize auth state
+  let authListener: { subscription: any } = { subscription: null };
+  
   const initialize = async () => {
-    await checkAuth();
-    
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      user.value = session?.user || null;
-    });
-
-    // Cleanup function
-    return () => {
-      subscription?.unsubscribe();
-    };
+    try {
+      // First check current session
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('Current session:', session);
+      
+      if (!session) {
+        const x = await supabase.auth.signInAnonymously();
+        console.log(x);
+        user.value = x.data.session?.user;
+      } else {
+        user.value = session?.user;
+      }
+      
+      // Set up auth state listener
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        console.log('Auth state changed:', event, session);
+        user.value = session?.user || null;
+        
+        // Handle specific auth events if needed
+        if (event === 'SIGNED_OUT') {
+          // Clear any sensitive data on sign out
+          clearUser();
+        }
+      });
+      
+      // Store the subscription for cleanup
+      authListener.subscription = subscription;
+      
+      return true;
+    } catch (err) {
+      console.error('Error initializing auth:', err);
+      error.value = 'Failed to initialize authentication';
+      return false;
+    }
   };
+  
+  // Cleanup auth listener when store is destroyed
+  onUnmounted(() => {
+    if (authListener.subscription) {
+      authListener.subscription.unsubscribe();
+    }
+  });
 
   return {
     // State
@@ -104,6 +167,7 @@ export const useAuthStore = defineStore('auth', () => {
     setUser,
     clearUser,
     signIn,
+    signUp,
     signOut,
     checkAuth,
     initialize,

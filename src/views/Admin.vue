@@ -58,6 +58,7 @@ import {
   IonTabButton, 
   IonLabel, 
   IonButton,
+  IonBackButton,
   IonIcon
 } from '@ionic/vue';
 import { addCircleOutline, micOutline } from 'ionicons/icons';

@@ -33,13 +33,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { IonPage, IonTabs, IonTabBar, IonTabButton, IonLabel, IonRouterOutlet } from "@ionic/vue";
 import SolarTvLinear from '~icons/solar/tv-linear'
 import SolarMagniferLinear from '~icons/solar/magnifer-linear'
 import SolarHome2Linear from '~icons/solar/home-2-linear'
 import SolarSettingsLinear from '~icons/solar/settings-linear'
+import { useAuthStore } from "@/stores/auth";
 
 interface TabItem {
   label: string;
@@ -51,51 +52,41 @@ const router = useRouter();
 
 const active = ref<string>("home");
 import { supabase } from '@/api/supabase';
+const authStore = useAuthStore();
 
-const items = ref([
-  {
-    label: "Accueil",
-    icon: SolarHome2Linear,
-    route: "Home",
-    href: "/tabs/home",
-  },
-  {
-    label: "Recherche",
-    icon: SolarMagniferLinear,
-    route: "Search",
-    href: "/tabs/search",
-  },
-  {
-    label: "Parametres",
-    icon: SolarSettingsLinear,
-    route: "Settings",
-    href: "/tabs/settings",
-  },
-]);
+const items = computed(() => {
+  const items = [
+    {
+      label: "Accueil",
+      icon: SolarHome2Linear,
+      route: "Home",
+      href: "/tabs/home",
+    },
+    {
+      label: "Recherche",
+      icon: SolarMagniferLinear,
+      route: "Search",
+      href: "/tabs/search",
+    },
+    {
+      label: "Parametres",
+      icon: SolarSettingsLinear,
+      route: "Settings",
+      href: "/tabs/settings",
+    },
+  ];
 
-// On mount, check if user is admin and add Admin tab
-import { onMounted } from 'vue';
-onMounted(async () => {
-  const user = supabase.auth.getUser ? (await supabase.auth.getUser()).data.user : supabase.auth.user();
-  if (user && (user.app_metadata?.role === 'admin' || user.role === 'admin')) {
-    // Avoid duplicate admin tab
-    if (!items.value.some(item => item.route === 'Admin')) {
-      items.value.push({
-        label: 'Admin',
-        icon: SolarSettingsLinear, // You can use a different icon if you want
-        route: 'Admin',
-        href: '/admin',
-      });
-    }
+  if (authStore.isAdmin) {
+    items.push({
+      label: "Admin",
+      icon: SolarSettingsLinear,
+      route: "Admin",
+      href: "/tabs/admin",
+    });
   }
-});
 
-const onTabClick = (item: TabItem) => {
-  active.value = item.route;
-  router.push({
-    name: item.route,
-  });
-};
+  return items;
+});
 </script>
 
 <style scoped>

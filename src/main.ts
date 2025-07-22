@@ -41,20 +41,31 @@ import '@ionic/vue/css/palettes/dark.system.css';
 import './theme/variables.css';
 
 import { supabase } from '@/api/supabase';
+import { useAuthStore } from '@/stores/auth';
 
-let user = await supabase.auth.getUser();
-console.log(user);
 
-if (!user) {
-  const x = await supabase.auth.signInAnonymously();
-  console.log(x);
-}
+
 
 const app = createApp(App)
-  .use(IonicVue)
-  .use(router)
-  .use(createPinia());
+.use(IonicVue)
+.use(router)
+.use(createPinia());
 
-router.isReady().then(() => {
+
+
+router.isReady().then(async () => {
+  const authStore = useAuthStore();
+  try {
+    // Initialize auth first
+    await authStore.initialize();
+    
+    // Check if we have a valid session
+    const { isAuthenticated } = authStore;
+    console.log('Initial auth state:', { isAuthenticated });
+    
+  } catch (error) {
+    console.error('Error during app initialization:', error);
+  }
+
   app.mount('#app');
 });

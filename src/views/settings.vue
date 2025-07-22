@@ -2,9 +2,6 @@
   <ion-page>
     <ion-header>
       <ion-toolbar color="primary">
-        <ion-buttons slot="start">
-          <ion-back-button default-href="/tabs/home" />
-        </ion-buttons>
         <ion-title>Paramètres</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -28,7 +25,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useIonRouter } from '@ionic/vue';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonText, IonButton } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonText, IonButton, IonBackButton, IonButtons } from '@ionic/vue';
 import { supabase } from '@/api/supabase';
 
 const user = ref<any>(null);

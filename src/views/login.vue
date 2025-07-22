@@ -33,46 +33,68 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useIonRouter } from '@ionic/vue';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonInput, IonButton, IonText } from '@ionic/vue';
-import { supabase } from '@/api/supabase';
+import { useRoute } from 'vue-router';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonInput, IonButton, IonText, IonButtons, IonBackButton } from '@ionic/vue';
+import { useAuthStore } from '@/stores/auth';
 
 const email = ref('');
 const password = ref('');
 const error = ref('');
 const loading = ref(false);
 const isRegister = ref(false);
+
+const authStore = useAuthStore();
 const ionRouter = useIonRouter();
+const route = useRoute();
+
+// Handle redirect after successful login
+const handleSuccessfulAuth = () => {
+  const redirectPath = Array.isArray(route.query.redirect) 
+    ? route.query.redirect[0] 
+    : route.query.redirect || '/tabs/home';
+  
+  // Ensure we don't redirect back to login
+  if (redirectPath === '/login') {
+    ionRouter.push('/tabs/home');
+  } else {
+    ionRouter.push(redirectPath);
+  }
+};
 
 const login = async () => {
   error.value = '';
   loading.value = true;
-  const { error: loginError } = await supabase.auth.signInWithPassword({
-    email: email.value,
-    password: password.value,
-  });
-  loading.value = false;
-  if (loginError) {
-    error.value = loginError.message;
-  } else {
-    ionRouter.push('/tabs/home');
+  
+  try {
+    await authStore.signIn(email.value, password.value);
+    handleSuccessfulAuth();
+  } catch (err: any) {
+    error.value = err.message || 'Échec de la connexion';
+    console.error('Login error:', err);
+  } finally {
+    loading.value = false;
   }
 };
 
 const register = async () => {
   error.value = '';
   loading.value = true;
-  const { error: registerError } = await supabase.auth.signUp({
-    email: email.value,
-    password: password.value,
-  });
-  loading.value = false;
-  if (registerError) {
-    error.value = registerError.message;
-  } else {
-    // Optionally, you can display a message or auto-login
-    await login();
+  
+  try {
+    const { error: registerError } = await authStore.signUp(email.value, password.value);
+    
+    if (registerError) throw registerError;
+    
+    // Show success message and switch to login
+    error.value = 'Compte créé avec succès ! Vous pouvez maintenant vous connecter.';
+    isRegister.value = false;
+  } catch (err: any) {
+    error.value = err.message || "Échec de la création du compte";
+    console.error('Registration error:', err);
+  } finally {
+    loading.value = false;
   }
 };
 </script>

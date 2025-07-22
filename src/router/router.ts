@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
-import { supabase } from '@/api/supabase';
 import type { RouteLocationNormalized, NavigationGuardNext, RouteRecordRaw } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 
 // Import your custom route meta types
 import Home from '../views/home.vue';
@@ -34,6 +34,24 @@ const routes: readonly RouteRecordRaw[] = [
       { path: '/tabs/home', name: 'Home', component: Home },
       { name: 'Search', path: '/tabs/search', component: Search },
       { name: 'Settings', path: '/tabs/settings', component: () => import('../views/settings.vue') },
+      { 
+        name: 'Admin', 
+        path: '/tabs/admin',  
+        component: Admin, 
+        meta: { requiresAdmin: true } 
+      },
+      { 
+        name: 'AddVoiceCast', 
+        path: '/tabs/admin/add-voice-cast/:id', 
+        component: AddVoiceCast, 
+        meta: { requiresAdmin: true } 
+      },
+      { 
+        name: 'EditVoiceActor', 
+        path: '/tabs/admin/edit-voice-actor/:id', 
+        component: EditVoiceActor, 
+        meta: { requiresAdmin: true } 
+      },
     ],
   },
   { 
@@ -66,24 +84,6 @@ const routes: readonly RouteRecordRaw[] = [
     path: '/serie/:id/season/:season/details/:episode', 
     component: SeasonByEpisode 
   },
-  { 
-    name: 'Admin', 
-    path: '/admin', 
-    component: Admin, 
-    meta: { requiresAdmin: true } 
-  },
-  { 
-    name: 'AddVoiceCast', 
-    path: '/admin/add-voice-cast/:id', 
-    component: AddVoiceCast, 
-    meta: { requiresAdmin: true } 
-  },
-  { 
-    name: 'EditVoiceActor', 
-    path: '/admin/edit-voice-actor/:id', 
-    component: EditVoiceActor, 
-    meta: { requiresAdmin: true } 
-  },
 ]
 
 export const router = createRouter({
@@ -91,41 +91,43 @@ export const router = createRouter({
   routes,
 });
 
+// Public routes that don't require authentication
+const publicRoutes = ['/login'];
+
 router.beforeEach(async (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
-  if (to.path === '/login') {
+  const authStore = useAuthStore();
+
+  await authStore.initialize();
+  
+  // Allow access to public routes
+  if (publicRoutes.includes(to.path)) {
     return next();
   }
   
-  try {
-    // TODO: do not fetch user on each route
-    // onstead fetch at start and watch it using onAuthStateChange
-    const x = await supabase.auth.getUser();
-    console.log(x);
-    const { data: { user }, error: authError } = x
-
-    console.log(user);
-    
-    if (authError) throw authError;
-    
-    if (!user) {
-      return next('/login');
-    }
-    
-    if (to.meta.requiresAdmin) {    
-      const isAdmin = user?.app_metadata?.role === 'admin' || 
-                     user?.user_metadata?.role === 'admin' ||
-                     user?.role === 'admin';
-      
-      if (isAdmin) {
-        next();
-      } else {
-        next('/tabs/home');
-      }
-    } else {
-      next();
-    }
-  } catch (error) {
-    console.error('Error in route guard:', error);
-    next('/login');
+  console.log('will redirect  ', authStore.isAuthenticated)
+  // Check if user is authenticated
+  if (!authStore.isAuthenticated) {
+    // If not authenticated, redirect to login with the attempted URL as a query parameter
+    return next({
+      path: '/login',
+      query: { redirect: to.fullPath }
+    });
   }
+  
+  // Check for admin routes
+  if (to.meta.requiresAdmin) {
+    if (!authStore.isAdmin) {
+      // User is not an admin, redirect to home
+      return next('/tabs/home');
+    }
+  }
+  
+  // Allow access to the route
+  next();
+});
+
+// Optional: Handle redirect after successful login
+router.afterEach((to) => {
+  // Track page views or perform other post-navigation tasks
+  console.log('Navigated to:', to.path);
 });

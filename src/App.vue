@@ -5,19 +5,23 @@
 </template>
 
 <script setup lang="ts">
-import { IonApp, IonRouterOutlet, onIonViewDidEnter } from '@ionic/vue';
+import { 
+  IonApp, 
+  IonRouterOutlet, 
+  IonLoading,
+  loadingController
+} from '@ionic/vue';
 import { useAuthStore } from '@/stores/auth';
 import { useDeepLinkHandler } from '@/utils/deepLinks';
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { App, URLOpenListenerEvent } from '@capacitor/app';
 
 const authStore = useAuthStore();
 const { handleDeepLink } = useDeepLinkHandler();
 
-authStore.initialize();
-
-// Handle deep links when app is in the background
+// Initialize auth and handle deep links
 onMounted(async () => {
+
   // Handle deep links when app is already open
   App.addListener('appUrlOpen', (event: URLOpenListenerEvent) => {
     // Extract the URL from the event
