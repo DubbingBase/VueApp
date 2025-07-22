@@ -628,6 +628,7 @@ onMounted(async () => {
 .actors-list {
   z-index: 1;
   position: relative;
+  top: -80px;
 
   .inner-list {
     background-color: #000;

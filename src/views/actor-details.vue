@@ -16,7 +16,7 @@
         </div>
 
         <div class="body" v-if="actor">
-          <ion-segment v-model="active">
+          <ion-segment scrollable v-model="active">
             <ion-segment-button value="about">
               <ion-label>À propos</ion-label>
             </ion-segment-button>

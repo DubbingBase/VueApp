@@ -42,7 +42,7 @@
             </div>
           </div>
         </div>
-        <ion-segment v-model="activeTab" class="season-tabs">
+        <ion-segment scrollable v-model="activeTab" class="season-tabs">
           <ion-segment-button value="details">Détails</ion-segment-button>
           <ion-segment-button value="episodes">Épisodes</ion-segment-button>
           <ion-segment-button value="voices">Voix FR</ion-segment-button>

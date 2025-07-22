@@ -18,120 +18,52 @@
       <div class="banner" v-if="show">
         <img
           class="banner-backdrop"
+          width="100%"
           :src="getImage(show.backdrop_path)"
           alt="Backdrop"
           v-if="show.backdrop_path"
         />
         <div class="banner-overlay"></div>
-        <div class="banner-meta">
-          <div class="banner-title">{{ show.name }}</div>
-          <div class="banner-genres" v-if="show.genres && show.genres.length">
-            <span
-              v-for="genre in show.genres"
-              :key="genre.id"
-              class="genre-chip"
-              >{{ genre.name }}</span
-            >
-          </div>
-          <div class="banner-stats">
-            <span v-if="show.vote_average"
-              >⭐ {{ show.vote_average.toFixed(1) }}</span
-            >
-            <span v-if="show.status">• {{ show.status }}</span>
-            <span v-if="show.first_air_date"
-              >• {{ show.first_air_date
-              }}<span
-                v-if="
-                  show.last_air_date &&
-                  show.last_air_date !== show.first_air_date
-                "
-              >
-                – {{ show.last_air_date }}</span
-              ></span
-            >
-          </div>
-          <div class="banner-overview" v-if="show.overview">
-            {{ show.overview }}
-          </div>
-          <div class="external-links">
-            <a
-              v-if="show.external_ids?.imdb_id"
-              :href="`https://www.imdb.com/title/${show.external_ids.imdb_id}`"
-              target="_blank"
-              rel="noopener"
-              aria-label="Lien IMDb"
-            >
-              <img
-                src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg"
-                alt="IMDb"
-                height="18"
-                style="vertical-align: middle"
-              />
-            </a>
-            <a
-              v-if="show.external_ids?.wikidata_id"
-              :href="`https://www.wikidata.org/wiki/${show.external_ids.wikidata_id}`"
-              target="_blank"
-              rel="noopener"
-              aria-label="Lien Wikidata"
-            >
-              <img
-                src="https://upload.wikimedia.org/wikipedia/commons/6/66/Wikidata-logo.svg"
-                alt="Wikidata"
-                height="18"
-                style="vertical-align: middle"
-              />
-            </a>
-            <a
-              v-if="show.external_ids?.tvdb_id"
-              :href="`https://thetvdb.com/series/${show.external_ids.tvdb_id}`"
-              target="_blank"
-              rel="noopener"
-              aria-label="Lien TVDb"
-            >
-              TVDb
-            </a>
-            <a
-              v-if="show.external_ids?.facebook_id"
-              :href="`https://facebook.com/${show.external_ids.facebook_id}`"
-              target="_blank"
-              rel="noopener"
-              aria-label="Lien Facebook"
-            >
-              Facebook
-            </a>
-            <a
-              v-if="show.external_ids?.instagram_id"
-              :href="`https://instagram.com/${show.external_ids.instagram_id}`"
-              target="_blank"
-              rel="noopener"
-              aria-label="Lien Instagram"
-            >
-              Instagram
-            </a>
-            <a
-              v-if="show.external_ids?.twitter_id"
-              :href="`https://twitter.com/${show.external_ids.twitter_id}`"
-              target="_blank"
-              rel="noopener"
-              aria-label="Lien Twitter"
-            >
-              Twitter
-            </a>
-            <a
-              v-if="show.external_ids?.tmdb_id"
-              :href="`https://www.themoviedb.org/tv/${show.external_ids.tmdb_id}`"
-              target="_blank"
-              rel="noopener"
-              aria-label="Lien TMDb"
-            >
-              TMDb
-            </a>
-          </div>
-        </div>
       </div>
       <div v-else class="banner banner-placeholder">
         <div class="banner-title">Chargement…</div>
+      </div>
+
+      <div v-if="show" class="movie-info-card">
+        <img
+          v-if="show.poster_path"
+          class="movie-poster"
+          :src="getImage(show.poster_path)"
+          :alt="show.title + ' poster'"
+        />
+        <div class="movie-info">
+          <div class="movie-title-row">
+            <h2 class="movie-title">{{ show.title }}</h2>
+            <span v-if="show.first_air_date" class="movie-year">{{
+              show.first_air_date.slice(0, 4)
+            }}</span>
+          </div>
+          <div v-if="show.genres && show.genres.length" class="movie-genres">
+            <span
+              v-for="genre in show.genres"
+              :key="genre.id"
+              class="movie-genre-chip"
+              >{{ genre.name }}</span
+            >
+          </div>
+          <div v-if="show.vote_average" class="movie-rating">
+            ⭐ {{ show.vote_average.toFixed(1) }}
+          </div>
+          <div v-if="show.overview" class="movie-overview">
+            {{ show.overview }}
+          </div>
+          <div class="movie-meta">
+            <span v-if="show.original_language"
+              >🌐 {{ show.original_language.toUpperCase() }}</span
+            >
+            <span v-if="show.first_air_date">📅 {{ show.first_air_date }}</span>
+          </div>
+        </div>
       </div>
 
       <ion-spinner
@@ -144,7 +76,7 @@
         <div class="summary">
           <div v-if="show" class="show-title">{{ show.name }}</div>
         </div>
-        <ion-segment>
+        <ion-segment scrollable>
           <ion-segment-button value="details" content-id="details">
             <!-- <ion-icon :icon="playCircle" /> -->
             Détail
@@ -160,7 +92,40 @@
         </ion-segment>
         <ion-segment-view>
           <ion-segment-content class="segmented-content" id="details">
-            <div class="example-content">Listen now content</div>
+            <div class="example-content" v-if="show">
+              <div class="banner-title">{{ show.title }}</div>
+              <div
+                class="banner-genres"
+                v-if="show.genres && show.genres.length"
+              >
+                <span
+                  v-for="genre in show.genres"
+                  :key="genre.id"
+                  class="genre-chip"
+                  >{{ genre.name }}</span
+                >
+              </div>
+              <div class="banner-stats">
+                <span v-if="show.vote_average"
+                  >⭐ {{ show.vote_average.toFixed(1) }}</span
+                >
+                <span v-if="show.status">• {{ show.status }}</span>
+                <span v-if="show.first_air_date"
+                  >• {{ show.first_air_date
+                  }}<span
+                    v-if="
+                      show.last_air_date &&
+                      show.last_air_date !== show.first_air_date
+                    "
+                  >
+                    – {{ show.last_air_date }}</span
+                  ></span
+                >
+              </div>
+              <div class="banner-overview" v-if="show.overview">
+                {{ show.overview }}
+              </div>
+            </div>
           </ion-segment-content>
           <ion-segment-content class="segmented-content" id="seasons">
             <div class="seasons" v-if="show">
@@ -663,7 +628,7 @@ $border: #1b1b1b;
 .tabs {
   z-index: 1;
   position: relative;
-  padding-top: calc(#{$coverHeight} - 44px);
+  top: -80px;
 }
 
 .summary {
@@ -736,5 +701,85 @@ ion-segment {
   align-items: center;
   gap: 8px;
   width: 100%;
+}
+
+
+.movie-info-card {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  background: rgba(20, 20, 20, 0.95);
+  margin: 0 auto 16px auto;
+  border-radius: 1rem;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
+  max-width: 700px;
+  padding: 16px;
+  position: relative;
+  top: -80px;
+  z-index: 2;
+}
+
+.movie-poster {
+  width: 120px;
+  height: 180px;
+  border-radius: 0.5rem;
+  object-fit: cover;
+  margin-right: 16px;
+  background: #222;
+}
+
+.movie-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.movie-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.movie-title {
+  font-size: 1.6rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.movie-year {
+  color: #ccc;
+  font-size: 1.1rem;
+}
+
+.movie-genres {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.movie-genre-chip {
+  background: #444;
+  color: #fff;
+  border-radius: 1rem;
+  padding: 2px 10px;
+  font-size: 0.9rem;
+}
+
+.movie-rating {
+  font-size: 1.2rem;
+  color: gold;
+}
+
+.movie-overview {
+  font-size: 1rem;
+  color: #eee;
+}
+
+.movie-meta {
+  display: flex;
+  gap: 18px;
+  color: #aaa;
+  font-size: 0.95rem;
 }
 </style>
