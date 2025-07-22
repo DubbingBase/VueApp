@@ -1,4 +1,4 @@
-import { useRouter } from 'vue-router';
+import { useIonRouter } from '@ionic/vue';
 
 type DeepLinkType = 'movie' | 'show';
 
@@ -27,7 +27,7 @@ export function parseDeepLink(url: string): DeepLink | null {
 }
 
 export function useDeepLinkHandler() {
-  const router = useRouter();
+  const router = useIonRouter();
 
   const handleDeepLink = (url: string): boolean => {
     const deepLink = parseDeepLink(url);

@@ -40,6 +40,11 @@ import '@ionic/vue/css/palettes/dark.system.css';
 /* Theme variables */
 import './theme/variables.css';
 
+import { supabase } from '@/api/supabase';
+
+const x = await supabase.auth.signInAnonymously();
+console.log(x);
+
 
 const app = createApp(App)
   .use(IonicVue)

@@ -1,7 +1,6 @@
-import { ref, computed, watch } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { ref, watch } from 'vue';
 import { useIonRouter } from '@ionic/vue';
-import { alertController, modalController } from '@ionic/vue';
+import { alertController } from '@ionic/vue';
 import { storeToRefs } from 'pinia';
 import { useAuthStore } from '@/stores/auth';
 import { supabase } from '@/api/supabase';
@@ -23,8 +22,6 @@ export interface WorkAndVoiceActor {
 }
 
 export function useVoiceActorManagement(workType: 'movie' | 'tv' | 'season' | 'episode') {
-  const router = useRouter();
-  const route = useRoute();
   const ionRouter = useIonRouter();
   const authStore = useAuthStore();
   const { isAdmin } = storeToRefs(authStore);
@@ -216,6 +213,13 @@ export function useVoiceActorManagement(workType: 'movie' | 'tv' | 'season' | 'e
     });
   };
 
+  const goToActor = (id: number) => {
+    ionRouter.push({
+      name: 'ActorDetails',
+      params: { id }
+    });
+  };
+
   watch(voiceActors, (newVal) => {
     console.log('voiceActors changed:', newVal);
   });
@@ -242,5 +246,6 @@ export function useVoiceActorManagement(workType: 'movie' | 'tv' | 'season' | 'e
     confirmDeleteVoiceActorLink,
     deleteVoiceActorLink,
     goToVoiceActor,
+    goToActor,
   };
 }

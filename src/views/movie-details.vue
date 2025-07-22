@@ -241,6 +241,7 @@ const {
   confirmDeleteVoiceActorLink,
   deleteVoiceActorLink,
   goToVoiceActor,
+  goToActor,
 } = useVoiceActorManagement('movie');
 
 const movie = ref<MovieResponse["movie"] | undefined>();

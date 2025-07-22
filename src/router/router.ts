@@ -1,7 +1,6 @@
-import { RouteRecordRaw } from 'vue-router'
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { supabase } from '@/api/supabase';
-import type { RouteLocationNormalized, NavigationGuardNext } from 'vue-router';
+import type { RouteLocationNormalized, NavigationGuardNext, RouteRecordRaw } from 'vue-router';
 
 // Import your custom route meta types
 import Home from '../views/home.vue';
@@ -98,7 +97,13 @@ router.beforeEach(async (to: RouteLocationNormalized, from: RouteLocationNormali
   }
   
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    // TODO: do not fetch user on each route
+    // onstead fetch at start and watch it using onAuthStateChange
+    const x = await supabase.auth.getUser();
+    console.log(x);
+    const { data: { user }, error: authError } = x
+
+    console.log(user);
     
     if (authError) throw authError;
     
@@ -106,12 +111,10 @@ router.beforeEach(async (to: RouteLocationNormalized, from: RouteLocationNormali
       return next('/login');
     }
     
-    if (to.meta.requiresAdmin) {
-      const { data: userData, error } = await supabase.auth.getUser();
-      if (error) throw error;
-      
-      const isAdmin = userData?.user?.app_metadata?.role === 'admin' || 
-                     userData?.user?.user_metadata?.role === 'admin';
+    if (to.meta.requiresAdmin) {    
+      const isAdmin = user?.app_metadata?.role === 'admin' || 
+                     user?.user_metadata?.role === 'admin' ||
+                     user?.role === 'admin';
       
       if (isAdmin) {
         next();

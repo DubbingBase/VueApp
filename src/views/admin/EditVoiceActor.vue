@@ -103,7 +103,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, nextTick } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
+import { useIonRouter } from '@ionic/vue';
+
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonSpinner, IonItem, IonLabel, IonInput, IonBackButton, IonButtons, toastController, IonIcon
 } from '@ionic/vue';
@@ -113,7 +115,7 @@ import MediaThumbnail from "@/components/MediaThumbnail.vue";
 
 
 const route = useRoute();
-const router = useRouter();
+const ionRouter = useIonRouter();
 const id = route.params.id as string | undefined;
 const isEditMode = computed(() => !!id && id !== 'new');
 
@@ -242,7 +244,7 @@ async function saveVoiceActor() {
   } else {
     const toast = await toastController.create({ message: 'Voice actor saved!', color: 'success', duration: 1200 });
     toast.present();
-    router.push('/admin/add-voice-cast');
+    ionRouter.push('/admin/add-voice-cast');
   }
 }
 </script>

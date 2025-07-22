@@ -1,10 +1,29 @@
 {
-    "deno.enablePaths": [
-        "./supabase"
-    ],
-    "debug.javascript.defaultRuntimeExecutable": {
-        "pwa-node": "/home/armaldio/.local/share/mise/shims/node"
-    },
-    "deno.path": "/home/armaldio/.local/share/mise/shims/deno",
-    "deno.enable": true
+  "[typescript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "debug.javascript.defaultRuntimeExecutable": {
+    "pwa-node": "/home/armaldio/.local/share/mise/shims/node"
+  },
+  "deno.enable": true,
+  "deno.enablePaths": [
+    "supabase/functions"
+  ],
+  "deno.lint": true,
+  "deno.path": "/home/armaldio/.local/share/mise/shims/deno",
+  "deno.unstable": [
+    "bare-node-builtins",
+    "byonm",
+    "sloppy-imports",
+    "unsafe-proto",
+    "webgpu",
+    "broadcast-channel",
+    "worker-options",
+    "cron",
+    "kv",
+    "ffi",
+    "fs",
+    "http",
+    "net"
+  ]
 }

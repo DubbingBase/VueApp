@@ -120,7 +120,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, onBeforeUnmount } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
+import { useIonRouter } from '@ionic/vue';
+
 import {
   IonPage,
   IonHeader,
@@ -190,7 +192,7 @@ interface MovieResponse {
 
 // Route and state
 const route = useRoute();
-const router = useRouter();
+const ionRouter = useIonRouter();
 const movieId = computed(() => Number(route.params.id));
 
 // State
@@ -409,7 +411,7 @@ const saveVoiceCast = async () => {
     }
     
     await showSuccess('Voice cast saved successfully!');
-    router.push(`/movie/${movieId.value}`);
+    ionRouter.push(`/movie/${movieId.value}`);
     
   } catch (err) {
     console.error('Error saving voice cast:', err);

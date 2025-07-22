@@ -284,11 +284,9 @@ import {
   IonItem,
   IonText,
   IonAvatar,
-  alertController,
-  toastController,
 } from "@ionic/vue";
 import { ref, computed, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { useIonRouter } from '@ionic/vue';
 import MediaThumbnail from '@/components/MediaThumbnail.vue';
 import { useVoiceActorManagement } from '@/composables/useVoiceActorManagement';
@@ -302,7 +300,6 @@ const authStore = useAuthStore();
 const { isAdmin } = storeToRefs(authStore);
 
 const route = useRoute();
-const router = useRouter();
 const ionRouter = useIonRouter();
 
 const show = ref<any>(null);
@@ -409,7 +406,7 @@ onMounted(async () => {
 
 // Navigation methods
 const goToSeason = (id: number, seasonNumber: number) => {
-  router.push({
+  ionRouter.push({
     name: "SeasonDetails",
     params: {
       id: id,
@@ -419,7 +416,7 @@ const goToSeason = (id: number, seasonNumber: number) => {
 };
 
 const goToActor = (id: number) => {
-  router.push({
+  ionRouter.push({
     name: "ActorDetails",
     params: { id },
   });

@@ -38,3 +38,13 @@ run = "pnpm supabase migration up"
 description = "Reverts the database migration"
 depends = ["install"]
 run = "pnpm supabase migration down"
+
+[tasks.pull-production]
+description = "Pulls the production database"
+depends = ["install"]
+run = "pnpm supabase db dump -f supabase/seed.sql --data-only --linked"
+
+[tasks.db-reset]
+description = "Resets the database migration"
+depends = ["pull-production"]
+run = "pnpm supabase db reset --local"

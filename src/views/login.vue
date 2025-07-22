@@ -3,6 +3,9 @@
     <ion-header>
       <ion-toolbar color="primary">
         <ion-title>{{ isRegister ? 'Créer un compte' : 'Connexion' }}</ion-title>
+        <ion-buttons slot="start">
+          <ion-back-button default-href="/tabs/home" />
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
     <ion-content class="ion-padding">
@@ -31,7 +34,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useIonRouter } from '@ionic/vue';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonInput, IonButton, IonText } from '@ionic/vue';
 import { supabase } from '@/api/supabase';
 
@@ -40,7 +43,7 @@ const password = ref('');
 const error = ref('');
 const loading = ref(false);
 const isRegister = ref(false);
-const router = useRouter();
+const ionRouter = useIonRouter();
 
 const login = async () => {
   error.value = '';
@@ -53,7 +56,7 @@ const login = async () => {
   if (loginError) {
     error.value = loginError.message;
   } else {
-    router.push('/tabs/home');
+    ionRouter.push('/tabs/home');
   }
 };
 

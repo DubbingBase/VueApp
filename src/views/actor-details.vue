@@ -134,7 +134,7 @@ function goToVoiceActor(id: number) {
   // (Assumes you are using vue-router and have a VoiceActorDetails route)
   // @ts-ignore: router is not typed here, but is globally available in setup
   // If using <script setup>, import useRouter from 'vue-router' and use it
-  const { push } = useRouter();
+  const { push } = useIonRouter();
   push({ name: 'VoiceActorDetails', params: { id } });
 }
 

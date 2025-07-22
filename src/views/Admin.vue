@@ -45,7 +45,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useIonRouter } from '@ionic/vue';
 import { 
   IonPage, 
   IonHeader, 
@@ -65,11 +65,11 @@ import DuplicateVATool from '@/components/admin/DuplicateVATool.vue';
 import UserManagement from '@/components/admin/UserManagement.vue';
 import DuplicateWork from '@/components/admin/DuplicateWork.vue';
 
-const router = useRouter();
+const ionRouter = useIonRouter();
 const activeTab = ref('duplicates');
 
 const navigateToNewVoiceActor = () => {
-  router.push('/admin/edit-voice-actor/new');
+  ionRouter.push('/admin/edit-voice-actor/new');
 };
 </script>
 
