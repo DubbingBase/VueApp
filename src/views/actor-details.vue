@@ -16,26 +16,38 @@
         </div>
 
         <div class="body" v-if="actor">
-          <TabView :activeIndex="active">
-            <TabPanel header="À propos">
+          <ion-segment v-model="active">
+            <ion-segment-button value="about">
+              <ion-label>À propos</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="movies">
+              <ion-label>Films</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="series">
+              <ion-label>Séries</ion-label>
+            </ion-segment-button>
+          </ion-segment>
+          
+          <ion-segment-view :activeIndex="active">
+            <ion-segment-content value="about">
               <p>Date de naissance : {{ actor.birthday }}</p>
               {{ actor.biography }}
-            </TabPanel>
-            <TabPanel header="Films">
+            </ion-segment-content>
+            <ion-segment-content value="movies">
               <div class="movies-wrapper">
                 <movie v-for="movie in movies" :value="movie"></movie>
               </div>
-            </TabPanel>
-            <TabPanel header="Séries">
+            </ion-segment-content>
+            <ion-segment-content value="series">
               <div class="series-wrapper">
                 <serie v-for="serie in series" :value="serie"></serie>
               </div>
-            </TabPanel>
-          </TabView>
+            </ion-segment-content>
+          </ion-segment-view>
         </div>
         <div v-if="actor && actor.voice_roles && actor.voice_roles.length" class="voice-roles-section">
           <div class="section-header">
-            <h2>Rôles de doublage</h2>
+            <h2>Rôles</h2>
             <ion-chip outline color="primary" class="role-count">
               {{ actor.voice_roles.length }} rôle{{ actor.voice_roles.length > 1 ? 's' : '' }}
             </ion-chip>
@@ -165,6 +177,12 @@ import {
   IonLabel,
   IonChip,
   IonIcon,
+  IonSegment,
+  IonSegmentButton,
+  IonSegmentView,
+  IonSegmentContent,
+  IonThumbnail,
+  IonContent,
 } from "@ionic/vue";
 import { mic, person, language, film } from 'ionicons/icons';
 import { getImage } from "../utils";

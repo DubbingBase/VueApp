@@ -37,7 +37,7 @@
           <MediaThumbnail
             v-if="profilePicture"
             :path="profilePicture"
-            raw-path
+            from-storage
           ></MediaThumbnail>
           <MediaThumbnail
             v-else
@@ -196,7 +196,7 @@ const route = useRoute();
 const { isAdmin } = storeToRefs(authStore);
 
 // Sorting options
-const sortBy = ref<'chronological' | 'actor'>('chronological');
+const sortBy = ref<'chronological' | 'actor'>('actor');
 const sortOptions = [
   { value: 'chronological', label: 'Chronologique' },
   { value: 'actor', label: 'Par acteur' }
@@ -384,16 +384,7 @@ onMounted(async () => {
   voiceActor.value = voiceActorResponse.voiceActor;
   medias.value = voiceActorResponse.medias;
 
-  try {
-    const oldImage = await supabase.storage
-      .from('voice_actor_profile_pictures')
-      .getPublicUrl(voiceActorResponse.voiceActor.profile_picture);
-    
-    console.log('Profile picture URL:', oldImage.data.publicUrl);
-    profilePicture.value = oldImage.data.publicUrl;
-  } catch (error) {
-    console.error('Error getting profile picture URL:', error);
-  }
+  profilePicture.value = voiceActorResponse.voiceActor.profile_picture;
   
   // Add a small delay to ensure computed properties are updated
   setTimeout(() => {

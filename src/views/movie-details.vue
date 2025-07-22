@@ -15,7 +15,7 @@
     </ion-header>
     <ion-content>
       <div class="background">
-        <img v-if="movie" :src="getImage(movie.backdrop_path)" alt="Movie background image" />
+        <img width="100%" v-if="movie" :src="getImage(movie.backdrop_path)" alt="Movie background image" />
         <div class="background-overlay"></div>
       </div>
 
