@@ -67,13 +67,18 @@
                     <div class="voice-actor" @click="goToVoiceActor(item.voiceActorDetails.id)"
                       v-for="item in getVoiceActorByTmdbId(actor.id)" :key="item.voiceActorDetails.id" tabindex="0"
                       role="button"
-                      aria-label="Go to details for {{ item.voiceActorDetails.firstname }} {{ item.voiceActorDetails.lastname }}">
-                      <ion-thumbnail class="avatar">
-                        <img v-if="item.voiceActorDetails.profile_picture"
-                          :src="getImage(item.voiceActorDetails.profile_picture)"
-                          :alt="item.voiceActorDetails.firstname + ' ' + item.voiceActorDetails.lastname + ' photo'" />
-                        <img v-else src="https://placehold.co/48x72?text=?" alt="No photo" />
-                      </ion-thumbnail>
+                      aria-label="Go to details for {{ item.voiceActorDetails.firstname }} {{ item.voiceActorDetails.lastname }}"
+                    >
+                    <MediaThumbnail
+                      v-if="item.voiceActorDetails.profile_picture"
+                      :path="item.voiceActorDetails.profile_picture"
+                      from-storage
+                    ></MediaThumbnail>
+                    <MediaThumbnail
+                      v-else
+                      :path="undefined"
+                    ></MediaThumbnail>
+
                       <ion-label class="line-label">
                         <span class="ellipsis label voice-actor">
                           {{ item.voiceActorDetails.firstname }} {{ item.voiceActorDetails.lastname }}
@@ -211,6 +216,8 @@ import { WorkAndVoiceActor } from "../../supabase/functions/_shared/movie";
 import { useVoiceActorManagement } from '@/composables/useVoiceActorManagement';
 import { storeToRefs } from 'pinia';
 import { useAuthStore } from '@/stores/auth';
+import MediaThumbnail from "@/components/MediaThumbnail.vue";
+
 
 const authStore = useAuthStore();
 const { isAdmin } = storeToRefs(authStore);

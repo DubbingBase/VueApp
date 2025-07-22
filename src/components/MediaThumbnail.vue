@@ -1,7 +1,6 @@
 <template>
   <div class="avatar">
-    <IonImg class="avatar-image" v-if="path" :src="src" />
-    <IonImg class="avatar-image" v-else :src="defaultSrc" />
+    <IonImg class="avatar-image" v-if="src" :src="src" />
   </div>
 </template>
 
@@ -9,6 +8,8 @@
 import { getImage } from "@/utils";
 import { computed, toRefs } from "vue";
 import { IonImg } from "@ionic/vue";
+import { supabase } from "@/api/supabase";
+import { computedAsync } from "@vueuse/core";
 
 const props = defineProps({
   path: {
@@ -35,17 +36,44 @@ const props = defineProps({
     type: Boolean,
     required: false,
     default: false,
-  }
+  },
+  fromStorage: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 });
 
-const { path, height, width, rawPath, radius } = toRefs(props);
+const { path, height, width, rawPath, radius, fromStorage } = toRefs(props);
 
 const src = computed(() => {
-  if (!path?.value) {
+  console.log("---");
+  if (!path?.value) { 
+    console.log("path is undefined");
     return defaultSrc.value;
   }
-  return rawPath.value ? path.value : getImage(path.value);
+
+  if(rawPath.value){      
+    console.log("rawPath is true");
+    return path.value;
+  }
+
+  if(fromStorage.value){
+    console.log("fromStorage is true", getImageUrl.value);
+    return getImageUrl.value;
+  }
+
+  console.log("getImage");
+  return getImage(path.value);
 });
+
+const getImageUrl = computedAsync(async () => {
+  const oldImage = supabase.storage
+    .from('voice_actor_profile_pictures')
+    .getPublicUrl(path.value!);
+  console.log("oldImage", oldImage)
+  return oldImage.data.publicUrl;
+}, undefined);
 
 const heightStyle = computed(() => {
   return `${height.value}px`;

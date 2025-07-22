@@ -188,7 +188,14 @@ onMounted(async () => {
   }
   voiceActor.value = voiceActorResponse.voiceActor;
   medias.value = voiceActorResponse.medias;
-  profilePicture.value = voiceActorResponse.profile_picture;
+
+  const oldImage = await supabase.storage
+    .from('voice_actor_profile_pictures')
+    .getPublicUrl(voiceActorResponse.voiceActor.profile_picture)
+
+  console.log("oldImage", oldImage)
+
+  profilePicture.value = oldImage.data.publicUrl;
 
   console.log("enhancedWork.value", enhancedWork.value);
 });
