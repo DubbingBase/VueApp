@@ -26,7 +26,9 @@
         <ion-button expand="block" fill="clear" type="button" @click="isRegister = !isRegister">
           {{ isRegister ? 'Déjà un compte ? Se connecter' : "Pas de compte ? S'inscrire" }}
         </ion-button>
-        <ion-text color="danger" v-if="error">{{ error }}</ion-text>
+        <ion-text color="danger" v-if="error" class="error-message">
+  <p>{{ error }}</p>
+</ion-text>
       </form>
     </ion-content>
   </ion-page>
@@ -68,11 +70,29 @@ const login = async () => {
   loading.value = true;
   
   try {
-    await authStore.signIn(email.value, password.value);
+    const { error: signInError } = await authStore.signIn(email.value, password.value);
+    
+    if (signInError) {
+      // Handle specific authentication errors
+      if (signInError.message.includes('Invalid login credentials') || 
+          signInError.message.includes('Email not confirmed')) {
+        error.value = 'Email ou mot de passe incorrect';
+      } else if (signInError.message.includes('Email rate limit exceeded')) {
+        error.value = 'Trop de tentatives de connexion. Veuillez réessayer plus tard.';
+      } else {
+        error.value = 'Une erreur est survenue lors de la connexion';
+      }
+      // Clear password field on error for security
+      password.value = '';
+      return;
+    }
+    
+    // If no error, proceed with successful auth
     handleSuccessfulAuth();
   } catch (err: any) {
-    error.value = err.message || 'Échec de la connexion';
-    console.error('Login error:', err);
+    // Handle unexpected errors
+    console.error('Unexpected login error:', err);
+    error.value = 'Une erreur inattendue est survenue';
   } finally {
     loading.value = false;
   }
@@ -103,5 +123,16 @@ const register = async () => {
 <style scoped>
 .ion-padding {
   padding: 2rem;
+}
+
+.error-message {
+  display: block;
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  padding: 0.5rem;
+  background-color: rgba(var(--ion-color-danger-rgb), 0.1);
+  border-radius: 4px;
 }
 </style>
