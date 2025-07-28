@@ -216,10 +216,12 @@ Deno.serve(async (req) => {
           entry.performance
         )
       } else {
-        console.error('mistral missing structure')
+        console.error('mistral missing structure', entry)
       }
     }
   }
+
+  console.log('done')
 
   const result = { ok: true }
   return Response.json(result, {
