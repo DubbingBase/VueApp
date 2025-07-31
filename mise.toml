@@ -48,3 +48,8 @@ run = "pnpm supabase db dump -f supabase/seed.sql --data-only --linked"
 description = "Resets the database migration"
 depends = ["pull-production"]
 run = "pnpm supabase db reset --local"
+
+[tasks.backup-db]
+description = "Backups the database"
+depends = ["install"]
+run = "./backup_db.sh"
