@@ -513,6 +513,7 @@ onMounted(async () => {
   try {
     const response = await getSerie(id as string);
     show.value = response.data.serie || response.data.show; // Handle both response formats
+    show.value.credits = response.data.aggregateCredits;
     // Load voice actors for this serie
     if (response.data.voiceActors) {
       voiceActors.value = response.data.voiceActors;

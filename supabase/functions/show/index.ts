@@ -19,7 +19,6 @@ Deno.serve(async (req) => {
   let serie = undefined
 
   try {
-
     const response = await fetch(`https://api.themoviedb.org/3/tv/${id}?append_to_response=credits,external_ids&language=fr-FR`, {
       headers: {
         "Content-Type": "application/json",
@@ -31,6 +30,26 @@ Deno.serve(async (req) => {
     serie = await response.json()
   } catch (e) {
     console.error('e', e)
+  }
+
+  // Fetch aggregate credits data
+  let aggregateCredits = null
+  try {
+    const creditsResponse = await fetch(`https://api.themoviedb.org/3/tv/${id}/aggregate_credits`, {
+      headers: {
+        "Content-Type": "application/json",
+        'Authorization': `Bearer ${Deno.env.get('TMDB_API_KEY')}`,
+        'Accept': 'application/json',
+      },
+    })
+
+    if (creditsResponse.ok) {
+      aggregateCredits = await creditsResponse.json()
+    } else {
+      console.error('Failed to fetch aggregate credits:', creditsResponse.status, creditsResponse.statusText)
+    }
+  } catch (e) {
+    console.error('Error fetching aggregate credits:', e)
   }
 
   let va: unknown[] = []
@@ -73,6 +92,7 @@ Deno.serve(async (req) => {
   const result = {
     serie,
     voiceActors: va,
+    aggregateCredits
   }
 
   return new Response(
