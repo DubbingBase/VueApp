@@ -35,12 +35,20 @@ defineProps<{
   top: -80px;
 
   .inner-list {
-    background-color: #000;
+    background: #1a1a2e;
     display: flex;
-    gap: 8px;
+    gap: 12px;
     flex-direction: column;
-    border-radius: 2rem;
-    padding-top: 8px;
+    border-radius: 1.5rem;
+    padding: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+
+    @media (max-width: 768px) {
+      padding: 12px;
+      gap: 8px;
+      border-radius: 1rem;
+    }
   }
 }
 </style>
