@@ -56,6 +56,27 @@
           </template>
         </div>
       </div>
+      <div class="recent-voice-actors">
+        <div class="list-header">🎤 Voice Actors Récents</div>
+        <div class="voice-actors">
+          <template v-if="isLoadingVoiceActors">
+            <div v-for="i in 3" :key="'voice-actor-skeleton-' + i" class="skeleton-loader"></div>
+          </template>
+          <template v-else-if="errorVoiceActors">
+            <div class="error-message">Impossible de charger les voix récentes. Veuillez réessayer plus tard.</div>
+          </template>
+          <template v-else-if="recentVoiceActors.length === 0">
+            <div class="empty-message">Aucune voix récente trouvée.</div>
+          </template>
+          <template v-else>
+            <VoiceActorItem
+              :key="va.id"
+              v-for="va in recentVoiceActors"
+              :value="va"
+            ></VoiceActorItem>
+          </template>
+        </div>
+      </div>
     </ion-content>
   </ion-page>
 </template>
@@ -63,22 +84,36 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import type { TrendingResponse } from "../../supabase/functions/_shared/movie";
+import type { Tables } from "../../supabase/functions/_shared/database.types";
 import MediaItem from "../components/MediaItem.vue";
+import VoiceActorItem from "../components/VoiceActorItem.vue";
 import { supabase } from "../api/supabase";
 import { IonPage, IonContent, IonHeader, IonTitle, IonToolbar } from "@ionic/vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const trendingMovies = ref<TrendingResponse["results"]>([]);
 const trendingSeries = ref<TrendingResponse["results"]>([]);
+const recentVoiceActors = ref<Tables<'voice_actors'>[]>([]);
 const isLoadingMovies = ref(true);
 const isLoadingSeries = ref(true);
+const isLoadingVoiceActors = ref(true);
 const errorMovies = ref("");
 const errorSeries = ref("");
+const errorVoiceActors = ref("");
+
+const goToVoiceActor = (id: number) => {
+  router.push({ name: "VoiceActorDetails", params: { id } });
+};
 
 onMounted(async () => {
   isLoadingMovies.value = true;
   isLoadingSeries.value = true;
+  isLoadingVoiceActors.value = true;
   errorMovies.value = "";
   errorSeries.value = "";
+  errorVoiceActors.value = "";
   try {
     const trendingMovieResponseRaw = await supabase.functions.invoke("trending-movies");
     if (trendingMovieResponseRaw.error) throw new Error(trendingMovieResponseRaw.error.message || "Erreur inconnue");
@@ -100,12 +135,24 @@ onMounted(async () => {
   } finally {
     isLoadingSeries.value = false;
   }
+
+  try {
+    const recentVoiceActorsResponseRaw = await supabase.functions.invoke("recent-voice-actors", { body: { limit: 10 } });
+    if (recentVoiceActorsResponseRaw.error) throw new Error(recentVoiceActorsResponseRaw.error.message || "Erreur inconnue");
+    recentVoiceActors.value = recentVoiceActorsResponseRaw.data || [];
+  } catch (e: any) {
+    errorVoiceActors.value = e.message || "Erreur lors du chargement des voix récentes.";
+    recentVoiceActors.value = [];
+  } finally {
+    isLoadingVoiceActors.value = false;
+  }
 });
 </script>
 
 <style scoped lang="scss">
 .movies,
-.series {
+.series,
+.voice-actors {
   display: flex;
   flex-direction: row;
   gap: 20px;
@@ -145,7 +192,7 @@ onMounted(async () => {
   }
 }
 
-.trending-movies, .trending-series {
+.trending-movies, .trending-series, .recent-voice-actors {
   margin-bottom: 32px;
   padding-left: 12px;
 }
