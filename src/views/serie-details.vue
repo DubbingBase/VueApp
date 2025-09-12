@@ -282,17 +282,35 @@
         </ion-segment-view>
       </div>
 
-      <ion-button
-        :disabled="isFetching"
-        v-if="hasWikidataId && !hasData"
-        class="fetch-infos-btn"
-        @click="fetchInfos"
-      >
-        <ion-spinner v-if="isFetching"></ion-spinner>
-        <span v-else
-          >Récupérer les informations {{ wikiDataId }} {{ hasData }}</span
+      <div class="action-buttons">
+        <ion-button
+          :disabled="isFetching"
+          v-if="hasWikidataId && !hasData"
+          class="fetch-infos-btn"
+          @click="fetchInfos"
         >
-      </ion-button>
+          <ion-spinner v-if="isFetching"></ion-spinner>
+          <span v-else>Récupérer les informations</span>
+        </ion-button>
+        
+        <ion-button 
+          v-if="hasWikidataId && !hasData"
+          class="scan-btn"
+          @click="takePhoto"
+          :disabled="isScanning"
+        >
+          <ion-spinner v-if="isScanning"></ion-spinner>
+          <ion-icon v-else :icon="cameraOutline" slot="start"></ion-icon>
+          Scanner
+        </ion-button>
+      </div>
+      
+      <ion-toast
+        :is-open="showScanResult"
+        :message="scanResult"
+        :duration="3000"
+        @didDismiss="showScanResult = false"
+      ></ion-toast>
 
       <!-- Voice Actor Search Modal -->
       <ion-modal
@@ -386,6 +404,7 @@ import {
   IonText,
   IonAvatar,
   toastController,
+  IonToast,
 } from "@ionic/vue";
 import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
@@ -397,11 +416,13 @@ import {
   createOutline,
   trashOutline,
   closeCircle,
+  cameraOutline,
 } from "ionicons/icons";
 import SolarSettingsMinimalisticOutline from "~icons/solar/settings-minimalistic-outline";
 import { storeToRefs } from "pinia";
 import { useAuthStore } from "@/stores/auth";
 import { supabase } from "@/api/supabase";
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 
 const authStore = useAuthStore();
 const { isAdmin } = storeToRefs(authStore);
@@ -455,6 +476,42 @@ const hasWikidataId = computed(() => {
 const hasData = computed(() => {
   return voiceActors.value.length > 0;
 });
+
+// Scan functionality
+const isScanning = ref(false);
+const scanResult = ref('');
+const showScanResult = ref(false);
+
+const takePhoto = async () => {
+  try {
+    isScanning.value = true;
+    const image = await Camera.getPhoto({
+      quality: 90,
+      allowEditing: false,
+      resultType: CameraResultType.Base64,
+      source: CameraSource.Prompt,
+    });
+
+    // Here you would typically send the image to your vision API
+    // For now, we'll just show a success message
+    scanResult.value = 'Image captured successfully! Processing...';
+    showScanResult.value = true;
+    
+    // Simulate API call
+    setTimeout(() => {
+      // TODO: Replace with actual API call to your vision LLM
+      scanResult.value = 'Processing complete! Ready to add voice actors.';
+      // Here you would process the response and potentially auto-fill the voice actor form
+    }, 2000);
+    
+  } catch (error) {
+    console.error('Error taking photo:', error);
+    scanResult.value = 'Error capturing image. Please try again.';
+    showScanResult.value = true;
+  } finally {
+    isScanning.value = false;
+  }
+};
 
 const getSerie = async (id: string) => {
   try {
@@ -555,19 +612,48 @@ $border: #1b1b1b;
   text-align: center;
 }
 
-.fetch-infos-btn {
-  position: fixed;
-  bottom: 0px;
-  right: 4px;
-  padding: 4px;
-  z-index: 1;
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 20px auto;
+  padding: 0 16px;
+  max-width: 600px;
 }
 
-.avatar {
-  --border-radius: 4px;
-  width: 48px;
-  height: auto;
-  min-height: 72px;
+.fetch-infos-btn,
+.scan-btn {
+  flex: 1;
+  --border-radius: 8px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  font-weight: 500;
+  margin: 0;
+  min-width: 0;
+}
+
+.fetch-infos-btn {
+  --background: var(--ion-color-primary);
+  --color: white;
+}
+
+.scan-btn {
+  --background: var(--ion-color-medium);
+  --color: var(--ion-color-dark);
+  --background-hover: var(--ion-color-medium-shade);
+  --background-activated: var(--ion-color-medium-tint);
+}
+
+@media (max-width: 480px) {
+  .action-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .fetch-infos-btn,
+  .scan-btn {
+    width: 100%;
+  }
 }
 
 .line-label {

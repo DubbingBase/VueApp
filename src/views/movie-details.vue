@@ -129,15 +129,35 @@
 
 
 
-      <ion-button :disabled="isFetching" v-if="hasWikidataId && !hasData" class="fetch-infos-btn" @click="fetchInfos">
-        <ion-spinner v-if="isFetching"></ion-spinner>
-        <span v-else>Récupérer les informations</span>
-      </ion-button>
+      <div class="action-buttons">
+        <ion-button :disabled="isFetching" v-if="hasWikidataId && !hasData" class="fetch-infos-btn" @click="fetchInfos">
+          <ion-spinner v-if="isFetching"></ion-spinner>
+          <span v-else>Récupérer les informations</span>
+        </ion-button>
+
+        <ion-button
+          v-if="hasWikidataId && !hasData"
+          class="scan-btn"
+          @click="takePhoto"
+          :disabled="isScanning"
+        >
+          <ion-spinner v-if="isScanning"></ion-spinner>
+          <ion-icon v-else :icon="cameraOutline" slot="start"></ion-icon>
+          Scanner
+        </ion-button>
+      </div>
       <div v-if="fetchError" class="fetch-error">{{ fetchError }}</div>
       <ion-spinner v-if="isLoading" class="main-spinner"></ion-spinner>
     </ion-content>
 
-    <!-- Voice Actor Search Modal -->
+    <ion-toast
+      :is-open="showScanResult"
+      :message="scanResult"
+      :duration="3000"
+      @didDismiss="showScanResult = false"
+    ></ion-toast>
+
+  <!-- Voice Actor Search Modal -->
     <ion-modal :is-open="showVoiceActorSearch" @didDismiss="showVoiceActorSearch = false">
       <ion-header>
         <ion-toolbar>
@@ -204,12 +224,13 @@ import {
   IonText,
   IonAvatar,
   alertController,
-  toastController
+  toastController,
+  IonToast
 } from "@ionic/vue";
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useIonRouter } from '@ionic/vue';
-import { pencil, personAddOutline, searchOutline, closeCircle, createOutline, trashOutline } from 'ionicons/icons';
+import { pencil, personAddOutline, searchOutline, closeCircle, createOutline, trashOutline, cameraOutline } from 'ionicons/icons';
 import { MovieResponse } from "../../supabase/functions/_shared/movie";
 import { supabase } from "../api/supabase";
 import { WorkAndVoiceActor } from "../../supabase/functions/_shared/movie";
@@ -217,6 +238,7 @@ import { useVoiceActorManagement } from '@/composables/useVoiceActorManagement';
 import { storeToRefs } from 'pinia';
 import { useAuthStore } from '@/stores/auth';
 import MediaThumbnail from "@/components/MediaThumbnail.vue";
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 
 
 const authStore = useAuthStore();
@@ -268,8 +290,46 @@ const hasData = computed(() => {
   return voiceActors.value.length > 0;
 });
 
+// Scan functionality
+const isScanning = ref(false);
+const scanResult = ref('');
+const showScanResult = ref(false);
+
 const isFetching = ref(false);
 const fetchError = ref('');
+
+const takePhoto = async () => {
+  try {
+    isScanning.value = true;
+    const image = await Camera.getPhoto({
+      quality: 90,
+      allowEditing: false,
+      resultType: CameraResultType.Base64,
+      source: CameraSource.Prompt,
+    });
+
+    const response = await supabase.functions.invoke("process_image", {
+      body: {
+        image: image.base64String,
+        mediaId: parseInt(route.params.id as string)
+      }
+    });
+
+    if (response.data.ok) {
+      scanResult.value = 'Image processed successfully!';
+      showScanResult.value = true;
+    } else {
+      scanResult.value = response.data.error || 'Error processing image.';
+      showScanResult.value = true;
+    }
+  } catch (error) {
+    console.error('Error taking photo:', error);
+    scanResult.value = 'Error capturing image. Please try again.';
+    showScanResult.value = true;
+  } finally {
+    isScanning.value = false;
+  }
+};
 
 const fetchInfos = async () => {
   const id = wikiDataId.value;
@@ -342,7 +402,7 @@ const goToEditPage = () => {
 
 //   router.push({
 //     name: 'AddVoiceCast',
-//     params: { 
+//     params: {
 //       movieId: movie.value.id,
 //       actorId: workItem.actor_id,
 //       workId: workItem.id
@@ -428,12 +488,48 @@ onMounted(async () => {
   width: 100%;
 }
 
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 20px auto;
+  padding: 0 16px;
+  max-width: 600px;
+}
+
+.fetch-infos-btn,
+.scan-btn {
+  flex: 1;
+  --border-radius: 8px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  font-weight: 500;
+  margin: 0;
+  min-width: 0;
+}
+
 .fetch-infos-btn {
-  position: fixed;
-  bottom: 0px;
-  right: 4px;
-  padding: 4px;
-  z-index: 1;
+  --background: var(--ion-color-primary);
+  --color: white;
+}
+
+.scan-btn {
+  --background: var(--ion-color-medium);
+  --color: var(--ion-color-dark);
+  --background-hover: var(--ion-color-medium-shade);
+  --background-activated: var(--ion-color-medium-tint);
+}
+
+@media (max-width: 480px) {
+  .action-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .fetch-infos-btn,
+  .scan-btn {
+    width: 100%;
+  }
 }
 
 .avatar {
