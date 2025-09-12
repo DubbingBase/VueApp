@@ -27,7 +27,7 @@
               <ion-label>Séries</ion-label>
             </ion-segment-button>
           </ion-segment>
-          
+
           <ion-segment-view :activeIndex="active">
             <ion-segment-content value="about">
               <p>Date de naissance : {{ actor.birthday }}</p>
@@ -35,12 +35,12 @@
             </ion-segment-content>
             <ion-segment-content value="movies">
               <div class="movies-wrapper">
-                <movie v-for="movie in movies" :value="movie"></movie>
+                <MediaItem v-for="movie in movies" :key="movie.id" :value="movie" type="movie"></MediaItem>
               </div>
             </ion-segment-content>
             <ion-segment-content value="series">
               <div class="series-wrapper">
-                <serie v-for="serie in series" :value="serie"></serie>
+                <MediaItem v-for="serie in series" :key="serie.id" :value="serie" type="serie"></MediaItem>
               </div>
             </ion-segment-content>
           </ion-segment-view>
@@ -52,14 +52,14 @@
               {{ actor.voice_roles.length }} rôle{{ actor.voice_roles.length > 1 ? 's' : '' }}
             </ion-chip>
           </div>
-          
+
           <!-- Group voice roles by media -->
           <div v-for="(roles, mediaId) in groupVoiceRolesByMedia()" :key="mediaId" class="media-voice-roles">
             <div class="media-header" @click="goToMedia(roles[0].mediaDetails.id)">
               <ion-thumbnail class="media-poster">
-                <img 
+                <img
                   v-if="roles[0].mediaDetails.poster_path"
-                  :src="getImage(roles[0].mediaDetails.poster_path, 'w92')" 
+                  :src="getImage(roles[0].mediaDetails.poster_path, 'w92')"
                   :alt="roles[0].mediaDetails.title || roles[0].mediaDetails.name"
                 />
                 <div v-else class="fallback-poster">
@@ -78,7 +78,7 @@
                 </p>
               </div>
             </div>
-            
+
             <!-- List of voice roles and their actors for this media -->
             <ion-list lines="none" class="voice-roles-list">
               <div v-for="role in roles" :key="role.id" class="voice-role-group">
@@ -86,8 +86,8 @@
                   <ion-icon :icon="mic" />
                   {{ role.character }}
                 </div>
-                
-                <ion-item 
+
+                <ion-item
                   v-for="voiceActor in role.voice_actors"
                   :key="voiceActor.id"
                   class="voice-role-item"
@@ -117,12 +117,12 @@
                 </ion-item>
               </div>
             </ion-list>
-            
+
             <!-- Double loop to group roles by media -->
             <div v-for="(roles, character) in groupRolesByCharacter(mediaRoles)" :key="character" class="character-roles">
               <h4 class="character-name">{{ character }}</h4>
               <ion-list lines="none" class="character-roles-list">
-                <ion-item 
+                <ion-item
                   v-for="role in roles"
                   :key="role.id"
                   class="character-role-item"
@@ -187,8 +187,7 @@ import {
 import { mic, person, language, film } from 'ionicons/icons';
 import { getImage } from "../utils";
 import { Actor } from "../../supabase/functions/_shared/actor";
-import movie from "../components/Movie.vue";
-import serie from "../components/Serie.vue";
+import MediaItem from "../components/MediaItem.vue";
 import type { Serie } from "../../supabase/functions/_shared/serie";
 import type { Movie } from "../../supabase/functions/_shared/movie";
 import { supabase } from "../api/supabase";
@@ -259,39 +258,39 @@ function groupRolesByCharacter(actorRoles: any) {
 
   actorRoles.forEach(role => {
     if (!role.id) return;
-    
+
     const mediaId = role.id;
     if (!grouped[mediaId]) {
       grouped[mediaId] = [];
     }
-    
+
     grouped[mediaId].push(role);
   });
 
   console.log('grouped', grouped);
-  
+
   return grouped;
 }
 
 // Group voice roles by media
 function groupVoiceRolesByMedia() {
   if (!actor.value?.voice_roles) return {};
-  
+
   const grouped = {};
-  
+
   actor.value.voice_roles.forEach(role => {
     if (!role.id) return;
-    
+
     const mediaId = role.id;
     if (!grouped[mediaId]) {
       grouped[mediaId] = [];
     }
-    
+
     grouped[mediaId].push(role);
   });
 
   console.log('grouped', grouped);
-  
+
   return grouped;
 }
 </script>
@@ -303,7 +302,7 @@ function groupVoiceRolesByMedia() {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  
+
   & + .media-voice-roles {
     margin-top: 1.5rem;
   }
@@ -316,7 +315,7 @@ function groupVoiceRolesByMedia() {
   background: var(--ion-color-light-shade);
   cursor: pointer;
   transition: background 0.2s ease;
-  
+
   &:hover {
     background: var(--ion-color-light-tint);
   }
@@ -334,7 +333,7 @@ function groupVoiceRolesByMedia() {
   color: var(--ion-color-dark);
   display: flex;
   align-items: center;
-  
+
   .media-year {
     margin-left: 0.5rem;
     font-size: 0.9rem;
@@ -353,12 +352,12 @@ function groupVoiceRolesByMedia() {
 .voice-roles-list {
   padding: 0.5rem 0;
   background: var(--ion-color-light);
-  
+
   .voice-role-item {
     --padding-start: 1rem;
     --padding-end: 1rem;
     --min-height: 72px;
-    
+
     &::part(native) {
       padding-top: 0.75rem;
       padding-bottom: 0.75rem;
@@ -370,14 +369,14 @@ function groupVoiceRolesByMedia() {
   width: 48px;
   height: 48px;
   margin-right: 1rem;
-  
+
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     border-radius: 50%;
   }
-  
+
   .fallback-avatar {
     display: flex;
     align-items: center;
@@ -387,7 +386,7 @@ function groupVoiceRolesByMedia() {
     background: var(--ion-color-light-shade);
     border-radius: 50%;
     color: var(--ion-color-medium);
-    
+
     ion-icon {
       font-size: 1.5rem;
     }
@@ -401,12 +400,12 @@ function groupVoiceRolesByMedia() {
     font-weight: 500;
     color: var(--ion-color-dark);
   }
-  
+
   p {
     margin: 0;
     font-size: 0.85rem;
     color: var(--ion-color-medium);
-    
+
     ion-icon {
       margin-right: 0.25rem;
       vertical-align: middle;
@@ -417,25 +416,25 @@ function groupVoiceRolesByMedia() {
 .character-roles {
   margin-top: 1rem;
   padding: 0 1rem 1rem;
-  
+
   .character-name {
     margin: 0 0 0.5rem;
     font-size: 0.95rem;
     font-weight: 600;
     color: var(--ion-color-primary);
   }
-  
+
   .character-roles-list {
     background: var(--ion-color-light-shade);
     border-radius: 8px;
     overflow: hidden;
-    
+
     .character-role-item {
       --background: transparent;
       --padding-start: 0.75rem;
       --padding-end: 0.75rem;
       --min-height: 64px;
-      
+
       &::part(native) {
         padding-top: 0.5rem;
         padding-bottom: 0.5rem;
@@ -451,13 +450,13 @@ function groupVoiceRolesByMedia() {
   background: var(--ion-color-light-shade);
   border-radius: 4px;
   overflow: hidden;
-  
+
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
-  
+
   .fallback-poster {
     display: flex;
     align-items: center;
@@ -465,7 +464,7 @@ function groupVoiceRolesByMedia() {
     width: 100%;
     height: 100%;
     color: var(--ion-color-medium);
-    
+
     ion-icon {
       font-size: 2rem;
     }
@@ -501,19 +500,19 @@ function groupVoiceRolesByMedia() {
 .voice-roles-section {
   margin: 1.5rem 0;
   padding: 0 1rem;
-  
+
   .section-header {
     display: flex;
     align-items: center;
     margin-bottom: 1rem;
-    
+
     h2 {
       margin: 0;
       font-size: 1.25rem;
       font-weight: 600;
       color: var(--ion-text-color);
     }
-    
+
     .role-count {
       margin-left: 0.75rem;
       font-size: 0.8rem;
@@ -524,7 +523,7 @@ function groupVoiceRolesByMedia() {
 
 .voice-roles-list {
   background: transparent;
-  
+
   .voice-role-item {
     --padding-start: 0.5rem;
     --padding-end: 0.5rem;
@@ -534,18 +533,18 @@ function groupVoiceRolesByMedia() {
     background: var(--ion-item-background);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    
+
     &:active {
       transform: translateY(1px);
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
-    
+
     .voice-actor-avatar {
       width: 48px;
       height: 48px;
       margin-right: 0.75rem;
       cursor: pointer;
-      
+
       img {
         object-fit: cover;
         border-radius: 8px;
@@ -554,7 +553,7 @@ function groupVoiceRolesByMedia() {
           transform: scale(1.05);
         }
       }
-      
+
       .fallback-avatar {
         width: 100%;
         height: 100%;
@@ -564,39 +563,39 @@ function groupVoiceRolesByMedia() {
         align-items: center;
         justify-content: center;
         color: var(--ion-color-medium);
-        
+
         ion-icon {
           font-size: 1.5rem;
         }
       }
     }
-    
+
     .voice-actor-details {
       h3 {
         font-weight: 500;
         margin: 0 0 0.25rem 0;
         color: var(--ion-text-color);
       }
-      
+
       p {
         margin: 0.25rem 0;
         font-size: 0.85rem;
         color: var(--ion-color-medium);
         display: flex;
         align-items: center;
-        
+
         ion-icon {
           margin-right: 0.5rem;
           font-size: 1rem;
           color: var(--ion-color-primary);
         }
       }
-      
+
       .voice-role-performance {
         font-weight: 500;
         color: var(--ion-color-primary) !important;
       }
-      
+
       .media-details {
         display: flex;
         align-items: flex-start;
@@ -604,7 +603,7 @@ function groupVoiceRolesByMedia() {
         margin-top: 0.5rem;
         padding-top: 0.5rem;
         border-top: 1px solid var(--ion-color-light);
-        
+
         .media-poster {
           width: 40px;
           height: 60px;
@@ -613,13 +612,13 @@ function groupVoiceRolesByMedia() {
           border-radius: 4px;
           overflow: hidden;
           flex-shrink: 0;
-          
+
           img {
             width: 100%;
             height: 100%;
             object-fit: cover;
           }
-          
+
           .fallback-poster {
             width: 100%;
             height: 100%;
@@ -627,24 +626,24 @@ function groupVoiceRolesByMedia() {
             align-items: center;
             justify-content: center;
             color: var(--ion-color-medium);
-            
+
             ion-icon {
               font-size: 1.5rem;
             }
           }
         }
-        
+
         .media-info {
           display: flex;
           flex-direction: column;
           gap: 0.25rem;
           font-size: 0.85rem;
-          
+
           .media-year {
             color: var(--ion-color-medium);
             margin-left: 0.25rem;
           }
-          
+
           .media-overview {
             color: var(--ion-color-medium);
             font-size: 0.8rem;
@@ -668,7 +667,7 @@ function groupVoiceRolesByMedia() {
     margin: 2rem auto;
     padding: 0 1.5rem;
   }
-  
+
   .voice-roles-list {
     .voice-role-item {
       --padding-start: 1rem;

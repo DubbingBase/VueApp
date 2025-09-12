@@ -25,11 +25,12 @@
             <div class="empty-message">Aucun film tendance trouvé.</div>
           </template>
           <template v-else>
-            <Movie
+            <MediaItem
               :key="movie.id"
               v-for="movie in trendingMovies"
               :value="movie"
-            ></Movie>
+              type="movie"
+            ></MediaItem>
           </template>
         </div>
       </div>
@@ -46,11 +47,12 @@
             <div class="empty-message">Aucune série tendance trouvée.</div>
           </template>
           <template v-else>
-            <Show
+            <MediaItem
               :key="show.id"
               v-for="show in trendingSeries"
               :value="show"
-            ></Show>
+              type="serie"
+            ></MediaItem>
           </template>
         </div>
       </div>
@@ -61,8 +63,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import type { TrendingResponse } from "../../supabase/functions/_shared/movie";
-import Movie from "../components/Movie.vue";
-import Show from "../components/Serie.vue";
+import MediaItem from "../components/MediaItem.vue";
 import { supabase } from "../api/supabase";
 import { IonPage, IonContent, IonHeader, IonTitle, IonToolbar } from "@ionic/vue";
 
@@ -111,7 +112,7 @@ onMounted(async () => {
   padding: 8px 0 16px 0;
   overflow-x: auto;
   scroll-padding: 16px;
-  height: 248px;
+  height: 263px;
 }
 
 .skeleton-loader {
