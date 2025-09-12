@@ -19,9 +19,9 @@
           <ion-item>
             <ion-label>Trier par:</ion-label>
             <ion-select :value="sortBy" @ionChange="sortBy = $event.detail.value" interface="popover">
-              <ion-select-option 
-                v-for="option in sortOptions" 
-                :key="option.value" 
+              <ion-select-option
+                v-for="option in sortOptions"
+                :key="option.value"
                 :value="option.value"
               >
                 {{ option.label }}
@@ -29,33 +29,44 @@
             </ion-select>
           </ion-item>
         </div>
-        
+
         <div
           class="header"
           v-if="voiceActor"
         >
-          <MediaThumbnail
-            v-if="profilePicture"
-            :path="profilePicture"
-            from-storage
-          ></MediaThumbnail>
-          <MediaThumbnail
-            v-else
-            @click="uploadImage"
-            :path="profilePicture"
-          ></MediaThumbnail>
-          <div class="actor-name">
-            {{ voiceActor.firstname }} {{ voiceActor.lastname }}
+          <div class="profile-picture">
+            <MediaThumbnail
+              v-if="profilePicture"
+              :path="profilePicture || undefined"
+              from-storage
+            ></MediaThumbnail>
+            <MediaThumbnail
+              v-else
+              @click="uploadImage"
+              :path="profilePicture || undefined"
+            ></MediaThumbnail>
           </div>
+          <div class="actor-info">
+            <div class="actor-name">
+              {{ voiceActor.firstname }} {{ voiceActor.lastname }}
+            </div>
+            <div class="actor-details">
+              <p v-if="voiceActor.date_of_birth">Date de naissance : {{ voiceActor.date_of_birth }}</p>
+              <p v-if="voiceActor.years_active">Active: {{ voiceActor.years_active }}</p>
+              <p v-if="voiceActor.awards">Awards: {{ voiceActor.awards }}</p>
+              <span v-if="voiceActor.nationality" class="nationality-tag">{{ voiceActor.nationality }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bio-section" v-if="voiceActor">
+          <p>{{ voiceActor.bio }}</p>
         </div>
 
         <div
           class="body"
           v-if="voiceActor"
         >
-          <p>Date de naissance : {{ voiceActor.date_of_birth }}</p>
-          <p>{{ voiceActor.bio }}</p>
-
           <!-- Chronological view -->
           <template v-if="sortBy === 'chronological'">
             <div
@@ -82,25 +93,25 @@
               </div>
 
               <div class="infos">
-                <div class="caption">{{ work.media.title ?? work.media.name }}</div>
+                <div class="caption">{{ (work.media as any).title ?? (work.media as any).name }}</div>
                 <div class="caption">{{ work.data.character }}</div>
                 <div class="caption">
-                  {{ work.media.release_date || work.media.first_air_date }}
+                  {{ (work.media as any).release_date || (work.media as any).first_air_date }}
                 </div>
 
                 <div class="actor">
-                  <router-link class="actor-link" :to="{
-                    name: 'ActorDetails',
-                    params: {
-                      id: work.data.actor.id,
-                    },
-                  }">
-                    <div class="poster">
-                      <MediaThumbnail :height="32" :width="32" radius="50%" :path="work.data.actor.profile_path" />
-                    </div>
-                    <div class="caption">{{ work.data.actor.name }}</div>
-                  </router-link>
-                </div>
+                   <router-link class="actor-link" :to="{
+                     name: 'ActorDetails',
+                     params: {
+                       id: work.data.actor.id.toString(),
+                     },
+                   }">
+                     <div class="poster">
+                       <MediaThumbnail :height="32" :width="32" radius="50%" :path="work.data.actor.profile_path || undefined" />
+                     </div>
+                     <div class="caption">{{ work.data.actor.name }}</div>
+                   </router-link>
+                 </div>
               </div>
             </div>
           </template>
@@ -113,15 +124,15 @@
             <div v-else>
               <div v-for="group in groupedWork" :key="group.actorId" class="actor-group">
                 <div v-if="group.works.length > 0" class="actor-header">
-                  <router-link 
-                    :to="{ name: 'ActorDetails', params: { id: group.works[0].data.actor.id } }" 
+                  <router-link
+                    :to="{ name: 'ActorDetails', params: { id: group.works[0].data.actor.id.toString() } }"
                     class="actor-link"
                   >
-                    <MediaThumbnail 
-                      :height="40" 
-                      :width="40" 
-                      radius="50%" 
-                      :path="group.works[0].data.actor.profile_path" 
+                    <MediaThumbnail
+                      :height="40"
+                      :width="40"
+                      radius="50%"
+                      :path="group.works[0].data.actor.profile_path || undefined"
                       class="actor-avatar"
                     />
                     <h3 class="actor-name">
@@ -130,7 +141,7 @@
                     </h3>
                   </router-link>
                 </div>
-                
+
                 <div class="works-container">
                   <div
                     v-for="(work, index) in group.works"
@@ -145,12 +156,12 @@
                         <MediaThumbnail :path="work.media.poster_path" />
                       </router-link>
                     </div>
-                    
+
                     <div class="infos">
-                      <div class="title">{{ work.media.title || work.media.name }}</div>
+                      <div class="title">{{ (work.media as any).title || (work.media as any).name }}</div>
                       <div class="character">{{ work.data.character }}</div>
                       <div class="year">
-                        {{ (work.media.release_date || work.media.first_air_date)?.substring(0, 4) || '' }}
+                        {{ ((work.media as any).release_date || (work.media as any).first_air_date)?.substring(0, 4) || '' }}
                       </div>
                     </div>
                   </div>
@@ -207,28 +218,42 @@ type VoiceActorResponse = {
     id: number;
     firstname: string;
     lastname: string;
+    bio: string | null;
+    nationality: string | null;
+    date_of_birth: string | null;
+    awards: string | null;
+    years_active: string | null;
+    social_media_links: any | null;
+    profile_picture: string | null;
+    voice_actor_name: string | null;
     work: {
-      id: string;
-      actor_id: string;
+      id: number;
+      actor_id: number;
       content_id: number;
+      content_type: string | null;
+      highlight: boolean | null;
+      performance: string | null;
+      source_id: number | null;
+      status: string | null;
+      suggestions: string | null;
+      voice_actor_id: number | null;
     }[];
   };
-  profile_picture: string;
   medias: (MovieModel | SerieModel)[];
 };
 
 const voiceActor = ref<VoiceActorResponse["voiceActor"] | undefined>();
 const medias = ref<VoiceActorResponse["medias"]>([]);
-const profilePicture = ref<VoiceActorResponse["profile_picture"] | undefined>();
+const profilePicture = ref<string | null | undefined>();
 
 // Define a type for our enhanced work item
 type EnhancedWorkItem = {
   media: MovieModel | SerieModel;
-  work: { id: string; actor_id: string; content_id: number };
+  work: { id: number; actor_id: number; content_id: number };
   data: {
     character: string | undefined;
     actor: {
-      id: string;
+      id: number;
       name: string;
       character?: string;
       profile_path?: string | null;
@@ -243,33 +268,33 @@ const baseEnhancedWork = computed<EnhancedWorkItem[]>(() => {
     console.log('No voice actor work data available');
     return [];
   }
-  
+
   const result = voiceActor.value.work
     .map((work) => {
       const media = medias.value.find((media) => media.id === work.content_id);
-      
+
       if (!media) {
         console.warn(`No media found for work with content_id: ${work.content_id}`);
         return null;
       }
-      
+
       // Ensure credits exist and has cast
-      if (!media.credits?.cast) {
+      if (!(media as any).credits?.cast) {
         console.warn(`No credits.cast found for media ${media.id}`);
         return null;
       }
 
-      const actor = media.credits.cast.find((cast: any) => cast.id === work.actor_id);
-      
+      const actor = (media as any).credits.cast.find((cast: any) => cast.id === work.actor_id);
+
       if (!actor) {
         console.warn(`No actor found with id: ${work.actor_id} in media ${media.id}`);
         return null;
       }
-      
+
       const character = actor.character;
       const data = {
         character,
-        actor: { 
+        actor: {
           id: actor.id,
           name: actor.name,
           character: actor.character,
@@ -281,18 +306,18 @@ const baseEnhancedWork = computed<EnhancedWorkItem[]>(() => {
         media,
         work,
         data,
-        sortDate: media.release_date || media.first_air_date || '9999-12-31' // Fallback for missing dates
+        sortDate: (media as any).release_date || (media as any).first_air_date || '9999-12-31' // Fallback for missing dates
       };
     })
     .filter((item): item is NonNullable<typeof item> => item !== null);
-    
+
   return result;
 });
 
 // For chronological view
 const enhancedWork = computed(() => {
   if (!baseEnhancedWork.value) return [];
-  
+
   return [...baseEnhancedWork.value].sort((a, b) => {
     if (!a || !b) return 0;
     return a.sortDate > b.sortDate ? -1 : 1; // Newest first
@@ -304,29 +329,29 @@ const groupedWork = computed<{actorId: string; actorName: string; works: Enhance
   if (!baseEnhancedWork.value || baseEnhancedWork.value.length === 0) {
     return [];
   }
-  
+
   const grouped: Record<string, EnhancedWorkItem[]> = {};
-  
+
   baseEnhancedWork.value.forEach(work => {
     const actorId = work.data.actor.id;
-    
+
     if (!grouped[actorId]) {
       grouped[actorId] = [];
     }
-    
+
     grouped[actorId].push(work);
   });
-  
+
   // Convert to array of {actorId, actorName, works}, sort actors by name, and sort their works by date
   const result = Object.entries(grouped)
     .map(([actorId, works]) => {
       // Sort works by date (newest first)
       const sortedWorks = [...works].sort((a, b) => {
-        const dateA = a.media.release_date || a.media.first_air_date || '';
-        const dateB = b.media.release_date || b.media.first_air_date || '';
+        const dateA = (a.media as any).release_date || (a.media as any).first_air_date || '';
+        const dateB = (b.media as any).release_date || (b.media as any).first_air_date || '';
         return dateB.localeCompare(dateA);
       });
-      
+
       return {
         actorId,
         actorName: works[0]?.data.actor?.name || 'Unknown',
@@ -335,7 +360,7 @@ const groupedWork = computed<{actorId: string; actorName: string; works: Enhance
     })
     // Sort actors by name
     .sort((a, b) => a.actorName.localeCompare(b.actorName));
-  
+
   return result;
 });
 
@@ -347,45 +372,45 @@ onMounted(async () => {
   const id = route.params.id;
 
   console.log('Fetching voice actor with ID:', id);
-  
+
   const voiceActorResponseRaw = await supabase.functions.invoke("voice-actor", {
     body: { id },
   });
-  
+
   const voiceActorResponse = (await voiceActorResponseRaw.data) as VoiceActorResponse;
-  
+
   console.log("Raw voice actor response:", voiceActorResponse);
-  
+
   if (!voiceActorResponse) {
     console.error("voiceActorResponse is null");
     return;
   }
-  
+
   console.log('Voice actor data:', voiceActorResponse.voiceActor);
   console.log('Number of works:', voiceActorResponse.voiceActor.work?.length || 0);
   console.log('Number of medias:', voiceActorResponse.medias?.length || 0);
-  
+
   // Log first few works and medias for inspection
   if (voiceActorResponse.voiceActor.work) {
     console.log('First 3 works:', voiceActorResponse.voiceActor.work.slice(0, 3));
   }
-  
+
   if (voiceActorResponse.medias) {
     console.log('First 3 medias:', voiceActorResponse.medias.slice(0, 3).map(m => ({
       id: m.id,
-      title: m.title || m.name,
-      credits: m.credits ? {
-        cast: m.credits.cast?.slice(0, 3).map(c => ({ id: c.id, name: c.name, character: c.character })),
-        crew: m.credits.crew?.slice(0, 3).map(c => ({ id: c.id, name: c.name, job: c.job }))
+      title: (m as any).title || (m as any).name,
+      credits: (m as any).credits ? {
+        cast: (m as any).credits.cast?.slice(0, 3).map((c: any) => ({ id: c.id, name: c.name, character: c.character })),
+        crew: (m as any).credits.crew?.slice(0, 3).map((c: any) => ({ id: c.id, name: c.name, job: c.job }))
       } : 'No credits'
     })));
   }
-  
+
   voiceActor.value = voiceActorResponse.voiceActor;
   medias.value = voiceActorResponse.medias;
 
   profilePicture.value = voiceActorResponse.voiceActor.profile_picture;
-  
+
   // Add a small delay to ensure computed properties are updated
   setTimeout(() => {
     console.log('baseEnhancedWork after update:', baseEnhancedWork.value);
@@ -406,7 +431,9 @@ onChange(async (files) => {
 
   const formData = new FormData()
   formData.append('file', file)
-  formData.append('voice_actor_id', voiceActor.value?.id)
+  if (voiceActor.value?.id) {
+    formData.append('voice_actor_id', voiceActor.value.id.toString())
+  }
 
   const { data, error } = await supabase.functions.invoke('upload_profile_picture', {
     body: formData
@@ -433,33 +460,33 @@ const uploadImage = async () => {
 
 .actor-group {
   margin-bottom: 2.5rem;
-  
+
   .actor-header {
     display: flex;
     align-items: center;
     margin-bottom: 1rem;
     padding: 0.5rem 0;
     border-bottom: 1px solid var(--ion-color-light-shade);
-    
+
     .actor-link {
       display: flex;
       align-items: center;
       text-decoration: none;
       color: inherit;
       width: 100%;
-      
+
       .actor-avatar {
         margin-right: 0.75rem;
         flex-shrink: 0;
       }
-      
+
       .actor-name {
         margin: 0;
         font-size: 1.1rem;
         font-weight: 500;
         display: flex;
         flex-direction: column;
-        
+
         .work-count {
           font-size: 0.85rem;
           font-weight: 400;
@@ -469,12 +496,12 @@ const uploadImage = async () => {
       }
     }
   }
-  
+
   .works-container {
     padding-left: 1.25rem;
     margin-left: 1.25rem;
     border-left: 2px solid var(--ion-color-light-shade);
-    
+
     .work {
       display: flex;
       margin-bottom: 1.25rem;
@@ -482,16 +509,16 @@ const uploadImage = async () => {
       background: var(--ion-color-light);
       border-radius: 8px;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
-      
+
       &:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       }
-      
+
       .poster {
         flex: 0 0 60px;
         margin-right: 1rem;
-        
+
         img {
           border-radius: 4px;
           width: 60px;
@@ -499,26 +526,26 @@ const uploadImage = async () => {
           object-fit: cover;
         }
       }
-      
+
       .infos {
         flex: 1;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        
+
         .title {
           font-weight: 500;
           margin-bottom: 0.25rem;
           line-height: 1.3;
         }
-        
+
         .character {
           font-size: 0.9rem;
           color: var(--ion-color-medium);
           margin-bottom: 0.25rem;
           font-style: italic;
         }
-        
+
         .year {
           font-size: 0.85rem;
           color: var(--ion-color-medium);
@@ -531,19 +558,19 @@ const uploadImage = async () => {
 .sort-controls {
   padding: 8px 16px;
   background: var(--ion-color-light);
-  
+
   ion-item {
     --background: transparent;
     --padding-start: 0;
     --inner-padding-end: 0;
     --min-height: 40px;
-    
+
     ion-label {
       margin-right: 16px;
       margin-bottom: 0;
       font-weight: 500;
     }
-    
+
     ion-select {
       --padding-start: 12px;
       --padding-end: 36px;
@@ -559,13 +586,68 @@ const uploadImage = async () => {
 
 .header {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 20px;
 
-  img {
-    height: 300px;
-    width: 240px;
-    object-fit: cover;
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .profile-picture {
+    flex-shrink: 0;
+
+    img {
+      height: 400px;
+      width: 300px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+  }
+
+  .actor-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .actor-name {
+    font-size: 2rem;
+    font-weight: bold;
+  }
+
+  .actor-details {
+    p {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--ion-color-medium);
+    }
+
+    .nationality-tag {
+      display: inline-block;
+      background: var(--ion-color-primary);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-top: 0.5rem;
+    }
+  }
+}
+
+.bio-section {
+  padding: 20px;
+  background: var(--ion-color-light);
+  border-radius: 8px;
+  margin: 20px 0;
+
+  p {
+    margin: 0;
+    line-height: 1.6;
   }
 }
 

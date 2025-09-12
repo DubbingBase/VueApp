@@ -6,31 +6,23 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { corsHeaders } from "../_shared/cors.ts"
 import { supabase } from "../_shared/supabase.ts"
+import { Database, Json } from "../_shared/database.types.ts"
 import { Movie, MovieResponse } from "../_shared/movie.ts";
 import { Serie } from "../_shared/serie.ts";
 
-interface TODO_VoiceActorDbResponse {
-  id: number
-  firstname: string
-  bio: any
-  nationality: any
-  date_of_birth: any
-  awards: any
-  years_active: any
-  social_media_links: any
-  lastname: string
-  work: Work[]
-}
+type TODO_VoiceActorDbResponse = Database['public']['Tables']['voice_actors']['Row']
 
 export interface Work {
   id: number
-  status: string
   actor_id: number
-  highlight: boolean
-  source_id: any
-  suggestions: any
-  voice_actor_id: number
   content_id: number
+  content_type: string | null
+  highlight: boolean | null
+  performance: string | null
+  source_id: number | null
+  status: string | null
+  suggestions: string | null
+  voice_actor_id: number | null
 }
 
 
@@ -100,8 +92,8 @@ Deno.serve(async (req) => {
 
       result.medias.push({
         ...tmdbMedia,
-        media_type: work.content_type
-      })
+        media_type: work.content_type as "movie" | "tv"
+      } as Movie | Serie)
     } catch (e) {
       console.error('e', e)
     }
