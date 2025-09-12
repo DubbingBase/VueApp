@@ -61,7 +61,7 @@
       :search-results="searchResults"
       :is-searching="isSearching"
       :search-error="searchError"
-      :movie-id="route.params.id as string"
+      :media-id="route.params.id as string"
       :search-voice-actors="searchVoiceActors"
       :link-voice-actor="linkVoiceActor"
       @close="showVoiceActorSearch = false"

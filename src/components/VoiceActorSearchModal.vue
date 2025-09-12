@@ -34,7 +34,7 @@
           v-for="va in searchResults"
           :key="va.id"
           button
-          @click="() => { if (linkVoiceActor) linkVoiceActor(va, movieId) }"
+          @click="() => { if (linkVoiceActor) linkVoiceActor(va, mediaId) }"
         >
           <ion-avatar slot="start" v-if="va.profile_picture">
             <img :src="va.profile_picture" :alt="va.firstname + ' ' + va.lastname" />
@@ -87,9 +87,9 @@ const props = defineProps<{
   searchResults: VoiceActor[];
   isSearching: boolean;
   searchError: string;
-  movieId: string;
+  mediaId: string;
   searchVoiceActors: (term?: string) => void;
-  linkVoiceActor: (va: VoiceActor, movieId: string) => void;
+  linkVoiceActor: (va: VoiceActor, mediaId: string) => void;
 }>();
 
 

@@ -1,25 +1,27 @@
 <template>
-  <div v-if="movie" class="movie-info-card">
-    <img v-if="movie.poster_path" class="movie-poster" :src="getImage(movie.poster_path)"
-      :alt="movie.title + ' poster'" />
+  <div v-if="media" class="movie-info-card">
+    <img v-if="media.poster_path" class="movie-poster" :src="getImage(media.poster_path)"
+      :alt="(media.title || media.name) + ' poster'" />
     <div class="movie-info">
       <div class="movie-title-row">
-        <h2 class="movie-title">{{ movie.title }}</h2>
-        <span v-if="movie.release_date" class="movie-year">{{ movie.release_date.slice(0, 4) }}</span>
+        <h2 class="movie-title">{{ media.title || media.name }}</h2>
+        <span v-if="media.release_date || media.first_air_date" class="movie-year">{{
+          (media.release_date || media.first_air_date).slice(0, 4)
+        }}</span>
       </div>
-      <div v-if="movie.genres && movie.genres.length" class="movie-genres">
-        <span v-for="genre in movie.genres" :key="genre.id" class="movie-genre-chip">{{ genre.name }}</span>
+      <div v-if="media.genres && media.genres.length" class="movie-genres">
+        <span v-for="genre in media.genres" :key="genre.id" class="movie-genre-chip">{{ genre.name }}</span>
       </div>
-      <div v-if="movie.vote_average" class="movie-rating">
-        ⭐ {{ movie.vote_average.toFixed(1) }}
+      <div v-if="media.vote_average" class="movie-rating">
+        ⭐ {{ media.vote_average.toFixed(1) }}
       </div>
-      <div v-if="movie.overview" class="movie-overview">
-        {{ movie.overview }}
+      <div v-if="media.overview" class="movie-overview">
+        {{ media.overview }}
       </div>
       <div class="movie-meta">
-        <span v-if="movie.runtime">⏱ {{ movie.runtime }} min</span>
-        <span v-if="movie.original_language">🌐 {{ movie.original_language.toUpperCase() }}</span>
-        <span v-if="movie.release_date">📅 {{ movie.release_date }}</span>
+        <span v-if="media.runtime && !media.first_air_date">⏱ {{ media.runtime }} min</span>
+        <span v-if="media.original_language">🌐 {{ media.original_language.toUpperCase() }}</span>
+        <span v-if="media.release_date || media.first_air_date">📅 {{ media.release_date || media.first_air_date }}</span>
       </div>
     </div>
   </div>
@@ -29,9 +31,30 @@
 import { MovieResponse } from '../../supabase/functions/_shared/movie';
 
 type MovieType = MovieResponse["movie"] & { runtime?: number };
+type SerieType = {
+  id: number;
+  name?: string;
+  title?: string;
+  poster_path?: string;
+  backdrop_path?: string;
+  overview?: string;
+  vote_average?: number;
+  original_language?: string;
+  release_date?: string;
+  first_air_date?: string;
+  last_air_date?: string;
+  genres?: { id: number; name: string }[];
+  status?: string;
+  seasons?: any[];
+  external_ids?: { wikidata_id?: string };
+  credits?: { cast?: any[] };
+  runtime?: number;
+};
+
+type MediaType = MovieType | SerieType;
 
 interface Props {
-  movie: MovieType | undefined;
+  media: MediaType | undefined;
   getImage: (path: string) => string;
 }
 

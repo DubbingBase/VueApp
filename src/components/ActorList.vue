@@ -32,7 +32,6 @@ defineProps<{
 .actors-list {
   z-index: 1;
   position: relative;
-  top: -80px;
 
   .inner-list {
     background: #1a1a2e;

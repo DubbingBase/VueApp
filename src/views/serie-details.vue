@@ -29,42 +29,7 @@
         <div class="banner-title">Chargement…</div>
       </div>
 
-      <div v-if="show" class="movie-info-card">
-        <img
-          v-if="show.poster_path"
-          class="movie-poster"
-          :src="getImage(show.poster_path)"
-          :alt="show.title + ' poster'"
-        />
-        <div class="movie-info">
-          <div class="movie-title-row">
-            <h2 class="movie-title">{{ show.title }}</h2>
-            <span v-if="show.first_air_date" class="movie-year">{{
-              show.first_air_date.slice(0, 4)
-            }}</span>
-          </div>
-          <div v-if="show.genres && show.genres.length" class="movie-genres">
-            <span
-              v-for="genre in show.genres"
-              :key="genre.id"
-              class="movie-genre-chip"
-              >{{ genre.name }}</span
-            >
-          </div>
-          <div v-if="show.vote_average" class="movie-rating">
-            ⭐ {{ show.vote_average.toFixed(1) }}
-          </div>
-          <div v-if="show.overview" class="movie-overview">
-            {{ show.overview }}
-          </div>
-          <div class="movie-meta">
-            <span v-if="show.original_language"
-              >🌐 {{ show.original_language.toUpperCase() }}</span
-            >
-            <span v-if="show.first_air_date">📅 {{ show.first_air_date }}</span>
-          </div>
-        </div>
-      </div>
+      <MediaInfoCard :media="show" :getImage="getImage" />
 
       <ion-spinner
         v-if="isLoading"
@@ -73,9 +38,6 @@
       ></ion-spinner>
 
       <div class="tabs" v-show="!isLoading">
-        <div class="summary">
-          <div v-if="show" class="show-title">{{ show.name }}</div>
-        </div>
         <ion-segment scrollable>
           <ion-segment-button value="details" content-id="details">
             <!-- <ion-icon :icon="playCircle" /> -->
@@ -148,163 +110,31 @@
             </div>
           </ion-segment-content>
           <ion-segment-content class="segmented-content" id="peoples">
-            <div class="actors-list">
-              <div class="inner-list">
-                <div
-                  v-for="actor in actors"
-                  :key="actor.id"
-                  class="actor-wrapper"
-                >
-                  <div
-                    class="actor"
-                    @click="goToActor(actor.id)"
-                    :routerLink="{
-                      name: 'ActorDetails',
-                      params: { id: actor.id },
-                    }"
-                    aria-label="Voir les détails de l'acteur {{ actor.name }}"
-                  >
-                    <ion-thumbnail class="avatar">
-                      <img
-                        v-if="actor.profile_path"
-                        :src="getImage(actor.profile_path)"
-                        :alt="actor.name"
-                      />
-                      <img
-                        v-else
-                        src="https://placehold.co/48x72?text=?"
-                        alt="?"
-                      />
-                    </ion-thumbnail>
-                    <ion-label class="line-label">
-                      <span class="ellipsis label actor">{{ actor.name }}</span>
-                      <span class="ellipsis label character"
-                        >as {{ actor.character }}</span
-                      >
-                    </ion-label>
-                  </div>
-                  <template v-if="getVoiceActorByTmdbId(actor.id).length">
-                    <div class="voice-actor-container">
-                      <div
-                        class="voice-actor"
-                        v-for="item in getVoiceActorByTmdbId(actor.id)"
-                        :key="item.voiceActorDetails.id"
-                        @click="goToVoiceActor(item.voiceActorDetails.id)"
-                        aria-label="Voir les détails de la voix de {{ item.voiceActorDetails.firstname }} {{ item.voiceActorDetails.lastname }}"
-                      >
-                        <ion-thumbnail class="avatar">
-                          <img
-                            v-if="item.voiceActorDetails.profile_picture"
-                            :src="
-                              getImage(item.voiceActorDetails.profile_picture)
-                            "
-                            :alt="
-                              item.voiceActorDetails.firstname +
-                              ' ' +
-                              item.voiceActorDetails.lastname
-                            "
-                          />
-                          <img
-                            v-else
-                            src="https://placehold.co/48x72?text=VA"
-                            :alt="
-                              item.voiceActorDetails.firstname +
-                              ' ' +
-                              item.voiceActorDetails.lastname
-                            "
-                          />
-                        </ion-thumbnail>
-                        <ion-label class="line-label">
-                          <span class="ellipsis label voice-actor">
-                            {{ item.voiceActorDetails.firstname }}
-                            {{ item.voiceActorDetails.lastname }}
-                          </span>
-                          <span class="ellipsis label performance">
-                            {{ item.performance }}
-                          </span>
-                        </ion-label>
-                        <div class="voice-actor-actions" v-if="isAdmin">
-                          <ion-button
-                            fill="clear"
-                            size="small"
-                            @click.stop="editVoiceActorLink(item)"
-                            aria-label="Modifier le doubleur"
-                          >
-                            <ion-icon :icon="createOutline"></ion-icon>
-                          </ion-button>
-                          <ion-button
-                            fill="clear"
-                            size="small"
-                            @click.stop="confirmDeleteVoiceActorLink(item)"
-                            color="danger"
-                            aria-label="Supprimer le doubleur"
-                          >
-                            <ion-icon :icon="trashOutline"></ion-icon>
-                          </ion-button>
-                        </div>
-                      </div>
-                    </div>
-                  </template>
-                  <div v-else class="no-voice-actor">
-                    <div class="voice-actor-container">
-                      <div class="voice-actor">
-                        <ion-thumbnail class="avatar">
-                          <img
-                            src="https://placehold.co/48x72?text=?"
-                            alt="No photo"
-                          />
-                        </ion-thumbnail>
-                        <ion-label class="line-label">
-                          <span class="ellipsis label">
-                            No voice actor found.
-                          </span>
-                          <ion-button
-                            v-if="isAdmin"
-                            fill="clear"
-                            size="small"
-                            @click.stop="openVoiceActorSearch(actor)"
-                            class="add-voice-actor-btn"
-                          >
-                            <ion-icon
-                              :icon="personAddOutline"
-                              slot="start"
-                            ></ion-icon>
-                            Add
-                          </ion-button>
-                        </ion-label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <ActorList
+              :actors="actors"
+              :voice-actors="voiceActors"
+              :is-admin="isAdmin"
+              :get-voice-actor-by-tmdb-id="getVoiceActorByTmdbId"
+              :go-to-actor="goToActor"
+              :go-to-voice-actor="goToVoiceActor"
+              :edit-voice-actor-link="editVoiceActorLink"
+              :confirm-delete-voice-actor-link="confirmDeleteVoiceActorLink"
+              :open-voice-actor-search="openVoiceActorSearch"
+              :get-image="getImage"
+            />
           </ion-segment-content>
         </ion-segment-view>
       </div>
 
-      <div class="action-buttons">
-        <ion-button
-          :disabled="isFetching"
-          v-if="hasWikidataId && !hasData"
-          class="fetch-infos-btn"
-          @click="fetchInfos"
-        >
-          <ion-spinner v-if="isFetching"></ion-spinner>
-          <span v-else>Récupérer les informations</span>
-        </ion-button>
-        
-        <ion-button 
-          v-if="hasWikidataId && !hasData"
-          class="scan-btn"
-          @click="takePhoto"
-          :disabled="isScanning"
-        >
-          <ion-spinner v-if="isScanning"></ion-spinner>
-          <ion-icon v-else :icon="cameraOutline" slot="start"></ion-icon>
-          Scanner
-        </ion-button>
-      </div>
-      
+      <ActionButtons
+        :has-wikidata-id="hasWikidataId"
+        :has-data="hasData"
+        :is-fetching="isFetching"
+        :is-scanning="isScanning"
+        @fetch-infos="fetchInfos"
+        @take-photo="takePhoto"
+      />
+
       <ion-toast
         :is-open="showScanResult"
         :message="scanResult"
@@ -312,70 +142,17 @@
         @didDismiss="showScanResult = false"
       ></ion-toast>
 
-      <!-- Voice Actor Search Modal -->
-      <ion-modal
+      <VoiceActorSearchModal
         :is-open="showVoiceActorSearch"
-        @didDismiss="showVoiceActorSearch = false"
-      >
-        <ion-header>
-          <ion-toolbar>
-            <ion-title>Select Voice Actor</ion-title>
-            <ion-buttons slot="end">
-              <ion-button @click="showVoiceActorSearch = false">
-                <ion-icon :icon="closeCircle"></ion-icon>
-              </ion-button>
-            </ion-buttons>
-          </ion-toolbar>
-          <ion-toolbar>
-            <ion-searchbar
-              v-model="searchTerm"
-              @ionInput="searchVoiceActors"
-              placeholder="Search voice actors..."
-              animated
-              :debounce="300"
-            ></ion-searchbar>
-          </ion-toolbar>
-        </ion-header>
-        <ion-content class="ion-padding">
-          <ion-list>
-            <ion-item v-if="isSearching" class="ion-text-center">
-              <ion-spinner></ion-spinner>
-            </ion-item>
-            <ion-item v-else-if="searchError" class="ion-text-center">
-              <ion-text color="danger">{{ searchError }}</ion-text>
-            </ion-item>
-            <ion-item
-              v-else-if="!searchResults.length && searchTerm"
-              class="ion-text-center"
-            >
-              <ion-text>No voice actors found</ion-text>
-            </ion-item>
-            <ion-item
-              v-for="va in searchResults"
-              :key="va.id"
-              button
-              @click="linkVoiceActor(va, route.params.id as string)"
-            >
-              <ion-avatar slot="start" v-if="va.profile_picture">
-                <img
-                  :src="va.profile_picture"
-                  :alt="va.firstname + ' ' + va.lastname"
-                />
-              </ion-avatar>
-              <ion-avatar slot="start" v-else>
-                <img
-                  src="https://placehold.co/40?text=VA"
-                  :alt="va.firstname + ' ' + va.lastname"
-                />
-              </ion-avatar>
-              <ion-label>
-                <h3>{{ va.firstname }} {{ va.lastname }}</h3>
-                <p v-if="va.nationality">{{ va.nationality }}</p>
-              </ion-label>
-            </ion-item>
-          </ion-list>
-        </ion-content>
-      </ion-modal>
+        :search-term="searchTerm"
+        :search-results="searchResults"
+        :is-searching="isSearching"
+        :search-error="searchError"
+        :media-id="route.params.id as string"
+        :search-voice-actors="searchVoiceActors"
+        :link-voice-actor="linkVoiceActor"
+        @close="showVoiceActorSearch = false"
+      />
     </ion-content>
   </ion-page>
 </template>
@@ -384,7 +161,6 @@
 import {
   IonPage,
   IonContent,
-  IonButton,
   IonSegment,
   IonHeader,
   IonToolbar,
@@ -393,16 +169,7 @@ import {
   IonSegmentButton,
   IonSegmentContent,
   IonSegmentView,
-  IonLabel,
   IonSpinner,
-  IonThumbnail,
-  IonIcon,
-  IonModal,
-  IonSearchbar,
-  IonList,
-  IonItem,
-  IonText,
-  IonAvatar,
   toastController,
   IonToast,
 } from "@ionic/vue";
@@ -410,14 +177,12 @@ import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useIonRouter } from "@ionic/vue";
 import MediaThumbnail from "@/components/MediaThumbnail.vue";
+import MediaInfoCard from "@/components/MediaInfoCard.vue";
+import ActorList from "@/components/ActorList.vue";
+import ActionButtons from "@/components/ActionButtons.vue";
+import VoiceActorSearchModal from "@/components/VoiceActorSearchModal.vue";
 import { useVoiceActorManagement } from "@/composables/useVoiceActorManagement";
-import {
-  personAddOutline,
-  createOutline,
-  trashOutline,
-  closeCircle,
-  cameraOutline,
-} from "ionicons/icons";
+// Removed unused imports
 import SolarSettingsMinimalisticOutline from "~icons/solar/settings-minimalistic-outline";
 import { storeToRefs } from "pinia";
 import { useAuthStore } from "@/stores/auth";
@@ -444,8 +209,6 @@ const {
   isSearching,
   searchError,
   voiceActors,
-  isLoading: isLoadingVoiceActors,
-  error: voiceActorError,
 
   // Methods
   getImage,
@@ -455,7 +218,6 @@ const {
   linkVoiceActor,
   editVoiceActorLink,
   confirmDeleteVoiceActorLink,
-  deleteVoiceActorLink,
   goToVoiceActor,
 } = useVoiceActorManagement("tv");
 
@@ -485,7 +247,7 @@ const showScanResult = ref(false);
 const takePhoto = async () => {
   try {
     isScanning.value = true;
-    const image = await Camera.getPhoto({
+    await Camera.getPhoto({
       quality: 90,
       allowEditing: false,
       resultType: CameraResultType.Base64,
@@ -496,14 +258,14 @@ const takePhoto = async () => {
     // For now, we'll just show a success message
     scanResult.value = 'Image captured successfully! Processing...';
     showScanResult.value = true;
-    
+
     // Simulate API call
     setTimeout(() => {
       // TODO: Replace with actual API call to your vision LLM
       scanResult.value = 'Processing complete! Ready to add voice actors.';
       // Here you would process the response and potentially auto-fill the voice actor form
     }, 2000);
-    
+
   } catch (error) {
     console.error('Error taking photo:', error);
     scanResult.value = 'Error capturing image. Please try again.';
@@ -612,92 +374,6 @@ $border: #1b1b1b;
   text-align: center;
 }
 
-.action-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin: 20px auto;
-  padding: 0 16px;
-  max-width: 600px;
-}
-
-.fetch-infos-btn,
-.scan-btn {
-  flex: 1;
-  --border-radius: 8px;
-  --padding-start: 16px;
-  --padding-end: 16px;
-  font-weight: 500;
-  margin: 0;
-  min-width: 0;
-}
-
-.fetch-infos-btn {
-  --background: var(--ion-color-primary);
-  --color: white;
-}
-
-.scan-btn {
-  --background: var(--ion-color-medium);
-  --color: var(--ion-color-dark);
-  --background-hover: var(--ion-color-medium-shade);
-  --background-activated: var(--ion-color-medium-tint);
-}
-
-@media (max-width: 480px) {
-  .action-buttons {
-    flex-direction: column;
-    gap: 12px;
-  }
-  
-  .fetch-infos-btn,
-  .scan-btn {
-    width: 100%;
-  }
-}
-
-.line-label {
-  margin-left: 8px;
-  .label {
-    width: 100%;
-    display: block;
-  }
-
-  .character {
-    text-align: left;
-    color: #777;
-  }
-
-  .actor,
-  .voice-actor {
-    font-weight: bold;
-  }
-}
-
-.actor-wrapper {
-  display: flex;
-  flex-direction: column;
-  padding: 8px;
-  margin: 0 8px;
-  background-color: #{$block};
-  border-radius: 0.5rem;
-  gap: 0.5rem;
-
-  .actor {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    gap: 4px;
-  }
-
-  .voice-actor {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    gap: 4px;
-  }
-}
-
 .background {
   position: fixed;
   top: 0;
@@ -715,21 +391,10 @@ $border: #1b1b1b;
 .tabs {
   z-index: 1;
   position: relative;
-  top: -80px;
 }
 
 .summary {
   background-color: #{$block};
-}
-
-.actors-list {
-  .inner-list {
-    display: flex;
-    gap: 8px;
-    flex-direction: column;
-    border-radius: 2rem;
-    padding-top: 8px;
-  }
 }
 
 ion-segment {
@@ -774,99 +439,5 @@ ion-segment {
 .toolbar {
   --background: transparent !important;
   --border-width: 0 !important;
-}
-
-.no-actors,
-.no-voice-actor {
-  color: var(--ion-color-medium);
-  font-style: italic;
-  padding: 10px 0;
-  text-align: center;
-  display: flex;
-  justify-content: space-between;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-}
-
-
-.movie-info-card {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  background: rgba(20, 20, 20, 0.95);
-  margin: 0 auto 16px auto;
-  border-radius: 1rem;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
-  max-width: 700px;
-  padding: 16px;
-  position: relative;
-  top: -80px;
-  z-index: 2;
-}
-
-.movie-poster {
-  width: 120px;
-  height: 180px;
-  border-radius: 0.5rem;
-  object-fit: cover;
-  margin-right: 16px;
-  background: #222;
-}
-
-.movie-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.movie-title-row {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.movie-title {
-  font-size: 1.6rem;
-  font-weight: bold;
-  margin: 0;
-}
-
-.movie-year {
-  color: #ccc;
-  font-size: 1.1rem;
-}
-
-.movie-genres {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.movie-genre-chip {
-  background: #444;
-  color: #fff;
-  border-radius: 1rem;
-  padding: 2px 10px;
-  font-size: 0.9rem;
-}
-
-.movie-rating {
-  font-size: 1.2rem;
-  color: gold;
-}
-
-.movie-overview {
-  font-size: 1rem;
-  color: #eee;
-}
-
-.movie-meta {
-  display: flex;
-  gap: 18px;
-  color: #aaa;
-  font-size: 0.95rem;
 }
 </style>
