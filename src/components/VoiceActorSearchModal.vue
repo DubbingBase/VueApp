@@ -1,0 +1,109 @@
+<template>
+  <ion-modal :is-open="isOpen" @didDismiss="$emit('close')">
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Select Voice Actor</ion-title>
+        <ion-buttons slot="end">
+          <ion-button @click="$emit('close')">
+            <ion-icon :icon="closeCircle"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+      <ion-toolbar>
+        <ion-searchbar
+          v-model="localSearchTerm"
+          @ionInput="handleSearchInput"
+          placeholder="Search voice actors..."
+          animated
+          :debounce="300"
+        ></ion-searchbar>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <ion-list>
+        <ion-item v-if="isSearching" class="ion-text-center">
+          <ion-spinner></ion-spinner>
+        </ion-item>
+        <ion-item v-else-if="searchError" class="ion-text-center">
+          <ion-text color="danger">{{ searchError }}</ion-text>
+        </ion-item>
+        <ion-item v-else-if="!searchResults.length && localSearchTerm" class="ion-text-center">
+          <ion-text>No voice actors found</ion-text>
+        </ion-item>
+        <ion-item
+          v-for="va in searchResults"
+          :key="va.id"
+          button
+          @click="() => { if (linkVoiceActor) linkVoiceActor(va, movieId) }"
+        >
+          <ion-avatar slot="start" v-if="va.profile_picture">
+            <img :src="va.profile_picture" :alt="va.firstname + ' ' + va.lastname" />
+          </ion-avatar>
+          <ion-avatar slot="start" v-else>
+            <img src="https://placehold.co/40?text=VA" :alt="va.firstname + ' ' + va.lastname" />
+          </ion-avatar>
+          <ion-label>
+            <h3>{{ va.firstname }} {{ va.lastname }}</h3>
+            <p v-if="va.nationality">{{ va.nationality }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </ion-modal>
+</template>
+
+<script setup lang="ts">
+import {
+  IonModal,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonButtons,
+  IonButton,
+  IonIcon,
+  IonSearchbar,
+  IonContent,
+  IonList,
+  IonItem,
+  IonText,
+  IonAvatar,
+  IonLabel,
+  IonSpinner
+} from "@ionic/vue";
+import { ref } from "vue";
+import { closeCircle } from 'ionicons/icons';
+
+interface VoiceActor {
+  id: number;
+  firstname: string;
+  lastname: string;
+  profile_picture?: string;
+  nationality?: string;
+}
+
+const props = defineProps<{
+  isOpen: boolean;
+  searchTerm: string;
+  searchResults: VoiceActor[];
+  isSearching: boolean;
+  searchError: string;
+  movieId: string;
+  searchVoiceActors: (term?: string) => void;
+  linkVoiceActor: (va: VoiceActor, movieId: string) => void;
+}>();
+
+
+const localSearchTerm = ref(props.searchTerm);
+
+const handleSearchInput = (event: any) => {
+  const value = event.target.value;
+  localSearchTerm.value = value;
+  if (props.searchVoiceActors) {
+    props.searchVoiceActors(value);
+  }
+};
+</script>
+
+<style scoped lang="scss">
+// Add any specific styles if needed
+</style>
