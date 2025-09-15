@@ -34,7 +34,7 @@ const routes: readonly RouteRecordRaw[] = [
       { path: '/tabs/home', name: 'Home', component: Home },
       { name: 'Search', path: '/tabs/search', component: Search },
       { name: 'Settings', path: '/tabs/settings', component: () => import('../views/settings.vue') },
-      { name: 'Profile', path: '/tabs/profile/:userId?', component: () => import('../views/profile.vue') },
+      { name: 'Profile', path: '/tabs/profile/:voiceActorId?', component: () => import('../views/profile.vue') },
       {
         name: 'Admin',
         path: '/tabs/admin',

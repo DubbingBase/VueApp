@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
     }
 
     const requestData = await req.json()
-    const { voice_actor_id, media_type, media_id, character_name, role, targetUserId } = requestData
+    const { voice_actor_id, media_type, media_id, character_name, role, targetUserId, actor_id } = requestData
 
     if (!voice_actor_id || !media_type || !media_id) {
       return new Response(
@@ -95,13 +95,20 @@ Deno.serve(async (req) => {
     }
 
     // Check if the link already exists
-    const { data: existingLink, error: linkCheckError } = await supabase
+    const query = supabase
       .from('work')
       .select('*')
       .eq('voice_actor_id', voice_actor_id)
       .eq('content_type', media_type)
       .eq('content_id', media_id)
-      .maybeSingle()
+
+    if (actor_id) {
+      query.eq('actor_id', actor_id)
+    } else {
+      query.is('actor_id', null)
+    }
+    const { data: existingLink, error: linkCheckError } = await query.maybeSingle()
+
 
     if (linkCheckError) {
       console.error('Error checking for existing link:', linkCheckError)
@@ -119,7 +126,8 @@ Deno.serve(async (req) => {
         content_type: media_type,
         content_id: media_id,
         performance: character_name || role || 'dialogues',
-        status: 'user'
+        status: 'user',
+        actor_id: actor_id || null,
       }
 
       const { data, error } = await supabase

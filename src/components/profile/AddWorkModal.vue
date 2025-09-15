@@ -12,27 +12,14 @@
     <form @submit.prevent="handleSubmit">
       <ion-list>
         <ion-item>
-          <ion-label position="stacked">Type de média *</ion-label>
-          <ion-select
-            v-model="formData.media_type"
-            placeholder="Sélectionner le type"
-            interface="popover"
-          >
-            <ion-select-option value="movie">Film</ion-select-option>
-            <ion-select-option value="serie">Série</ion-select-option>
-          </ion-select>
-        </ion-item>
-
-        <ion-item>
           <ion-label position="stacked">Titre du média *</ion-label>
-          <ion-input
+          <ion-searchbar
             v-model="formData.media_title"
             placeholder="Rechercher un film ou une série..."
             @ionInput="searchMedia"
-          ></ion-input>
+          ></ion-searchbar>
         </ion-item>
 
-        <!-- Search Results -->
         <div v-if="searchResults.length > 0" class="search-results">
           <ion-list>
             <ion-item
@@ -47,41 +34,43 @@
                   :src="`https://image.tmdb.org/t/p/w92${result.poster_path}`"
                   :alt="getMediaTitle(result)"
                 />
-                <div v-else class="placeholder">
-                  <ion-icon name="film"></ion-icon>
-                </div>
               </ion-thumbnail>
               <ion-label>
                 <h3>{{ getMediaTitle(result) }}</h3>
-                <p>{{ result.release_date ? new Date(result.release_date).getFullYear() : '' }}</p>
+                <p>{{ getMediaYear(result) }}</p>
               </ion-label>
             </ion-item>
           </ion-list>
         </div>
 
-        <ion-item v-if="selectedMedia">
-          <ion-label position="stacked">Média sélectionné</ion-label>
-          <ion-input
-            :value="getMediaTitle(selectedMedia)"
-            readonly
-          ></ion-input>
-        </ion-item>
+        <div v-if="selectedMedia">
+          <ion-item>
+            <ion-label position="stacked">Personnage / Acteur Original *</ion-label>
+            <ion-searchbar
+              v-model="characterSearchQuery"
+              placeholder="Rechercher un personnage ou acteur"
+              @ionInput="onCharacterSearch"
+              :disabled="!cast.length"
+            ></ion-searchbar>
+          </ion-item>
 
-        <ion-item>
-          <ion-label position="stacked">Nom du personnage</ion-label>
-          <ion-input
-            v-model="formData.character_name"
-            placeholder="Nom du personnage doublé"
-          ></ion-input>
-        </ion-item>
+          <div v-if="characterSearchResults.length > 0" class="search-results">
+            <ion-list>
+              <ion-item
+                v-for="member in characterSearchResults"
+                :key="member.id"
+                button
+                @click="selectCastMember(member)"
+              >
+                <ion-label>
+                  <h3>{{ member.name }}</h3>
+                  <p>{{ member.character }}</p>
+                </ion-label>
+              </ion-item>
+            </ion-list>
+          </div>
+        </div>
 
-        <ion-item>
-          <ion-label position="stacked">Rôle</ion-label>
-          <ion-input
-            v-model="formData.role"
-            placeholder="Ex: Voix principale, Voix secondaire..."
-          ></ion-input>
-        </ion-item>
       </ion-list>
 
       <div class="form-actions">
@@ -90,8 +79,8 @@
           :disabled="!isFormValid || isSubmitting"
           expand="block"
         >
-          <ion-spinner v-if="isSubmitting" slot="start" name="crescent"></ion-spinner>
-          <span v-else>Ajouter le projet</span>
+          <ion-spinner v-if="isSubmitting" slot="start"></ion-spinner>
+          Ajouter le projet
         </ion-button>
       </div>
     </form>
@@ -100,120 +89,112 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import {
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonButtons,
-  IonButton,
-  IonContent,
-  IonList,
-  IonItem,
-  IonLabel,
-  IonSelect,
-  IonSelectOption,
-  IonInput,
-  IonThumbnail,
-  IonIcon,
-  IonSpinner
-} from '@ionic/vue'
+import { modalController, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent, IonList, IonItem, IonSearchbar, IonThumbnail, IonLabel, IonSpinner } from '@ionic/vue'
 import { useProfileStore } from '@/stores/profile'
-import { useRoute } from 'vue-router'
-import type { Movie } from '../../../supabase/functions/_shared/movie'
-import type { Serie } from '../../../supabase/functions/_shared/serie'
+import { supabase } from '@/api/supabase'
+import type { Movie, CastMember as MovieCastMember } from '../../../supabase/functions/_shared/movie'
+import type { Serie, CastMember as SerieCastMember } from '../../../supabase/functions/_shared/serie'
 
 const profileStore = useProfileStore()
-const route = useRoute()
-const emit = defineEmits<{
-  close: []
-}>()
+const emit = defineEmits<{ (e: 'close'): void }>()
 
 const formData = ref({
-  media_type: '' as 'movie' | 'serie' | '',
   media_title: '',
-  character_name: '',
-  role: ''
 })
 
 const searchResults = ref<(Movie | Serie)[]>([])
-const selectedMedia = ref<Movie | Serie | null>(null)
+const selectedMedia = ref<(Movie | Serie | any) | null>(null)
+const cast = ref<(MovieCastMember | SerieCastMember)[]>([])
+const selectedCastId = ref<number | null>(null)
+const characterSearchQuery = ref('')
+const characterSearchResults = ref<(MovieCastMember | SerieCastMember)[]>([])
 const isSubmitting = ref(false)
-const searchTimeout = ref<NodeJS.Timeout | null>(null)
+let searchTimeout: any = null
 
-const isFormValid = computed(() => {
-  return formData.value.media_type &&
-         selectedMedia.value &&
-         formData.value.media_title.trim()
-})
+const isFormValid = computed(() => !!selectedMedia.value && !!selectedCastId.value)
 
-const getMediaTitle = (media: any) => {
-  return media?.title || media?.name || 'Titre inconnu'
-}
+const getMediaTitle = (media: any) => media?.title || media?.name
+const getMediaYear = (media: any) => new Date(media?.release_date || media?.first_air_date).getFullYear()
 
-const closeModal = () => {
-  emit('close')
-}
+const closeModal = () => modalController.dismiss()
 
-const searchMedia = async () => {
-  if (!formData.value.media_title.trim() || !formData.value.media_type) {
-    searchResults.value = []
-    return
-  }
-
-  // Debounce search
-  if (searchTimeout.value) {
-    clearTimeout(searchTimeout.value)
-  }
-
-  searchTimeout.value = setTimeout(async () => {
-    try {
-      const query = formData.value.media_title.trim()
-      const type = formData.value.media_type
-
-      const response = await fetch(
-        `https://api.themoviedb.org/3/search/${type}?query=${encodeURIComponent(query)}&language=fr-FR&page=1`,
-        {
-          headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_TMDB_API_KEY}`,
-            'Accept': 'application/json',
-          },
-        }
-      )
-
-      const data = await response.json()
-      searchResults.value = data.results?.slice(0, 5) || []
-    } catch (error) {
-      console.error('Error searching media:', error)
+const searchMedia = (event: any) => {
+  const query = event.target.value.toLowerCase()
+  if (searchTimeout) clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(async () => {
+    if (query.length < 2) {
       searchResults.value = []
+      return
     }
-  }, 500)
+    const { data, error } = await supabase.functions.invoke('search', { body: { query } })
+    if (error) {
+      console.error(error)
+      return
+    }
+    searchResults.value = data.filter((r: any) => r.media_type === 'movie' || r.media_type === 'tv')
+  }, 300)
 }
 
-const selectMedia = (media: Movie | Serie) => {
+const selectMedia = async (media: Movie | Serie | any) => {
   selectedMedia.value = media
   formData.value.media_title = getMediaTitle(media)
   searchResults.value = []
+  selectedCastId.value = null
+  characterSearchQuery.value = ''
+  const { data, error } = await supabase.functions.invoke('get-media-credits', { body: { media_type: media.media_type, media_id: media.id } })
+  if (error) {
+    console.error(error)
+    return
+  }
+  cast.value = data.cast
+  characterSearchResults.value = cast.value.slice(0, 10)
+}
+
+const onCharacterSearch = (event: any) => {
+  const query = event.target.value
+  characterSearchQuery.value = query
+
+  if (selectedCastId.value) {
+    const selectedMember = cast.value.find(c => c.id === selectedCastId.value)
+    if (selectedMember) {
+      const selectedText = `${selectedMember.name} (${selectedMember.character})`
+      if (query !== selectedText) {
+        selectedCastId.value = null
+      }
+    }
+  }
+
+  const lowerCaseQuery = query.toLowerCase()
+  if (lowerCaseQuery.length === 0) {
+    characterSearchResults.value = cast.value.slice(0, 10)
+    return
+  }
+  
+  characterSearchResults.value = cast.value.filter(member => 
+    member.name.toLowerCase().includes(lowerCaseQuery) || 
+    (member.character && member.character.toLowerCase().includes(lowerCaseQuery))
+  )
+}
+
+const selectCastMember = (member: MovieCastMember | SerieCastMember) => {
+  selectedCastId.value = member.id
+  characterSearchQuery.value = `${member.name} (${member.character})`
+  characterSearchResults.value = []
 }
 
 const handleSubmit = async () => {
-  if (!isFormValid.value || !selectedMedia.value || !profileStore.voiceActor) return
-
+  if (!isFormValid.value || !selectedMedia.value) return
+  isSubmitting.value = true
   try {
-    isSubmitting.value = true
-
-    const targetUserId = route.params.userId as string | undefined
-
     await profileStore.addWorkEntry({
-      voice_actor_id: profileStore.voiceActor.id,
-      media_type: formData.value.media_type as 'movie' | 'serie',
+      voice_actor_id: profileStore.voiceActor!.id,
+      media_type: selectedMedia.value.media_type,
       media_id: selectedMedia.value.id,
-      character_name: formData.value.character_name || undefined,
-      role: formData.value.role || undefined
-    }, targetUserId)
-
+      actor_id: selectedCastId.value,
+    }, { voiceActorId: profileStore.voiceActor!.id })
     closeModal()
-  } catch (error) {
-    console.error('Error adding work entry:', error)
+  } catch (err) {
+    console.error(err)
   } finally {
     isSubmitting.value = false
   }
@@ -221,28 +202,6 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped>
-.search-results {
-  margin: 1rem 0;
-  border: 1px solid var(--ion-color-light-shade);
-  border-radius: 4px;
-}
-
-.placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--ion-color-light);
-  border-radius: 4px;
-}
-
-.placeholder ion-icon {
-  font-size: 2rem;
-  color: var(--ion-color-medium);
-}
-
-.form-actions {
-  padding: 1rem;
-}
+.search-results ion-list { max-height: 200px; overflow-y: auto; }
+.form-actions { padding: 1rem; }
 </style>

@@ -15,6 +15,7 @@ export interface WorkEntry {
   character_name?: string;
   role?: string;
   media?: Movie | Serie;
+  actor_id?: number | null;
 }
 
 export const useProfileStore = defineStore('profile', () => {
@@ -31,14 +32,14 @@ export const useProfileStore = defineStore('profile', () => {
   const profileError = computed(() => error.value);
 
   // Actions
-  const fetchProfile = async (targetUserId?: string) => {
-    console.log('Profile store: fetchProfile called with targetUserId:', targetUserId)
+  const fetchProfile = async (params: { voiceActorId?: number; targetUserId?: string }) => {
+    console.log('Profile store: fetchProfile called with params:', params)
     try {
       isLoading.value = true;
       error.value = null;
 
       const { data, error: fetchError } = await supabase.functions.invoke('get-user-voice-actor', {
-        body: targetUserId ? { targetUserId } : {}
+        body: params
       });
 
       console.log('Profile store: fetchProfile response:', { data, error: fetchError })
@@ -62,7 +63,7 @@ export const useProfileStore = defineStore('profile', () => {
     }
   };
 
-  const updateProfile = async (updates: Partial<VoiceActor>, targetUserId?: string) => {
+  const updateProfile = async (updates: Partial<VoiceActor>, identifiers: { targetUserId?: string; voiceActorId?: number }) => {
     if (!voiceActor.value) return;
 
     try {
@@ -71,9 +72,9 @@ export const useProfileStore = defineStore('profile', () => {
 
       const { data, error: updateError } = await supabase.functions.invoke('update-voice-actor', {
         body: {
-          voice_actor_id: voiceActor.value.id,
+          voice_actor_id: identifiers.voiceActorId || voiceActor.value.id,
           updates,
-          targetUserId
+          targetUserId: identifiers.targetUserId
         }
       });
 
@@ -90,26 +91,22 @@ export const useProfileStore = defineStore('profile', () => {
     }
   };
 
-  const addWorkEntry = async (workEntry: Omit<WorkEntry, 'id'>, targetUserId?: string) => {
+  const addWorkEntry = async (workEntry: Omit<WorkEntry, 'id' | 'character_name' | 'role' | 'media'>, identifiers: { targetUserId?: string; voiceActorId?: number }) => {
     try {
       isUpdating.value = true;
       error.value = null;
 
       const { data, error: addError } = await supabase.functions.invoke('link-voice-actor', {
         body: {
-          voice_actor_id: workEntry.voice_actor_id,
-          media_type: workEntry.media_type,
-          media_id: workEntry.media_id,
-          character_name: workEntry.character_name,
-          role: workEntry.role,
-          targetUserId
+          ...workEntry,
+          targetUserId: identifiers.targetUserId
         }
       });
 
       if (addError) throw addError;
 
       // Refresh work entries
-      await fetchProfile(targetUserId);
+      await fetchProfile(identifiers);
     } catch (err: any) {
       error.value = err.message || 'Failed to add work entry';
       console.error('Error adding work entry:', err);
@@ -119,13 +116,13 @@ export const useProfileStore = defineStore('profile', () => {
     }
   };
 
-  const removeWorkEntry = async (workEntryId: number, targetUserId?: string) => {
+  const removeWorkEntry = async (workEntryId: number, identifiers: { targetUserId?: string; voiceActorId?: number }) => {
     try {
       isUpdating.value = true;
       error.value = null;
 
       const { error: removeError } = await supabase.functions.invoke('delete-voice-actor-link', {
-        body: { id: workEntryId, targetUserId }
+        body: { id: workEntryId, targetUserId: identifiers.targetUserId }
       });
 
       if (removeError) throw removeError;

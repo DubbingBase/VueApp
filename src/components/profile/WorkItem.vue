@@ -13,10 +13,10 @@
 
     <ion-label>
       <h2>{{ getMediaTitle(workEntry.media) }}</h2>
-      <p v-if="workEntry.character_name">Personnage: {{ workEntry.character_name }}</p>
-      <p v-if="workEntry.role">Rôle: {{ workEntry.role }}</p>
+      <p v-if="workEntry.character_name">Personnage: {{ workEntry.character_name.split('/').join(', ') }}</p>
+      <p v-if="workEntry.role">Rôle: {{ workEntry.role.split('/').join(', ') }}</p>
       <p class="media-type">
-        {{ workEntry.media_type === 'movie' ? 'Film' : 'Série' }}
+        <span>{{ workEntry.media_type === 'movie' ? 'Film' : 'Série' }}</span>
         <span v-if="workEntry.media?.release_date">
           • {{ new Date(workEntry.media.release_date).getFullYear() }}
         </span>
@@ -29,7 +29,7 @@
       size="small"
       @click="handleEdit"
     >
-      <ion-icon name="create" color="primary"></ion-icon>
+      <ion-icon :name="create" color="primary"></ion-icon>
     </ion-button>
 
     <ion-button
@@ -38,7 +38,7 @@
       size="small"
       @click="confirmDelete"
     >
-      <ion-icon name="trash" color="danger"></ion-icon>
+      <ion-icon :name="trash" color="danger"></ion-icon>
     </ion-button>
   </ion-item>
 </template>
@@ -53,12 +53,18 @@ import {
   alertController
 } from '@ionic/vue'
 import type { WorkEntry } from '@/stores/profile'
+import { onMounted } from 'vue';
+import { trash, create } from 'ionicons/icons';
 
 interface Props {
   workEntry: WorkEntry
 }
 
 const props = defineProps<Props>()
+
+onMounted(() => {
+    console.log('props.workEntry', props.workEntry)
+})
 
 const emit = defineEmits<{
   edit: [workEntry: WorkEntry]
