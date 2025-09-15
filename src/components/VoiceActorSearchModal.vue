@@ -20,7 +20,7 @@
       </ion-toolbar>
     </ion-header>
     <ion-content class="ion-padding">
-      <ion-list>
+      <ion-list v-if="searchResults.length > 0">
         <ion-item v-if="isSearching" class="ion-text-center">
           <ion-spinner></ion-spinner>
         </ion-item>

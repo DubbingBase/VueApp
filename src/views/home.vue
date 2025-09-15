@@ -28,8 +28,10 @@
             <MediaItem
               :key="movie.id"
               v-for="movie in trendingMovies"
-              :value="movie"
-              type="movie"
+              :imagePath="movie.poster_path"
+              :title="movie.title"
+              routeName="MovieDetails"
+              :routeParams="{ id: movie.id }"
             ></MediaItem>
           </template>
         </div>
@@ -50,8 +52,10 @@
             <MediaItem
               :key="show.id"
               v-for="show in trendingSeries"
-              :value="show"
-              type="serie"
+              :imagePath="show.poster_path"
+              :title="show.name"
+              routeName="SerieDetails"
+              :routeParams="{ id: show.id }"
             ></MediaItem>
           </template>
         </div>
@@ -69,11 +73,14 @@
             <div class="empty-message">Aucune voix récente trouvée.</div>
           </template>
           <template v-else>
-            <VoiceActorItem
+            <MediaItem
               :key="va.id"
               v-for="va in recentVoiceActors"
-              :value="va"
-            ></VoiceActorItem>
+              :imagePath="va.profile_picture ?? undefined"
+              :title="`${va.firstname} ${va.lastname}`"
+              routeName="VoiceActorDetails"
+              :routeParams="{ id: va.id }"
+            ></MediaItem>
           </template>
         </div>
       </div>
@@ -84,17 +91,14 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import type { TrendingResponse } from "../../supabase/functions/_shared/movie";
+import type { TrendingResponse as SerieTrendingResponse } from "../../supabase/functions/_shared/serie";
 import type { Tables } from "../../supabase/functions/_shared/database.types";
 import MediaItem from "../components/MediaItem.vue";
-import VoiceActorItem from "../components/VoiceActorItem.vue";
 import { supabase } from "../api/supabase";
 import { IonPage, IonContent, IonHeader, IonTitle, IonToolbar } from "@ionic/vue";
-import { useRouter } from "vue-router";
-
-const router = useRouter();
 
 const trendingMovies = ref<TrendingResponse["results"]>([]);
-const trendingSeries = ref<TrendingResponse["results"]>([]);
+const trendingSeries = ref<SerieTrendingResponse["results"]>([]);
 const recentVoiceActors = ref<Tables<'voice_actors'>[]>([]);
 const isLoadingMovies = ref(true);
 const isLoadingSeries = ref(true);
@@ -103,9 +107,7 @@ const errorMovies = ref("");
 const errorSeries = ref("");
 const errorVoiceActors = ref("");
 
-const goToVoiceActor = (id: number) => {
-  router.push({ name: "VoiceActorDetails", params: { id } });
-};
+
 
 onMounted(async () => {
   isLoadingMovies.value = true;

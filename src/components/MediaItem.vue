@@ -1,53 +1,35 @@
 <template>
-  <ion-text v-if="type === 'movie'" class="media-item" @click="navigate">
+  <router-link class="media-item" :to="{ name: routeName, params: routeParams }">
     <div class="poster">
-      <img :src="getImage(value.poster_path)" alt="" />
+      <img :src="getImage(imagePath)" alt="" />
     </div>
-    <div class="caption">{{ caption }}</div>
-  </ion-text>
-  <router-link v-else class="media-item" :to="{ name: 'SerieDetails', params: { id: value.id } }">
-    <div class="poster">
-      <img :src="getImage(value.poster_path)" alt="" />
-    </div>
-    <div class="caption">{{ caption }}</div>
+    <div class="caption">{{ title }}</div>
   </router-link>
 </template>
 
 <script lang="ts" setup>
-import { PropType, computed } from "vue";
-import { Movie } from "../../supabase/functions/_shared/movie";
-import { Serie } from "../../supabase/functions/_shared/serie";
-import { getImage } from "../utils";
-import { IonText } from "@ionic/vue";
-import { useRouter } from "vue-router";
+import { PropType } from "vue";
+import { getImage } from "@/utils";
 
 const props = defineProps({
-  value: {
-    type: Object as PropType<Movie | Serie>,
+  imagePath: {
+    type: String as PropType<string | undefined>,
     required: true,
   },
-  type: {
-    type: String as PropType<'movie' | 'serie'>,
+  title: {
+    type: String,
+    required: true,
+  },
+  routeName: {
+    type: String,
+    required: true,
+  },
+  routeParams: {
+    type: Object,
     required: true,
   },
 });
-
-const router = useRouter();
-
-const caption = computed(() => props.type === 'movie' ? (props.value as Movie).title : (props.value as Serie).name);
-
-const navigate = () => {
-  if (props.type === 'movie') {
-    router.push({
-      name: "MovieDetails",
-      params: {
-        id: (props.value as Movie).id,
-      },
-    });
-  }
-};
 </script>
-
 <style lang="scss" scoped>
 .media-item {
   flex-basis: 28%;

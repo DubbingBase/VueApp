@@ -1,8 +1,8 @@
 <template>
-  <div class="voice-actor" @click="goToVoiceActor(item.voiceActorDetails.id)" tabindex="0" role="button" :aria-label="`Go to details for ${item.voiceActorDetails.firstname} ${item.voiceActorDetails.lastname}`">
+  <div v-if="item" class="voice-actor" @click="goToVoiceActor(voiceActor.id)" tabindex="0" role="button" :aria-label="`Go to details for ${voiceActor.firstname} ${voiceActor.lastname}`">
     <MediaThumbnail
-      v-if="item.voiceActorDetails.profile_picture"
-      :path="item.voiceActorDetails.profile_picture"
+      v-if="voiceActor.profile_picture"
+      :path="voiceActor.profile_picture"
       from-storage
     ></MediaThumbnail>
     <MediaThumbnail
@@ -12,7 +12,7 @@
 
     <ion-label class="line-label">
       <span class="ellipsis label voice-actor">
-        {{ item.voiceActorDetails.firstname }} {{ item.voiceActorDetails.lastname }}
+        {{ voiceActor.firstname }} {{ voiceActor.lastname }}
       </span>
       <span class="ellipsis label performance">
         {{ item.performance }}
@@ -31,11 +31,12 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { IonLabel, IonButton, IonIcon } from "@ionic/vue";
 import { createOutline, trashOutline } from 'ionicons/icons';
 import MediaThumbnail from "@/components/MediaThumbnail.vue";
 
-defineProps<{
+const props = defineProps<{
   item: {
     voiceActorDetails: any;
     performance: string;
@@ -45,6 +46,8 @@ defineProps<{
   editVoiceActorLink: (item: any) => void;
   confirmDeleteVoiceActorLink: (item: any) => void;
 }>();
+
+const voiceActor = computed(() => props.item?.voiceActorDetails || props.item);
 </script>
 
 <style scoped lang="scss">

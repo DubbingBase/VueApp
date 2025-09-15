@@ -6,6 +6,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { corsHeaders } from "../_shared/cors.ts"
 import { supabase } from "../_shared/supabase.ts"
+import { Tables } from "../_shared/database.types.ts"
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -21,7 +22,7 @@ Deno.serve(async (req) => {
   let resp = []
 
   try {
-    const response = await fetch(`https://api.themoviedb.org/3/search/multi?query=${trimmedQuery}&page=1language=fr-FR`, {
+    const response = await fetch(`https://api.themoviedb.org/3/search/multi?query=${trimmedQuery}&page=1&language=fr-FR`, {
       headers: {
         "Content-Type": "application/json",
         'Authorization': `Bearer ${Deno.env.get('TMDB_API_KEY')}`,
@@ -36,7 +37,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabaseQuery = trimmedQuery.split(' ').map(x => `'${x}'`).join(' | ')
+    const supabaseQuery = trimmedQuery.split(' ').map((x: string) => `'${x}'`).join(' | ')
     console.log('supabaseQuery', supabaseQuery)
     const { data, error } = await supabase
       .from('voice_actors')
@@ -44,11 +45,30 @@ Deno.serve(async (req) => {
       .textSearch('voice_actor_name', supabaseQuery)
     console.log('data', data)
     console.log('error', error)
-    if (data) {
-      resp.push(...data.map(x => ({
-        ...x,
-        media_type: 'voice_actor',
-      })))
+    if (data && Array.isArray(data)) {
+      // Create a map for resp to handle merging and deduplication
+      const respMap = new Map()
+      resp.forEach(item => {
+        respMap.set(item.id, item)
+      })
+      // Process voice_actors
+      data.forEach((voiceActor) => {
+        const key = voiceActor.tmdb_id
+        if (respMap.has(key)) {
+          const person = respMap.get(key)
+          respMap.set(key, {
+            ...voiceActor,
+            actor: person,
+            profile_path: person.profile_path,
+            popularity: person.popularity,
+            media_type: 'voice_actor'
+          })
+        } else {
+          respMap.set(key, { ...voiceActor, media_type: 'voice_actor' })
+        }
+      })
+      // Update resp with deduplicated results
+      resp = Array.from(respMap.values())
     }
   } catch (e) {
     console.log('e', e)

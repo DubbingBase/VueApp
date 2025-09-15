@@ -35,12 +35,26 @@
             </ion-segment-content>
             <ion-segment-content value="movies">
               <div class="movies-wrapper">
-                <MediaItem v-for="movie in movies" :key="movie.id" :value="movie" type="movie"></MediaItem>
+                <MediaItem
+                  v-for="movie in movies"
+                  :key="movie.id"
+                  :imagePath="movie.poster_path"
+                  :title="movie.title"
+                  routeName="MovieDetails"
+                  :routeParams="{ id: movie.id }"
+                ></MediaItem>
               </div>
             </ion-segment-content>
             <ion-segment-content value="series">
               <div class="series-wrapper">
-                <MediaItem v-for="serie in series" :key="serie.id" :value="serie" type="serie"></MediaItem>
+                <MediaItem
+                  v-for="serie in series"
+                  :key="serie.id"
+                  :imagePath="serie.poster_path"
+                  :title="serie.name"
+                  routeName="SerieDetails"
+                  :routeParams="{ id: serie.id }"
+                ></MediaItem>
               </div>
             </ion-segment-content>
           </ion-segment-view>

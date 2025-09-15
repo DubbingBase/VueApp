@@ -6,142 +6,139 @@
       </ion-toolbar>
       <ion-toolbar>
         <ion-searchbar
+          v-model="query"
           :debounce="300"
           @ionInput="search($event)"
+          show-clear-button="always"
         ></ion-searchbar>
       </ion-toolbar>
     </ion-header>
     <ion-content>
-    <ion-list>
-      <ion-item
-        :routerLink="{
-          name: typeToRoute(match.media_type),
-          params: { id: match.id },
-        }"
-        v-for="match in matches"
-        :key="match.id"
-      >
-        <MediaThumbnail :path="matchToImage(match)"></MediaThumbnail>
-        <ion-label>
-          <h3 class="title ellipsis">{{ matchToName(match) }}</h3>
-          <p class="subtitle">{{ date(match) }} <ion-chip>{{ match.media_type }}</ion-chip></p>
-        </ion-label>
-      </ion-item>
-    </ion-list>
-  </ion-content>
+      <div class="content-wrapper">
+        <transition-group name="fade" tag="div">
+          <ion-list v-if="matches.length > 0">
+            <SearchResultItem
+              v-for="match in matches"
+              :key="match.id"
+              :match="match"
+            />
+          </ion-list>
+        </transition-group>
+        <p v-if="!isLoading && matches.length === 0 && query.length >= 3" class="empty-state">No results found</p>
+        <p v-if="!isLoading && matches.length === 0 && query.length < 3" class="empty-state">Start typing to search...</p>
+      </div>
+      <div v-if="isLoading" class="loading-overlay">
+        <ion-spinner name="crescent"></ion-spinner>
+      </div>
+      <ion-toast :is-open="!!error" :message="error" @didDismiss="error=''"></ion-toast>
+    </ion-content>
   </ion-page>
 </template>
 
 <script lang="ts" setup>
-import { supabase } from "../api/supabase";
 import { ref } from "vue";
 import {
   IonHeader,
   IonSearchbar,
   IonTitle,
   IonContent,
-  IonLabel,
-  IonItem,
   IonList,
-  IonChip,
   IonToolbar,
   IonPage,
+  IonSpinner,
+  IonToast,
   SearchbarInputEventDetail,
 } from "@ionic/vue";
 import { IonSearchbarCustomEvent } from "@ionic/core";
-import { Movie } from "../../supabase/functions/_shared/movie";
-import { Serie } from "../../supabase/functions/_shared/serie";
-import { format, parseISO } from 'date-fns'
-import MediaThumbnail from "@/components/MediaThumbnail.vue";
+import SearchResultItem from "@/components/SearchResultItem.vue";
+import { supabase } from '@/api/supabase';
 
-const matches = ref<(Movie | Serie)[]>([]);
+type SearchResult = {
+  id: number;
+  media_type: "movie" | "tv" | "person" | "voice_actor";
+  poster_path?: string;
+  profile_path?: string;
+  title?: string;
+  name?: string;
+  firstname?: string;
+  lastname?: string;
+  release_date?: string;
+  first_air_date?: string;
+};
 
-const matchToImage = (el: unknown) => {
-  return el.profile_path ?? el.poster_path
-}
+const matches = ref<SearchResult[]>([]);
+const isLoading = ref(false);
+const error = ref('');
+const query = ref('');
+let abortController: AbortController | null = null;
 
-const matchToName = (el: unknown) => {
-  return el.name ?? el.title ?? (el.firstname ?? '') + ' ' + (el.lastname ?? '')
-}
-
-const date = (match: Movie | Serie) => {
-  const date = match.first_air_date ?? match.release_date
-  if (date) {
-    return format(parseISO(date), 'yyyy')
-  }
-}
+const priority = { voice_actor: 1, movie: 2, person: 3, tv: 4 };
 
 const search = async (
   event: IonSearchbarCustomEvent<SearchbarInputEventDetail>
 ) => {
-  console.log(event.target.value);
+  const inputQuery = event.target.value?.trim() || '';
+  query.value = inputQuery;
 
-  const { data, error } = await supabase.functions.invoke("search", {
-    body: {
-      query: event.target.value,
-    },
-  });
+  if (inputQuery.length < 3) {
+    matches.value = [];
+    return;
+  }
 
-  console.log("data", data);
+  // Cancel previous request
+  if (abortController) {
+    abortController.abort();
+  }
 
-  matches.value = data;
-};
+  abortController = new AbortController();
+  isLoading.value = true;
+  error.value = '';
 
-const typeToRoute = (type: string) => {
-  switch (type) {
-    case "movie":
-      return "MovieDetails";
-    case "tv":
-      return "SerieDetails";
-    case "person":
-      return "ActorDetails";
-    case "voice_actor":
-      return "VoiceActorDetails";
-    default:
-      return "home";
+  try {
+    const { data, error } = await supabase.functions.invoke('search', {
+      body: { query: inputQuery },
+    });
+
+    if (error) throw error;
+
+    matches.value = data || [];
+    matches.value.sort((a, b) => priority[a.media_type] - priority[b.media_type]);
+  } catch (err: any) {
+    if (err.name !== 'AbortError') {
+      error.value = err.message || 'Search failed';
+    }
+  } finally {
+    isLoading.value = false;
   }
 };
 </script>
 
-<style lang="scss" scoped>
-.results {
+<style scoped>
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+.empty-state {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+.content-wrapper {
+  position: relative;
+}
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
-  width: 100%;
-}
-
-.result {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  width: 100%;
-
-  .overview {
-    font-size: 1rem;
-    color: #666;
-  }
-}
-
-.avatar {
-  --border-radius: 4px;
-  width: 48px;
-  height: auto;
-  min-height: 72px;
-}
-
-.title {
-  width: 100%;
-}
-
-.subtitle {
-  display: flex;
-  align-items: center;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 10;
 }
 </style>
+
