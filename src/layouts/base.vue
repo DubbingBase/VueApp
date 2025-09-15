@@ -40,6 +40,7 @@ import SolarTvLinear from '~icons/solar/tv-linear'
 import SolarMagniferLinear from '~icons/solar/magnifer-linear'
 import SolarHome2Linear from '~icons/solar/home-2-linear'
 import SolarSettingsLinear from '~icons/solar/settings-linear'
+import SolarUserLinear from '~icons/solar/user-linear'
 import { useAuthStore } from "@/stores/auth";
 
 interface TabItem {
@@ -82,6 +83,15 @@ const items = computed(() => {
       icon: SolarSettingsLinear,
       route: "Admin",
       href: "/tabs/admin",
+    });
+  }
+
+  if (authStore.currentUser?.user_metadata?.voice_actor_id || authStore.isAdmin) {
+    items.push({
+      label: "Profil",
+      icon: SolarUserLinear,
+      route: "Profile",
+      href: "/tabs/profile",
     });
   }
 

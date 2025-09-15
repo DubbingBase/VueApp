@@ -11,13 +11,38 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const requestData = await req.json()
-
-    const { actor_id, work_type, voice_actor_id, performance, content_id } = requestData
-
-    if (!actor_id || !work_type || !voice_actor_id || !content_id) {
+    // Get the authenticated user
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
       return new Response(
-        JSON.stringify({ error: 'Missing required fields: actor_id, work_type, voice_actor_id, performance, and content_id are required' }),
+        JSON.stringify({ error: 'No authorization header' }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 401
+        }
+      )
+    }
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    )
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid token' }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 401
+        }
+      )
+    }
+
+    const requestData = await req.json()
+    const { voice_actor_id, media_type, media_id, character_name, role, targetUserId } = requestData
+
+    if (!voice_actor_id || !media_type || !media_id) {
+      return new Response(
+        JSON.stringify({ error: 'Missing required fields: voice_actor_id, media_type, and media_id are required' }),
         {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -25,11 +50,26 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Validate content_type
-    const validContentTypes = ['movie', 'tv', 'season', 'episode']
-    if (!validContentTypes.includes(work_type)) {
+    // Check if user is admin for impersonation
+    const isAdmin = user.app_metadata?.role === 'admin' ||
+                   user.user_metadata?.role === 'admin' ||
+                   user.role === 'admin'
+
+    if (targetUserId && !isAdmin) {
       return new Response(
-        JSON.stringify({ error: 'Invalid content_type. Must be one of: movie, tv, season, episode' }),
+        JSON.stringify({ error: 'Unauthorized: Admin access required for impersonation' }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 403
+        }
+      )
+    }
+
+    // Validate media_type
+    const validMediaTypes = ['movie', 'serie']
+    if (!validMediaTypes.includes(media_type)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid media_type. Must be one of: movie, serie' }),
         {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -58,8 +98,9 @@ Deno.serve(async (req) => {
     const { data: existingLink, error: linkCheckError } = await supabase
       .from('work')
       .select('*')
-      .eq('actor_id', actor_id)
       .eq('voice_actor_id', voice_actor_id)
+      .eq('content_type', media_type)
+      .eq('content_id', media_id)
       .maybeSingle()
 
     if (linkCheckError) {
@@ -68,26 +109,25 @@ Deno.serve(async (req) => {
     }
 
     let result
-    
+
     if (existingLink) {
       result = existingLink
     } else {
       // Create new link
-      const insertData: Database['public']['Tables']['work']['Insert'] = {
-        actor_id,
-        content_type: work_type,
+      const insertData = {
         voice_actor_id,
-        performance: performance || 'dialogues',
-        status: 'user',
-        content_id,
+        content_type: media_type,
+        content_id: media_id,
+        performance: character_name || role || 'dialogues',
+        status: 'user'
       }
-      
+
       const { data, error } = await supabase
         .from('work')
-        .insert(insertData)
+        .insert(insertData as any)
         .select()
         .single()
-      
+
       if (error) throw error
       result = data
     }
@@ -102,7 +142,7 @@ Deno.serve(async (req) => {
     if (detailsError) throw detailsError
 
     const response = {
-      ...result,
+      ...(result as any),
       voiceActorDetails: voiceActorDetails
     }
 
@@ -112,10 +152,11 @@ Deno.serve(async (req) => {
     })
   } catch (error) {
     console.error('Error in link-voice-actor:', error)
+    const err = error as any
     return new Response(
-      JSON.stringify({ 
-        error: error.message || 'Internal server error',
-        details: error.details || null
+      JSON.stringify({
+        error: err?.message || 'Internal server error',
+        details: err?.details || null
       }),
       {
         status: 500,

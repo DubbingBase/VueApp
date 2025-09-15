@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed, onUnmounted } from 'vue';
 import { supabase } from '@/api/supabase';
 import { useIonRouter } from '@ionic/vue';
+import type { User } from '@supabase/supabase-js';
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -11,10 +12,10 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Getters
   const isAuthenticated = computed(() => !!user.value);
-  const isAdmin = computed(() => user.value?.app_metadata?.role === 'admin' || 
+  const isAdmin = computed(() => user.value?.app_metadata?.role === 'admin' ||
                      user.value?.user_metadata?.role === 'admin' ||
                      user.value?.role === 'admin');
-                     
+
   const currentUser = computed(() => user.value);
 
   // Actions
@@ -30,14 +31,14 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       isLoading.value = true;
       error.value = null;
-      
+
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (signInError) throw signInError;
-      
+
       user.value = data.user;
       return { user: data.user, error: null };
     } catch (err: any) {
@@ -48,23 +49,23 @@ export const useAuthStore = defineStore('auth', () => {
       isLoading.value = false;
     }
   };
-  
+
   const signUp = async (email: string, password: string) => {
     try {
       isLoading.value = true;
       error.value = null;
-      
+
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
       });
 
       if (signUpError) throw signUpError;
-      
+
       if (data.user) {
         user.value = data.user;
       }
-      
+
       return { user: data.user, error: null };
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to sign up';
@@ -79,10 +80,10 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       isLoading.value = true;
       error.value = null;
-      
+
       const { error: signOutError } = await supabase.auth.signOut();
       if (signOutError) throw signOutError;
-      
+
       clearUser();
     } catch (err: any) {
       error.value = err.message || 'Failed to sign out';
@@ -107,36 +108,36 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Initialize auth state
   let authListener: { subscription: any } = { subscription: null };
-  
+
   const initialize = async () => {
     try {
       // First check current session
       const { data: { session } } = await supabase.auth.getSession();
       console.log('Current session:', session);
-      
+
       if (!session) {
         const x = await supabase.auth.signInAnonymously();
         console.log(x);
-        user.value = x.data.session?.user;
+        user.value = x.data.session?.user || null;
       } else {
-        user.value = session?.user;
+        user.value = session?.user || null;
       }
-      
+
       // Set up auth state listener
       const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
         console.log('Auth state changed:', event, session);
         user.value = session?.user || null;
-        
+
         // Handle specific auth events if needed
         if (event === 'SIGNED_OUT') {
           // Clear any sensitive data on sign out
           clearUser();
         }
       });
-      
+
       // Store the subscription for cleanup
       authListener.subscription = subscription;
-      
+
       return true;
     } catch (err) {
       console.error('Error initializing auth:', err);
@@ -144,7 +145,7 @@ export const useAuthStore = defineStore('auth', () => {
       return false;
     }
   };
-  
+
   // Cleanup auth listener when store is destroyed
   onUnmounted(() => {
     if (authListener.subscription) {
@@ -157,12 +158,12 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     isLoading,
     error,
-    
+
     // Getters
     isAuthenticated,
     isAdmin,
     currentUser,
-    
+
     // Actions
     setUser,
     clearUser,
@@ -174,16 +175,5 @@ export const useAuthStore = defineStore('auth', () => {
   };
 });
 
-// Types
-export interface User {
-  id: string;
-  email?: string;
-  app_metadata?: {
-    role?: string;
-  }
-  user_metadata?: {
-    name?: string;
-    avatar_url?: string;
-  };
-  // Add other user properties as needed
-}
+// Types - using Supabase User type
+export type { User } from '@supabase/supabase-js';
