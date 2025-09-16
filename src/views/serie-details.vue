@@ -300,7 +300,6 @@ const fetchInfos = async () => {
   isFetching.value = true;
   const showResponseRaw = await supabase.functions.invoke("prepare_movie", {
     body: {
-      wikiId: id,
       tmdbId: route.params.id,
       type: "tv",
     },

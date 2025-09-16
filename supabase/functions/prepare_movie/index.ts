@@ -92,8 +92,7 @@ Deno.serve(async (req) => {
 
   const lang = 'fr'
 
-  const { wikiId, tmdbId, type } = await req.json() as {
-    wikiId: string
+  const { tmdbId, type } = await req.json() as {
     tmdbId: number
     type: 'movie' | 'tv'
   }
@@ -107,6 +106,26 @@ Deno.serve(async (req) => {
   })
 
   const movie = await response.json() as WithCast
+
+  const wikiId = movie.external_ids?.wikidata_id
+
+  if (!wikiId) {
+    console.error('Could not find wikidata_id', { tmdbId, type })
+    return Response.json(
+      {
+        ok: false, 
+        error: 'Could not find wikidata_id',
+        tmdbId,
+        type,
+      },
+      {
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json"
+        }
+      },
+    )
+  }
 
   const entityURL = getEntity(wikiId)
 

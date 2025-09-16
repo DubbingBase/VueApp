@@ -59,7 +59,6 @@ async function fetchEpisodeInfos() {
   try {
     const data = await supabase.functions.invoke("prepare_movie", {
       body: {
-        wikiId: id,
         tmdbId: route.params.id,
         type: "episode",
         seasonNumber: route.params.season,
