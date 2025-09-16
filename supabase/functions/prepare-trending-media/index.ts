@@ -35,8 +35,12 @@ Deno.serve(async (req) => {
     ...(trendingShows.results || []).map((item: any) => ({ ...item, type: 'tv' })),
   ]
 
+  // Limit to the top 5 most popular items
+  const top5Trending = allTrending.sort(t => t.popularity).slice(0, 5);
+
+  console.log('top5Trending', top5Trending)
+
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
-  console.log('supabaseUrl', supabaseUrl)
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
   if (!supabaseUrl || !serviceRoleKey) {
@@ -47,39 +51,86 @@ Deno.serve(async (req) => {
     })
   }
 
-  // Iterate over trending items and trigger processing (fire-and-forget)
-  for (const media of allTrending) {
-      const tmdbId = media.id;
-      const type = media.type as 'movie' | 'tv';
+  const allResults = [];
+  console.log(`Starting sequential processing of top ${top5Trending.length} items.`);
 
+  for (const media of top5Trending) {
+    const tmdbId = media.id;
+    const type = media.type as 'movie' | 'tv';
+    const title = media.title ?? media.name;
+
+    const result = await (async () => {
       try {
-        console.log(`Invoking prepare_movie for ${type} ${tmdbId}`);
-
-        // Invoke the 'prepare_movie' function
+        console.log(`Invoking prepare_movie for ${type} ${tmdbId} (${title})`);
         const invokeResponse = await fetch(`${supabaseUrl}/functions/v1/prepare_movie`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${serviceRoleKey}`,
           },
-          body: JSON.stringify({
-            tmdbId: tmdbId,
-            type: type,
-          }),
+          body: JSON.stringify({ tmdbId, type }),
         });
 
         if (!invokeResponse.ok) {
           const errorBody = await invokeResponse.text();
-          console.error(`Failed to invoke prepare_movie for ${type} ${tmdbId}. Status: ${invokeResponse.status}. Body: ${errorBody}`);
-        } else {
-          console.log(`Successfully invoked prepare_movie for ${type} ${tmdbId}.`);
+          throw new Error(`Status ${invokeResponse.status}: ${errorBody}`);
         }
+
+        const result = await invokeResponse.json();
+        if (result.ok === false) {
+            throw new Error(result.error || 'prepare_movie function returned an error');
+        }
+
+        return { status: 'fulfilled', value: { title, type } };
       } catch (error) {
-        console.error(`An error occurred while processing ${type} ${tmdbId}:`, error);
+        console.error(`Failed to process ${type} ${tmdbId} (${title}):`, error.message);
+        return { status: 'rejected', reason: { title, type, error: error.message } };
       }
+    })();
+
+    allResults.push(result);
   }
 
-  return new Response(JSON.stringify({ ok: true, message: "Trending media processing done." }), {
+  // Generate Summary
+  const successfulMovies = allResults.filter(r => r.status === 'fulfilled' && r.value.type === 'movie');
+  const successfulShows = allResults.filter(r => r.status === 'fulfilled' && r.value.type === 'tv');
+  const failedJobs = allResults.filter(r => r.status === 'rejected');
+
+  const jobs = [
+    ...successfulMovies,
+    ...successfulShows,
+  ]
+
+  let summary = `DubbingBase Top 5 Trending Report:\n`;
+  summary += `- ✅ Processed ${successfulMovies.length} movies and ${successfulShows.length} shows successfully.\n`;
+  for (const item of jobs) {
+    console.log('item', item)
+    summary += `  - ${item.value?.title ?? 'Unknown'}\n`
+  }
+  if (failedJobs.length > 0) {
+    summary += `- ❌ Encountered ${failedJobs.length} errors.\n`;
+    failedJobs.forEach(job => {
+        const reason = job.reason as { title: string, type: string, error: string };
+        summary += `  - Failed: ${reason.type} "${reason.title}" (Reason: ${reason.error})\n`;
+    });
+  }
+
+  // Send ntfy notification
+const ntfyTopic = 'Armaldio_DubbingBaseTrendingSummary';
+  try {
+    await fetch(`https://ntfy.sh/${ntfyTopic}`, {
+      method: 'POST',
+      body: summary,
+      headers: {
+        'Title': 'DubbingBase Trending Media Report',
+      }
+    });
+    console.log('Sent ntfy notification.');
+  } catch (e) {
+    console.error('Failed to send ntfy notification:', e);
+  }
+
+  return new Response(JSON.stringify({ ok: true, message: "Trending media processing done.", summary }), {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
 })

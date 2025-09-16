@@ -33,20 +33,32 @@ const insertVoiceActorWork = async (
   contentType: string,
   performance?: string,
 ) => {
-  // TODO: add source
   console.log('inserting work', {
     voice_actor_id: voiceActorId,
     content_id: tmdbId,
     actor_id: actorId,
   })
-  const insertResult = await supabase.from('work').insert({
-    voice_actor_id: voiceActorId,
-    content_id: tmdbId,
-    actor_id: actorId,
-    performance,
-    content_type: contentType,
-  }).select()
-  return insertResult
+
+  const { data, error } = await supabase
+    .from('work')
+    .upsert(
+      {
+        voice_actor_id: voiceActorId,
+        content_id: tmdbId,
+        actor_id: actorId,
+        performance,
+        content_type: contentType,
+      },
+      { onConflict: ['voice_actor_id', 'content_id', 'actor_id', 'content_type'] } // requires unique constraint
+    )
+    .select()
+
+  if (error) {
+    console.error('Error inserting/upserting work:', error)
+    throw error
+  }
+
+  return data
 }
 
 const insertVoiceActorAndWork = async (
@@ -113,7 +125,7 @@ Deno.serve(async (req) => {
     console.error('Could not find wikidata_id', { tmdbId, type })
     return Response.json(
       {
-        ok: false, 
+        ok: false,
         error: 'Could not find wikidata_id',
         tmdbId,
         type,
@@ -140,7 +152,7 @@ Deno.serve(async (req) => {
     console.error('wikipediaPageTitle is undefined')
     return Response.json(
       {
-        ok: false, 
+        ok: false,
         error: 'wikipediaPageTitle is undefined',
         lang,
         wikiId,

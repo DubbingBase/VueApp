@@ -135,8 +135,23 @@ Deno.serve(async (req) => {
 
         const tmdbMedia = await response.json() as Movie | Serie
 
+        // Find character name from TMDB credits using actor_id
+        let tmdbCharacterName: string | undefined;
+        if (work.actor_id && tmdbMedia.credits?.cast) {
+          const castMember = tmdbMedia.credits.cast.find(c => c.id === work.actor_id);
+          tmdbCharacterName = castMember?.character;
+        }
+
+        // Combine unique names from TMDB (character) and our DB (performance)
+        const allCharacterNames = new Set<string>();
+        if (tmdbCharacterName) {
+            tmdbCharacterName.split('/').forEach(name => allCharacterNames.add(name.trim()));
+        }
+        const finalCharacterName = Array.from(allCharacterNames).join(' / ');
+
         populatedWorkEntries.push({
           ...work,
+          character_name: finalCharacterName,
           media: {
             ...tmdbMedia,
             media_type: work.content_type as "movie" | "tv"
