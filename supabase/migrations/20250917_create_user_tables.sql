@@ -1,8 +1,0 @@
--- Migration: Create user-related tables\n-- Date: 2024-09-17\n\n-- Create user_profiles table\nCREATE TABLE user_profiles (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,\n    bio TEXT,\n    nationality TEXT,\n    date_of_birth DATE,\n    social_media_links JSONB,\n    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),\n    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()\n),
--- Create user_profile_links table\nCREATE TABLE user_profile_links (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,\n    profile_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,\n    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),\n    UNIQUE (user_id)\n),
--- Create user_voice_actor_links table\nCREATE TABLE user_voice_actor_links (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,\n    voice_actor_id INTEGER NOT NULL REFERENCES voice_actors(id) ON DELETE CASCADE,\n    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),\n    UNIQUE (user_id)\n),
--- Indexes for performance\nCREATE INDEX idx_user_profiles_user_id ON user_profiles(user_id),
-CREATE INDEX idx_user_profile_links_user_id ON user_profile_links(user_id),
-CREATE INDEX idx_user_profile_links_profile_id ON user_profile_links(profile_id),
-CREATE INDEX idx_user_voice_actor_links_user_id ON user_voice_actor_links(user_id),
-CREATE INDEX idx_user_voice_actor_links_voice_actor_id ON user_voice_actor_links(voice_actor_id)

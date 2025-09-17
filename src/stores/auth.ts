@@ -15,6 +15,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isAdmin = computed(() => user.value?.app_metadata?.role === 'admin' ||
                      user.value?.user_metadata?.role === 'admin' ||
                      user.value?.role === 'admin');
+  const isAnonymous = computed(() => user.value?.is_anonymous)
 
   const currentUser = computed(() => user.value);
 
@@ -171,6 +172,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     // Getters
     isAuthenticated,
+    isAnonymous,
     isAdmin,
     currentUser,
 
