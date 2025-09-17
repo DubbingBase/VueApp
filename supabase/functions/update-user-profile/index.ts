@@ -3,7 +3,7 @@ import { corsHeaders } from "../_shared/cors.ts"
 import { supabase } from "../_shared/supabase.ts"
 import { Database } from "../_shared/database.types.ts"
 
-type VoiceActor = Database['public']['Tables']['voice_actors']['Row']
+type UserProfile = Database['public']['Tables']['user_profiles']['Row']
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -49,55 +49,26 @@ Deno.serve(async (req) => {
 
     // Parse request body
     const body = await req.json()
-    const { voice_actor_id, updates, targetUserId } = body
+    const { bio, date_of_birth, nationality } = body
 
-    if (!voice_actor_id) {
-      return new Response(
-        JSON.stringify({ error: 'voice_actor_id is required' }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 400
-        }
-      )
-    }
-
-    // Determine which user to check permissions for
-    const userIdToCheck = targetUserId || user.id
-
-    // Check if the user has permission to update this voice actor
-    const { data: linkData, error: linkError } = await supabase
-      .from('user_voice_actor_links')
-      .select('voice_actor_id')
-      .eq('user_id', userIdToCheck)
-      .eq('voice_actor_id', voice_actor_id)
-      .single()
-
-    if (linkError || !linkData) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized to update this voice actor' }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 403
-        }
-      )
-    }
-
-    // Prepare update data
-    const updateData: any = { ...updates }
+    // Update user profile directly
+    const updateData: any = {}
+    if (bio !== undefined) updateData.bio = bio
+    if (date_of_birth !== undefined) updateData.date_of_birth = date_of_birth
+    if (nationality !== undefined) updateData.nationality = nationality
     updateData.updated_at = new Date().toISOString()
 
-    // Update voice actor
-    const { data: voiceActorData, error: vaError } = await supabase
-      .from('voice_actors')
+    const { data: profileData, error: profileError } = await supabase
+      .from('user_profiles')
       .update(updateData)
-      .eq('id', voice_actor_id)
+      .eq('user_id', user.id)
       .select()
       .single()
 
-    if (vaError) {
-      console.error('Error updating voice actor:', vaError)
+    if (profileError) {
+      console.error('Error updating user profile:', profileError)
       return new Response(
-        JSON.stringify({ error: 'Failed to update voice actor' }),
+        JSON.stringify({ error: 'Failed to update user profile' }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 500
@@ -106,7 +77,7 @@ Deno.serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ profile: voiceActorData }),
+      JSON.stringify({ profile: profileData }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       }

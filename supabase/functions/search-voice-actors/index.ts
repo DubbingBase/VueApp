@@ -19,7 +19,7 @@ const searchVoiceActors = async (query: string, limit = 10) => {
 
     // Filter by full name in JS
     const lowerQuery = query.toLowerCase();
-    const filtered = (data || []).filter(actor => {
+    const filtered = data.filter(actor => {
       const fullName = `${actor.firstname} ${actor.lastname}`.toLowerCase();
       return (
         actor.firstname.toLowerCase().includes(lowerQuery) ||
@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
 
   try {
     const { query, limit = 10 } = (await req.json()) as SearchParams;
-    
+
     if (!query || typeof query !== 'string') {
       return new Response(
         JSON.stringify({ error: 'Query parameter is required' }),
@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
     }
 
     const results = await searchVoiceActors(query, limit);
-    
+
     return new Response(
       JSON.stringify(results),
       {

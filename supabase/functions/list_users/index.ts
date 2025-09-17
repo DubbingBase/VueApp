@@ -1,6 +1,7 @@
 // supabase/functions/list_users/index.ts
 import { corsHeaders } from '../_shared/cors.ts'
 import { supabaseAdmin } from '../_shared/supabase.ts'
+import type { Response } from '../../../src/types/UserList.ts'
 
 Deno.serve(async (req) => {
     console.log("req", req.method);
@@ -12,7 +13,7 @@ Deno.serve(async (req) => {
   if (error) {
     return new Response(JSON.stringify({ error }), { status: 500, headers: corsHeaders })
   }
-  return new Response(JSON.stringify({ users: data.users }), {
+  return new Response(JSON.stringify({ users: data.users } satisfies Response), {
     headers: { 'Content-Type': 'application/json', ...corsHeaders },
   })
 })

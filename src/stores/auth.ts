@@ -64,6 +64,16 @@ export const useAuthStore = defineStore('auth', () => {
 
       if (data.user) {
         user.value = data.user;
+
+        // Auto-create user profile after successful signup
+        try {
+          await supabase.functions.invoke('create-user-profile', {
+            body: {} // Create empty profile
+          });
+        } catch (profileError) {
+          console.warn('Failed to auto-create user profile:', profileError);
+          // Don't fail signup if profile creation fails
+        }
       }
 
       return { user: data.user, error: null };

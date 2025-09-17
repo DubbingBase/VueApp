@@ -22,6 +22,10 @@
             <ion-icon :icon="micOutline"></ion-icon>
             <ion-label>Voice Actors</ion-label>
           </ion-tab-button>
+          <ion-tab-button tab="link-user-to-va" @click="activeTab = 'user-va-profiles'">
+            <ion-icon :icon="micOutline"></ion-icon>
+            <ion-label>User -- VA </ion-label>
+          </ion-tab-button>
         </ion-tab-bar>
         <div v-if="activeTab === 'duplicates'">
           <DuplicateVATool />
@@ -38,6 +42,9 @@
             New Voice Actor
           </ion-button>
         </div>
+        <div v-if="activeTab === 'user-va-profiles'" class="ion-padding">
+          <LinkUserVoiceActor />
+        </div>
       </ion-tabs>
     </ion-content>
   </ion-page>
@@ -46,17 +53,17 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useIonRouter } from '@ionic/vue';
-import { 
-  IonPage, 
-  IonHeader, 
-  IonRouterOutlet, 
-  IonToolbar, 
-  IonTitle, 
-  IonContent, 
-  IonTabs, 
-  IonTabBar, 
-  IonTabButton, 
-  IonLabel, 
+import {
+  IonPage,
+  IonHeader,
+  IonRouterOutlet,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonTabs,
+  IonTabBar,
+  IonTabButton,
+  IonLabel,
   IonButton,
   IonBackButton,
   IonIcon
@@ -65,6 +72,7 @@ import { addCircleOutline, micOutline } from 'ionicons/icons';
 import DuplicateVATool from '@/components/admin/DuplicateVATool.vue';
 import UserManagement from '@/components/admin/UserManagement.vue';
 import DuplicateWork from '@/components/admin/DuplicateWork.vue';
+import LinkUserVoiceActor from './admin/LinkUserVoiceActor.vue';
 
 const ionRouter = useIonRouter();
 const activeTab = ref('duplicates');

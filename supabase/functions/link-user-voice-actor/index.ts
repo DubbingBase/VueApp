@@ -82,16 +82,42 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Update user metadata to link voice actor
-    const { error: updateError } = await supabase.auth.admin.updateUserById(user_id, {
-      user_metadata: {
-        ...user.user_metadata,
-        voice_actor_id: voice_actor_id
-      }
-    })
+    // Check if link already exists
+    const { data: existingLink, error: checkError } = await supabase
+      .from('user_voice_actor_links')
+      .select('id')
+      .eq('user_id', user_id)
+      .eq('voice_actor_id', voice_actor_id)
+      .single()
 
-    if (updateError) {
-      console.error('Error linking user to voice actor:', updateError)
+    if (checkError && checkError.code !== 'PGRST116') {
+      console.error('Error checking existing link:', checkError)
+      return new Response(
+        JSON.stringify({ error: 'Failed to check existing link' }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 500
+        }
+      )
+    }
+
+    if (existingLink) {
+      return new Response(
+        JSON.stringify({ error: 'User is already linked to this voice actor' }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400
+        }
+      )
+    }
+
+    // Insert link in user_voice_actor_links table
+    const { error: insertError } = await supabase
+      .from('user_voice_actor_links')
+      .insert({ user_id, voice_actor_id } as any)
+
+    if (insertError) {
+      console.error('Error linking user to voice actor:', insertError)
       return new Response(
         JSON.stringify({ error: 'Failed to link user to voice actor' }),
         {

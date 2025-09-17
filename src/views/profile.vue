@@ -2,9 +2,9 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Mon Profil</ion-title>
+        <ion-title>{{ profileStore.currentProfileType === 'voice_actor' ? 'Mon Profil de Comédien' : 'Mon Profil' }}</ion-title>
         <ion-buttons slot="end">
-          <ion-button v-if="profileStore.hasProfile" @click="openPublicProfile">
+          <ion-button v-if="profileStore.hasProfile && profileStore.currentProfileType === 'voice_actor'" @click="openPublicProfile">
             <ion-icon :icon="eye" slot="icon-only"></ion-icon>
           </ion-button>
         </ion-buttons>
@@ -28,16 +28,19 @@
       </div>
 
       <div v-else class="profile-content">
+        <ProfileSelector v-if="profileStore.allVoiceActors.length > 0 || !profileStore.userProfileData" :hasUnsavedChanges="hasUnsavedChanges" />
         <VoiceActorSelector v-if="authStore.isAdmin" />
 
         <div v-if="profileStore.hasProfile && editableProfile">
           <ion-list>
-            <ion-item>
-              <ion-input label="Prénom" label-placement="stacked" v-model="editableProfile.firstname"></ion-input>
-            </ion-item>
-            <ion-item>
-              <ion-input label="Nom" label-placement="stacked" v-model="editableProfile.lastname"></ion-input>
-            </ion-item>
+            <template v-if="profileStore.currentProfileType === 'voice_actor'">
+              <ion-item>
+                <ion-input label="Prénom" label-placement="stacked" v-model="(editableProfile as any).firstname"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-input label="Nom" label-placement="stacked" v-model="(editableProfile as any).lastname"></ion-input>
+              </ion-item>
+            </template>
             <ion-item>
               <ion-textarea label="Biographie" label-placement="stacked" v-model="editableProfile.bio" :auto-grow="true"></ion-textarea>
             </ion-item>
@@ -47,12 +50,14 @@
             <ion-item>
               <ion-input type="date" label="Date de naissance" label-placement="stacked" v-model="editableProfile.date_of_birth"></ion-input>
             </ion-item>
-             <ion-item>
-              <ion-input label="Prix et récompenses" label-placement="stacked" v-model="editableProfile.awards"></ion-input>
-            </ion-item>
-            <ion-item>
-              <ion-input label="Années d'activité" label-placement="stacked" v-model="editableProfile.years_active"></ion-input>
-            </ion-item>
+            <template v-if="profileStore.currentProfileType === 'voice_actor'">
+              <ion-item>
+                <ion-input label="Prix et récompenses" label-placement="stacked" v-model="(editableProfile as any).awards"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-input label="Années d'activité" label-placement="stacked" v-model="(editableProfile as any).years_active"></ion-input>
+              </ion-item>
+            </template>
           </ion-list>
 
           <ion-button expand="block" @click="handleSave" :disabled="profileStore.isUpdating">
@@ -60,7 +65,7 @@
             Enregistrer les modifications
           </ion-button>
 
-          <div class="work-section">
+          <div v-if="profileStore.currentProfileType === 'voice_actor'" class="work-section">
             <div class="work-header">
               <h3>Filmographie</h3>
               <ion-button v-if="canEdit" @click="isAddWorkModalOpen = true">
@@ -71,11 +76,34 @@
           </div>
         </div>
 
-        <div v-if="!profileStore.hasProfile && !authStore.isAdmin" class="no-profile-container">
+        <div v-if="!profileStore.hasProfile || (profileStore.currentProfileType === 'user_profile' && !profileStore.userProfileData)" class="no-profile-container">
           <ion-icon :icon="personCircle" size="large" color="medium"></ion-icon>
-          <h3>Aucun profil trouvé</h3>
-          <p>Vous n'êtes pas encore lié à un profil de comédien de doublage.</p>
-          <p>Contactez un administrateur pour lier votre compte.</p>
+          <h3 v-if="authStore.isAdmin">Aucun profil trouvé</h3>
+          <h3 v-else-if="profileStore.currentProfileType === 'user_profile' && !profileStore.userProfileData">Créer votre profil utilisateur</h3>
+          <h3 v-else>Créer votre profil</h3>
+          <p v-if="authStore.isAdmin">Vous n'êtes pas encore lié à un profil de comédien de doublage.</p>
+          <p v-if="authStore.isAdmin">Contactez un administrateur pour lier votre compte.</p>
+          <p v-else-if="profileStore.currentProfileType === 'user_profile' && !profileStore.userProfileData">Remplissez les informations ci-dessous pour créer votre profil utilisateur.</p>
+          <p v-else>Remplissez les informations ci-dessous pour créer votre profil utilisateur.</p>
+
+          <div v-if="!authStore.isAdmin" class="profile-creation-form">
+            <ion-list>
+              <ion-item>
+                <ion-textarea label="Biographie" label-placement="stacked" v-model="editableProfile.bio" :auto-grow="true" placeholder="Parlez-nous de vous..."></ion-textarea>
+              </ion-item>
+              <ion-item>
+                <ion-input label="Nationalité" label-placement="stacked" v-model="editableProfile.nationality" placeholder="Ex: Française"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-input type="date" label="Date de naissance" label-placement="stacked" v-model="editableProfile.date_of_birth"></ion-input>
+              </ion-item>
+            </ion-list>
+
+            <ion-button expand="block" @click="handleCreateProfile" :disabled="profileStore.isUpdating">
+              <ion-spinner v-if="profileStore.isUpdating" name="crescent"></ion-spinner>
+              Créer mon profil
+            </ion-button>
+          </div>
         </div>
       </div>
 
@@ -109,19 +137,21 @@ import {
 import { useProfileStore } from '@/stores/profile'
 import { useAuthStore } from '@/stores/auth'
 import VoiceActorSelector from '@/components/profile/VoiceActorSelector.vue';
+import ProfileSelector from '@/components/profile/ProfileSelector.vue';
 import WorkList from '@/components/profile/WorkList.vue';
 import AddWorkModal from '@/components/profile/AddWorkModal.vue';
 import { alertCircle, personCircle, refresh, add, eye } from 'ionicons/icons';
 import type { Tables } from '../../supabase/functions/_shared/database.types';
 
 type VoiceActor = Tables<'voice_actors'>;
+type UserProfile = Tables<'user_profiles'>;
 
 const route = useRoute()
 const router = useRouter()
 const profileStore = useProfileStore()
 const authStore = useAuthStore()
 
-const editableProfile = ref<Partial<VoiceActor>>({});
+const editableProfile = ref<Partial<VoiceActor | UserProfile>>({});
 const isAddWorkModalOpen = ref(false);
 
 const voiceActorId = computed(() => {
@@ -131,6 +161,27 @@ const voiceActorId = computed(() => {
 
 const canEdit = computed(() => {
   return authStore.isAdmin || !voiceActorId.value
+})
+
+const hasUnsavedChanges = computed(() => {
+  if (!editableProfile.value || !profileStore.hasProfile) return false
+
+  if (profileStore.currentProfileType === 'voice_actor' && profileStore.voiceActor) {
+    const current = profileStore.voiceActor
+    const editable = editableProfile.value as Partial<VoiceActor>
+    return Object.keys(editable).some(key => {
+      const k = key as keyof VoiceActor
+      return editable[k] !== current[k]
+    })
+  } else if (profileStore.currentProfileType === 'user_profile' && profileStore.userProfile) {
+    const current = profileStore.userProfile
+    const editable = editableProfile.value as Partial<UserProfile>
+    return Object.keys(editable).some(key => {
+      const k = key as keyof UserProfile
+      return editable[k] !== current[k]
+    })
+  }
+  return false
 })
 
 const retryLoadProfile = async () => {
@@ -150,24 +201,55 @@ watch(() => route.params.voiceActorId, async (newId) => {
 })
 
 watch(() => profileStore.voiceActor, (newProfile) => {
-  if (newProfile) {
+  if (newProfile && profileStore.currentProfileType === 'voice_actor') {
     editableProfile.value = newProfile;
-  } else {
+  } else if (!profileStore.hasProfile) {
     editableProfile.value = {};
   }
 }, { immediate: true });
 
+watch(() => profileStore.userProfile, (newProfile) => {
+  if (newProfile && profileStore.currentProfileType === 'user_profile') {
+    editableProfile.value = newProfile;
+  } else if (!profileStore.hasProfile) {
+    editableProfile.value = {};
+  }
+}, { immediate: true });
+
+const handleCreateProfile = async () => {
+  const profileData: { bio?: string; date_of_birth?: string; nationality?: string } = {};
+
+  if (editableProfile.value.bio) profileData.bio = editableProfile.value.bio;
+  if (editableProfile.value.date_of_birth) profileData.date_of_birth = editableProfile.value.date_of_birth;
+  if (editableProfile.value.nationality) profileData.nationality = editableProfile.value.nationality;
+
+  await profileStore.createUserProfile(profileData);
+};
+
 const handleSave = async () => {
-  if (profileStore.voiceActor) {
+  if (profileStore.currentProfileType === 'voice_actor' && profileStore.voiceActor) {
     const updates: Partial<VoiceActor> = {};
-    for (const key in editableProfile.value) {
-      if (editableProfile.value[key] !== profileStore.voiceActor[key]) {
-        updates[key] = editableProfile.value[key];
+    const editable = editableProfile.value as Partial<VoiceActor>;
+    for (const key in editable) {
+      if (editable[key as keyof VoiceActor] !== profileStore.voiceActor[key as keyof VoiceActor]) {
+        (updates as any)[key] = editable[key as keyof VoiceActor];
       }
     }
 
     if (Object.keys(updates).length > 0) {
       await profileStore.updateProfile(updates, { voiceActorId: voiceActorId.value });
+    }
+  } else if (profileStore.currentProfileType === 'user_profile' && profileStore.userProfile) {
+    const updates: Partial<UserProfile> = {};
+    const editable = editableProfile.value as Partial<UserProfile>;
+    for (const key in editable) {
+      if (editable[key as keyof UserProfile] !== profileStore.userProfile[key as keyof UserProfile]) {
+        (updates as any)[key] = editable[key as keyof UserProfile];
+      }
+    }
+
+    if (Object.keys(updates).length > 0) {
+      await profileStore.updateProfile(updates, {});
     }
   }
 };

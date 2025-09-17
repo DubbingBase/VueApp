@@ -86,7 +86,7 @@ const items = computed(() => {
     });
   }
 
-  if (authStore.currentUser?.user_metadata?.voice_actor_id || authStore.isAdmin) {
+  if (authStore.isAuthenticated) {
     items.push({
       label: "Profil",
       icon: SolarUserLinear,
