@@ -38,7 +38,7 @@
 import { ref, onMounted } from 'vue';
 import { useIonRouter } from '@ionic/vue';
 import { useRoute } from 'vue-router';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonInput, IonButton, IonText, IonButtons, IonBackButton } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonInput, IonButton, IonText, IonButtons, IonBackButton, toastController } from '@ionic/vue';
 import { useAuthStore } from '@/stores/auth';
 
 const email = ref('');
@@ -53,10 +53,10 @@ const route = useRoute();
 
 // Handle redirect after successful login
 const handleSuccessfulAuth = () => {
-  const redirectPath = Array.isArray(route.query.redirect) 
-    ? route.query.redirect[0] 
+  const redirectPath = Array.isArray(route.query.redirect)
+    ? route.query.redirect[0]
     : route.query.redirect || '/tabs/home';
-  
+
   // Ensure we don't redirect back to login
   if (redirectPath === '/login') {
     ionRouter.push('/tabs/home');
@@ -68,13 +68,13 @@ const handleSuccessfulAuth = () => {
 const login = async () => {
   error.value = '';
   loading.value = true;
-  
+
   try {
     const { error: signInError } = await authStore.signIn(email.value, password.value);
-    
+
     if (signInError) {
       // Handle specific authentication errors
-      if (signInError.message.includes('Invalid login credentials') || 
+      if (signInError.message.includes('Invalid login credentials') ||
           signInError.message.includes('Email not confirmed')) {
         error.value = 'Email ou mot de passe incorrect';
       } else if (signInError.message.includes('Email rate limit exceeded')) {
@@ -86,7 +86,7 @@ const login = async () => {
       password.value = '';
       return;
     }
-    
+
     // If no error, proceed with successful auth
     handleSuccessfulAuth();
   } catch (err: any) {
@@ -101,14 +101,20 @@ const login = async () => {
 const register = async () => {
   error.value = '';
   loading.value = true;
-  
+
   try {
     const { error: registerError } = await authStore.signUp(email.value, password.value);
-    
+
     if (registerError) throw registerError;
-    
+
     // Show success message and switch to login
-    error.value = 'Compte créé avec succès ! Vous pouvez maintenant vous connecter.';
+    const toast = await toastController.create({
+      message: 'Compte créé avec succès ! Vous pouvez maintenant vous connecter.',
+      color: 'success',
+      duration: 3000
+    });
+    await toast.present();
+    error.value = '';
     isRegister.value = false;
   } catch (err: any) {
     error.value = err.message || "Échec de la création du compte";
