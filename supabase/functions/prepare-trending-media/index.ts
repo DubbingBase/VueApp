@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
   ]
 
   // Limit to the top 5 most popular items
-  const top5Trending = allTrending.sort(t => t.popularity).slice(0, 5);
+  const top5Trending = allTrending.sort(t => t.popularity).slice(0, 25);
 
   console.log('top5Trending', top5Trending)
 
