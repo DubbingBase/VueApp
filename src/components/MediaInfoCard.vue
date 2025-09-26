@@ -1,24 +1,21 @@
 <template>
-  <div v-if="media" class="movie-info-card">
-    <img v-if="media.poster_path" class="movie-poster" :src="getImage(media.poster_path)"
+  <div v-if="media" class="media-info-card">
+    <img v-if="media.poster_path" class="media-poster" :src="getImage(media.poster_path)"
       :alt="(media.title || media.name) + ' poster'" />
-    <div class="movie-info">
-      <div class="movie-title-row">
-        <h2 class="movie-title">{{ media.title || media.name }}</h2>
-        <span v-if="media.release_date || media.first_air_date" class="movie-year">{{
-          (media.release_date || media.first_air_date).slice(0, 4)
-        }}</span>
+    <div class="media-info">
+      <div class="media-title-row">
+        <h2 class="media-title">{{ media.title || media.name }}</h2>
       </div>
-      <div v-if="media.genres && media.genres.length" class="movie-genres">
-        <span v-for="genre in media.genres" :key="genre.id" class="movie-genre-chip">{{ genre.name }}</span>
+      <div v-if="media.genres && media.genres.length" class="media-genres">
+        <span v-for="genre in media.genres" :key="genre.id" class="media-genre-chip">{{ genre.name }}</span>
       </div>
-      <div v-if="media.vote_average" class="movie-rating">
+      <div v-if="media.vote_average" class="media-rating">
         ⭐ {{ media.vote_average.toFixed(1) }}
       </div>
-      <div v-if="media.overview" class="movie-overview">
+      <div v-if="media.overview" class="media-overview">
         {{ media.overview }}
       </div>
-      <div class="movie-meta">
+      <div class="media-meta">
         <span v-if="media.runtime && !media.first_air_date">⏱ {{ media.runtime }} min</span>
         <span v-if="media.original_language">🌐 {{ media.original_language.toUpperCase() }}</span>
         <span v-if="media.release_date || media.first_air_date">📅 {{ media.release_date || media.first_air_date }}</span>
@@ -62,13 +59,11 @@ defineProps<Props>();
 </script>
 
 <style scoped lang="scss">
-.movie-info-card {
+.media-info-card {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
   background: rgba(20, 20, 20, 0.95);
-  margin: 0 auto 16px auto;
-  border-radius: 1rem;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
   max-width: 700px;
   padding: 16px;
@@ -76,7 +71,7 @@ defineProps<Props>();
   z-index: 2;
 }
 
-.movie-poster {
+.media-poster {
   width: 120px;
   height: 180px;
   border-radius: 0.5rem;
@@ -85,50 +80,49 @@ defineProps<Props>();
   background: #222;
 }
 
-.movie-info {
+.media-info {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.movie-title-row {
+.media-title-row {
   display: flex;
   align-items: baseline;
   gap: 8px;
 }
 
-.movie-title {
-  font-size: 1.6rem;
+.media-title {
+  font-size: 1.1rem;
   font-weight: bold;
   margin: 0;
 }
 
-.movie-year {
+.media-year {
   color: #ccc;
   font-size: 1.1rem;
 }
 
-.movie-genres {
+.media-genres {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
 }
 
-.movie-genre-chip {
+.media-genre-chip {
   background: #444;
   color: #fff;
-  border-radius: 1rem;
   padding: 2px 10px;
   font-size: 0.9rem;
 }
 
-.movie-rating {
+.media-rating {
   font-size: 1.2rem;
   color: gold;
 }
 
-.movie-overview {
+.media-overview {
   font-size: 1rem;
   color: #eee;
   max-height: 100px;
@@ -138,7 +132,7 @@ defineProps<Props>();
   -webkit-box-orient: vertical;
 }
 
-.movie-meta {
+.media-meta {
   display: flex;
   gap: 18px;
   color: #aaa;

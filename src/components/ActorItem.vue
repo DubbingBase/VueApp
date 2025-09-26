@@ -46,8 +46,6 @@ defineProps<{
   flex: 1 0 auto;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  transition: transform 0.3s ease;
 
   img {
     width: 100%;
@@ -88,25 +86,15 @@ defineProps<{
   flex-direction: column;
   padding: 12px;
   margin: 0 8px;
-  background: #1a1a2e;
   border-radius: 12px;
   gap: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-  }
 
   .character-name {
     font-size: 16px;
     font-weight: 700;
     color: #ffffff;
-    text-align: center;
     margin-bottom: 4px;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   }
 
   .actor {
@@ -114,22 +102,10 @@ defineProps<{
     display: flex;
     flex-direction: row;
     gap: 8px;
-    background: #16213e;
     padding: 8px;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-
-    &:hover {
-      background: #0f3460;
-      transform: scale(1.02);
-    }
-
-    &:focus {
-      outline: 2px solid #533483;
-      outline-offset: 2px;
-    }
   }
 
   @media (max-width: 768px) {
@@ -147,7 +123,4 @@ defineProps<{
     }
   }
 }
-
-
-
 </style>

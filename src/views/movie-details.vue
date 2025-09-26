@@ -14,12 +14,12 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
-      <div class="background">
+      <!-- <div class="background">
         <img width="100%" v-if="movie" :src="getImage(movie.backdrop_path)" alt="Movie background image" />
         <div class="background-overlay"></div>
-      </div>
+      </div> -->
 
-      <MovieInfoCard :movie="movie" :getImage="getImage" />
+      <MediaInfoCard :media="movie" :getImage="getImage" />
 
       <ActorList
         :actors="actors"
@@ -80,7 +80,6 @@ import {
   IonButtons,
   IonButton,
   IonIcon,
-  IonSpinner,
   toastController,
   IonToast
 } from "@ionic/vue";
@@ -92,7 +91,7 @@ import { supabase } from "../api/supabase";
 import { useVoiceActorManagement } from '@/composables/useVoiceActorManagement';
 import { storeToRefs } from 'pinia';
 import { useAuthStore } from '@/stores/auth';
-import MovieInfoCard from "@/components/MovieInfoCard.vue";
+import MediaInfoCard from "@/components/MediaInfoCard.vue";
 import ActorList from "@/components/ActorList.vue";
 import ActionButtons from "@/components/ActionButtons.vue";
 import VoiceActorSearchModal from "@/components/VoiceActorSearchModal.vue";
