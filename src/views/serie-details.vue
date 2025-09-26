@@ -35,10 +35,7 @@
 
       <div class="tabs" v-show="!isLoading">
         <ion-segment scrollable>
-          <ion-segment-button value="details" content-id="details">
-            <!-- <ion-icon :icon="playCircle" /> -->
-            Détail
-          </ion-segment-button>
+
           <ion-segment-button value="seasons" content-id="seasons">
             <!-- <ion-icon :icon="radio" /> -->
             Saisons
@@ -49,42 +46,6 @@
           </ion-segment-button>
         </ion-segment>
         <ion-segment-view>
-          <ion-segment-content class="segmented-content" id="details">
-            <div class="example-content" v-if="show">
-              <div class="banner-title">{{ show.title }}</div>
-              <div
-                class="banner-genres"
-                v-if="show.genres && show.genres.length"
-              >
-                <span
-                  v-for="genre in show.genres"
-                  :key="genre.id"
-                  class="genre-chip"
-                  >{{ genre.name }}</span
-                >
-              </div>
-              <div class="banner-stats">
-                <span v-if="show.vote_average"
-                  >⭐ {{ show.vote_average.toFixed(1) }}</span
-                >
-                <span v-if="show.status">• {{ show.status }}</span>
-                <span v-if="show.first_air_date"
-                  >• {{ show.first_air_date
-                  }}<span
-                    v-if="
-                      show.last_air_date &&
-                      show.last_air_date !== show.first_air_date
-                    "
-                  >
-                    – {{ show.last_air_date }}</span
-                  ></span
-                >
-              </div>
-              <div class="banner-overview" v-if="show.overview">
-                {{ show.overview }}
-              </div>
-            </div>
-          </ion-segment-content>
           <ion-segment-content class="segmented-content" id="seasons">
             <div class="seasons" v-if="show">
               <div

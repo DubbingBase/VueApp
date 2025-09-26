@@ -17,14 +17,13 @@
           <ion-searchbar
             v-model="searchTerm"
             placeholder="Rechercher..."
-            @ionInput="onSearch"
           ></ion-searchbar>
         </ion-toolbar>
       </ion-header>
       <ion-content>
         <ion-list>
           <ion-item
-            v-for="va in filteredVoiceActors"
+            v-for="va in allVoiceActors"
             :key="va.id"
             button
             @click="selectVoiceActor(va)"
@@ -50,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   IonItem,
@@ -90,14 +89,6 @@ const errorMessage = ref('')
 const isModalOpen = ref(false)
 const searchTerm = ref('')
 
-const filteredVoiceActors = computed(() => {
-  if (!searchTerm.value) {
-    return allVoiceActors.value;
-  }
-  return allVoiceActors.value.filter(va =>
-    (va.firstname + ' ' + va.lastname).toLowerCase().includes(searchTerm.value.toLowerCase())
-  );
-});
 
 const selectVoiceActor = (va: VoiceActor) => {
   selectedVoiceActorId.value = va.id;
@@ -120,11 +111,14 @@ const viewOwnProfile = () => {
   router.push({ name: 'Profile' })
 }
 
-const loadVoiceActors = async () => {
+const loadVoiceActors = async (query?: string) => {
   isLoading.value = true
   errorMessage.value = ''
   try {
-    const { data, error } = await supabase.functions.invoke('list-voice-actors')
+    const requestBody = query && query.trim() ? { query: query.trim() } : {}
+    const { data, error } = await supabase.functions.invoke('list-voice-actors', {
+      body: requestBody
+    })
     if (error) {
       throw error
     }
@@ -137,9 +131,22 @@ const loadVoiceActors = async () => {
   }
 }
 
-const onSearch = (event: any) => {
-  searchTerm.value = event.target.value;
+// Debounced function to load voice actors with search query
+let debounceTimer: ReturnType<typeof setTimeout> | undefined
+
+const debouncedLoadVoiceActors = (query: string) => {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer)
+  }
+  debounceTimer = setTimeout(() => {
+    loadVoiceActors(query)
+  }, 300)
 }
+
+// Watch for search term changes and trigger debounced search
+watch(searchTerm, (newValue) => {
+  debouncedLoadVoiceActors(newValue)
+})
 
 onMounted(() => {
   if (authStore.isAdmin) {

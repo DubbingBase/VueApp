@@ -20,7 +20,8 @@
     "edit": "Modifier",
     "search": "Rechercher",
     "filter": "Filtrer",
-    "sort": "Trier"
+    "sort": "Trier",
+    "himself": "Lui-même"
   },
   "voiceActor": {
     "name": "Nom",

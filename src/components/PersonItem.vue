@@ -33,6 +33,7 @@ export interface PersonData {
   profile_picture?: string;
   performance?: string;
   tags?: string[] | string;
+  tmdb_id: number
 }
 
 const props = withDefaults(defineProps<{

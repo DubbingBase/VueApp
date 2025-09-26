@@ -48,7 +48,8 @@ const getVoiceActorsForActor = (actorId: number) => {
     id: va.voiceActorDetails.id,
     firstname: va.voiceActorDetails.firstname,
     lastname: va.voiceActorDetails.lastname,
-    tags: [va.performance]
+    tags: [va.performance],
+    tmdb_id: va.voiceActorDetails.actor_id
   } satisfies PersonData));
 };
 
