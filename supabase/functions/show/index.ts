@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
   // Fetch aggregate credits data
   let aggregateCredits = null
   try {
-    const creditsResponse = await fetch(`https://api.themoviedb.org/3/tv/${id}/aggregate_credits`, {
+    const creditsResponse = await fetch(`https://api.themoviedb.org/3/tv/${id}/aggregate_credits&language=fr-FR`, {
       headers: {
         "Content-Type": "application/json",
         'Authorization': `Bearer ${Deno.env.get('TMDB_API_KEY')}`,

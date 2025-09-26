@@ -15,7 +15,7 @@
     </ion-header>
     <ion-content>
       <!-- Banner with backdrop and metadata -->
-      <div class="banner" v-if="show">
+      <!-- <div class="banner" v-if="show">
         <img
           class="banner-backdrop"
           width="100%"
@@ -27,7 +27,7 @@
       </div>
       <div v-else class="banner banner-placeholder">
         <div class="banner-title">Chargement…</div>
-      </div>
+      </div> -->
 
       <MediaInfoCard :media="show" :getImage="getImage" />
 

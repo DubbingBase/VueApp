@@ -6,9 +6,12 @@
     </div>
 
     <div class="person-info">
-      <div class="person-name">{{ displayName }}</div>
-      <div v-if="subtitle" class="person-subtitle">{{ subtitle }}</div>
-    </div>
+       <div class="person-name">{{ displayName }}</div>
+       <div v-if="subtitle" class="person-subtitle">{{ subtitle }}</div>
+       <div v-if="tags.length > 0" class="person-tags">
+         <span v-for="tag in tags" :key="tag" class="tag">{{ tag }}</span>
+       </div>
+     </div>
 
     <div class="person-actions">
       <slot name="actions"></slot>
@@ -57,14 +60,25 @@ const image = computed(() => {
 });
 
 const subtitle = computed(() => {
-  if (props.type === 'actor' && props.person.character) {
-    return props.person.character;
-  }
-  if (props.type === 'voice-actor' && props.person.performance) {
-    return props.person.performance;
-  }
-  return undefined;
-});
+   if (props.type === 'actor' && props.person.character) {
+     return props.person.character;
+   }
+   if (props.type === 'voice-actor' && props.person.performance) {
+     return props.person.performance;
+   }
+   return undefined;
+ });
+
+const tags = computed(() => {
+   if (!props.person.tags) return [];
+   if (Array.isArray(props.person.tags)) {
+     return props.person.tags;
+   }
+   if (typeof props.person.tags === 'string') {
+     return props.person.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+   }
+   return [];
+ });
 
 const handleClick = () => {
   emit('click', props.person);
@@ -122,6 +136,26 @@ const handleClick = () => {
     color: #b0b0b0;
     line-height: 1.2;
   }
+
+  .person-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+
+    .tag {
+      display: inline-block;
+      padding: 2px 6px;
+      background-color: rgba(0, 123, 255, 0.2);
+      color: #4dabf7;
+      font-size: 10px;
+      font-weight: 500;
+      border-radius: 4px;
+      border: 1px solid rgba(0, 123, 255, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
 }
 
 .person-actions {
@@ -131,14 +165,21 @@ const handleClick = () => {
 }
 
 @media (max-width: 768px) {
-  .person-item {
-    padding: 6px;
-    gap: 8px;
-  }
+   .person-item {
+     padding: 6px;
+     gap: 8px;
+   }
 
-  .person-avatar {
-    width: 40px;
-    height: 60px;
-  }
-}
+   .person-avatar {
+     width: 40px;
+     height: 60px;
+   }
+
+   .person-tags {
+     .tag {
+       font-size: 9px;
+       padding: 1px 4px;
+     }
+   }
+ }
 </style>

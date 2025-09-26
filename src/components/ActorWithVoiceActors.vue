@@ -1,5 +1,8 @@
 <template>
   <div class="actor-with-voice-actors">
+    <!-- Character Name -->
+    <div v-if="actor.character" class="character-name">{{ actor.character }}</div>
+
     <!-- Main Actor Display -->
     <div class="main-actor">
       <PersonItem
@@ -12,7 +15,6 @@
 
     <!-- Voice Actors List -->
     <div v-if="voiceActors && voiceActors.length" class="voice-actors-section">
-      <div class="voice-actors-label">Voice Actors</div>
       <div class="voice-actors-scroll">
         <div class="voice-actors-container">
           <PersonItem
@@ -71,6 +73,15 @@ const handleVoiceActorClick = (voiceActor: PersonData) => {
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.02);
 
+  .character-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #e0e0e0;
+    margin-bottom: 8px;
+    padding: 4px 8px;
+    border-radius: 8px;
+  }
+
   .main-actor {
     width: 100%;
   }
@@ -122,6 +133,13 @@ const handleVoiceActorClick = (voiceActor: PersonData) => {
     padding: 8px;
     gap: 12px;
     border-radius: 8px;
+
+    .character-name {
+      font-size: 14px;
+      margin-bottom: 6px;
+      padding: 3px 6px;
+      border-radius: 6px;
+    }
 
     .voice-actors-section {
       gap: 6px;

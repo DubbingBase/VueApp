@@ -6,12 +6,10 @@
           v-for="actor in actors"
           :key="actor.id"
           :actor="actor"
-          :voiceActors="voiceActors || []"
+          :voiceActors="getVoiceActorsForActor(actor.id)"
           :getImage="getImage"
-          :onActorClick="(actor) => goToActor(actor.id)"
-          :onVoiceActorClick="(voiceActor) => goToVoiceActor(voiceActor.id)"
-          @actor-click="(actor) => goToActor(actor.id)"
-          @voice-actor-click="(voiceActor) => goToVoiceActor(voiceActor.id)"
+          :onActorClick="handleActorClick"
+          :onVoiceActorClick="handleVoiceActorClick"
         />
       </template>
       <template v-else>
@@ -24,15 +22,40 @@
 <script setup lang="ts">
 import ActorWithVoiceActors from './ActorWithVoiceActors.vue';
 import NoActors from './NoActors.vue';
+import { PersonData } from './PersonItem.vue';
 
 // Props
-defineProps<{
+const props = defineProps<{
   actors?: any[];
   voiceActors?: any[];
   goToActor: (id: number) => void;
   goToVoiceActor: (id: number) => void;
   getImage: (path: string) => string;
 }>();
+
+console.log('actors', props.actors)
+console.log('voiceActors', props.voiceActors)
+
+// Filter voice actors for a specific actor
+const getVoiceActorsForActor = (actorId: number) => {
+  if (!props.voiceActors) return [];
+  console.log('props.voiceActors', props.voiceActors)
+  return props.voiceActors.filter((item: any) => item.actor_id === actorId).map(va => ({
+    id: va.voiceActorDetails.id,
+    firstname: va.voiceActorDetails.firstname,
+    lastname: va.voiceActorDetails.lastname,
+    tags: [va.performance]
+  } satisfies PersonData));
+};
+
+// Wrapper functions to handle prop type requirements
+const handleActorClick = (actor: any) => {
+  props.goToActor(actor.id);
+};
+
+const handleVoiceActorClick = (voiceActor: any) => {
+  props.goToVoiceActor(voiceActor.id);
+};
 </script>
 
 <style scoped lang="scss">
