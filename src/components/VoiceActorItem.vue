@@ -1,5 +1,6 @@
 <template>
-  <div v-if="item" class="voice-actor" @click="goToVoiceActor(voiceActor.id)" tabindex="0" role="button" :aria-label="`Go to details for ${voiceActor.firstname} ${voiceActor.lastname}`">
+  <div v-if="item" class="voice-actor-wrapper">
+    <div class="voice-actor" @click="goToVoiceActor(voiceActor.id)" tabindex="0" role="button" :aria-label="`Go to details for ${voiceActor.firstname} ${voiceActor.lastname}`">
     <MediaThumbnail
       v-if="voiceActor.profile_picture"
       :path="voiceActor.profile_picture"
@@ -28,6 +29,7 @@
       </ion-button>
     </div>
   </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -51,30 +53,65 @@ const voiceActor = computed(() => props.item?.voiceActorDetails || props.item);
 </script>
 
 <style scoped lang="scss">
-.voice-actor {
-  background-color: #666;
-  flex: 1 0 auto;
-  width: 100%;
+.voice-actor-wrapper {
   display: flex;
-  flex-direction: row;
-  gap: 4px;
-  border-radius: 4px;
-  padding: 4px;
+  flex-direction: column;
+  padding: 12px;
+  margin: 0 8px;
+  border-radius: 12px;
+  gap: 8px;
+  transition: all 0.3s ease;
+
+  .voice-actor {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  @media (max-width: 768px) {
+    padding: 8px;
+    margin: 0 4px;
+    border-radius: 8px;
+
+    .voice-actor {
+      padding: 6px;
+      gap: 6px;
+    }
+
+    .line-label {
+      margin-left: 8px;
+    }
+  }
 }
 
 .line-label {
-  margin-left: 8px;
+  margin-left: 12px;
   width: 100%;
   display: flex;
   justify-content: space-between;
+  flex-direction: column;
 
   .label {
     width: 100%;
     display: block;
+    color: #e0e0e0;
+    font-size: 14px;
+    line-height: 1.4;
   }
 
   .voice-actor {
-    font-weight: bold;
+    font-weight: 600;
+  }
+
+  .performance {
+    text-align: left;
+    color: #b0b0b0;
+    font-size: 12px;
   }
 }
 

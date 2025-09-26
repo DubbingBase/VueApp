@@ -2,28 +2,35 @@
   <div class="actors-list">
     <div class="inner-list">
       <template v-if="actors && actors.length">
-        <ActorItem v-for="actor in actors" :key="actor.id" :actor="actor" :voiceActors="getVoiceActorByTmdbId(actor.id)" :isAdmin="isAdmin" :goToActor="goToActor" :goToVoiceActor="goToVoiceActor" :editVoiceActorLink="editVoiceActorLink" :confirmDeleteVoiceActorLink="confirmDeleteVoiceActorLink" :openVoiceActorSearch="openVoiceActorSearch" :getImage="getImage" />
+        <ActorWithVoiceActors
+          v-for="actor in actors"
+          :key="actor.id"
+          :actor="actor"
+          :voiceActors="voiceActors || []"
+          :getImage="getImage"
+          :onActorClick="(actor) => goToActor(actor.id)"
+          :onVoiceActorClick="(voiceActor) => goToVoiceActor(voiceActor.id)"
+          @actor-click="(actor) => goToActor(actor.id)"
+          @voice-actor-click="(voiceActor) => goToVoiceActor(voiceActor.id)"
+        />
       </template>
-      <NoActors v-else />
+      <template v-else>
+        <NoActors />
+      </template>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import ActorItem from './ActorItem.vue';
+import ActorWithVoiceActors from './ActorWithVoiceActors.vue';
 import NoActors from './NoActors.vue';
 
 // Props
 defineProps<{
-  actors: any[];
-  voiceActors: any[];
-  isAdmin: boolean;
-  getVoiceActorByTmdbId: (tmdbId: number) => any[];
+  actors?: any[];
+  voiceActors?: any[];
   goToActor: (id: number) => void;
   goToVoiceActor: (id: number) => void;
-  editVoiceActorLink: (item: any) => void;
-  confirmDeleteVoiceActorLink: (item: any) => void;
-  openVoiceActorSearch: (actor: any) => void;
   getImage: (path: string) => string;
 }>();
 </script>
@@ -44,6 +51,17 @@ defineProps<{
       padding: 12px;
       gap: 8px;
       border-radius: 1rem;
+    }
+  }
+
+  .no-items {
+    text-align: center;
+    color: var(--ion-color-medium);
+    font-style: italic;
+    padding: 20px;
+
+    p {
+      margin: 0;
     }
   }
 }
