@@ -3,7 +3,7 @@
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button default-href="/tabs/home" />
+          <ion-back-button :default-href="{ name: 'Home' }" />
         </ion-buttons>
         <ion-title>{{ season?.name || "Détails de la saison" }}</ion-title>
       </ion-toolbar>
@@ -50,6 +50,7 @@
             :confirmDeleteVoiceActorLink="confirmDeleteVoiceActorLink"
             :openVoiceActorSearch="openVoiceActorSearch"
             :getImage="getImage"
+            :loading="isLoading"
           />
         </div>
       </div>

@@ -6,7 +6,7 @@
     </div>
     <div class="caption">
       <template v-if="!loading">{{ title }}</template>
-      <ion-skeleton-text :animated="true" v-else :style="{ width: '100%', height: '32px', borderRadius: '4px', margin: 0 }"></ion-skeleton-text>
+      <ion-skeleton-text :animated="true" v-else :style="{ width: '100%', height: '42px', borderRadius: '4px', margin: 0 }"></ion-skeleton-text>
     </div>
   </router-link>
 </template>

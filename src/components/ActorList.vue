@@ -1,7 +1,10 @@
 <template>
   <div class="actors-list">
     <div class="inner-list">
-      <template v-if="actors && actors.length">
+      <template v-if="loading">
+        <!-- Don't show anything while loading -->
+      </template>
+      <template v-else-if="actors && actors.length">
         <ActorWithVoiceActors
           v-for="actor in actors"
           :key="actor.id"
@@ -31,6 +34,7 @@ const props = defineProps<{
   goToActor: (id: number) => void;
   goToVoiceActor: (id: number) => void;
   getImage: (path: string) => string;
+  loading?: boolean;
 }>();
 
 console.log('actors', props.actors)

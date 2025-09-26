@@ -3,7 +3,7 @@
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button default-href="/" />
+          <ion-back-button :default-href="{ name: 'Home' }" />
         </ion-buttons>
         <ion-title>Voix</ion-title>
         <ion-buttons slot="end" v-if="isAdmin">

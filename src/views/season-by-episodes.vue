@@ -16,7 +16,7 @@
         <EpisodeBanner :episode="episode" :getImage="getImage" />
         <div class="voices">
           <h3>Distribution originale et voix françaises</h3>
-          <ActorList :actors="episode?.credits?.cast || []" :voiceActors="[]" :getVoiceActorByTmdbId="getVoiceActorByTmdbId" :goToActor="goToActor" :goToVoiceActor="goToVoiceActor" :isAdmin="false" :editVoiceActorLink="editVoiceActorLink" :confirmDeleteVoiceActorLink="confirmDeleteVoiceActorLink" :openVoiceActorSearch="openVoiceActorSearch" :getImage="getImage" />
+          <ActorList :actors="episode?.credits?.cast || []" :voiceActors="[]" :getVoiceActorByTmdbId="getVoiceActorByTmdbId" :goToActor="goToActor" :goToVoiceActor="goToVoiceActor" :isAdmin="false" :editVoiceActorLink="editVoiceActorLink" :confirmDeleteVoiceActorLink="confirmDeleteVoiceActorLink" :openVoiceActorSearch="openVoiceActorSearch" :getImage="getImage" :loading="isLoading" />
         </div>
       </div>
     </ion-content>

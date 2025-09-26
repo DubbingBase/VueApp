@@ -94,7 +94,7 @@ const filteredVoiceActors = computed(() => {
   if (!searchTerm.value) {
     return allVoiceActors.value;
   }
-  return allVoiceActors.value.filter(va => 
+  return allVoiceActors.value.filter(va =>
     (va.firstname + ' ' + va.lastname).toLowerCase().includes(searchTerm.value.toLowerCase())
   );
 });
@@ -108,16 +108,16 @@ const selectVoiceActor = (va: VoiceActor) => {
 
 const onVoiceActorChange = () => {
   if (selectedVoiceActorId.value) {
-    router.push(`/tabs/profile/${selectedVoiceActorId.value}`)
+    router.push({ name: 'Profile', params: { voiceActorId: selectedVoiceActorId.value } })
   } else {
-    router.push('/tabs/profile')
+    router.push({ name: 'Profile' })
   }
 }
 
 const viewOwnProfile = () => {
   selectedVoiceActorId.value = null
   selectedVoiceActorName.value = ''
-  router.push('/tabs/profile')
+  router.push({ name: 'Profile' })
 }
 
 const loadVoiceActors = async () => {

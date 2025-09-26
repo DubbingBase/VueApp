@@ -3,7 +3,7 @@
     <ion-header class="header">
       <ion-toolbar class="toolbar">
         <ion-buttons slot="start">
-          <ion-back-button default-href="/tabs/home" />
+          <ion-back-button :default-href="{ name: 'Home' }" />
         </ion-buttons>
         <ion-title>{{ show?.name || "Détails de la série" }}</ion-title>
         <ion-buttons slot="end">
@@ -117,6 +117,7 @@
               :confirm-delete-voice-actor-link="confirmDeleteVoiceActorLink"
               :open-voice-actor-search="openVoiceActorSearch"
               :get-image="getImage"
+              :loading="isLoading"
             />
           </ion-segment-content>
         </ion-segment-view>

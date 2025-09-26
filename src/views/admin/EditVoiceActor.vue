@@ -3,7 +3,7 @@
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button default-href="/admin/add-voice-cast" />
+          <ion-back-button :default-href="{ name: 'Admin' }" />
         </ion-buttons>
         <ion-title>{{ isEditMode ? 'Edit Voice Actor' : 'Create Voice Actor' }}</ion-title>
       </ion-toolbar>

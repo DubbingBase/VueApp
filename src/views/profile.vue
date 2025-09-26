@@ -255,7 +255,7 @@ const handleSave = async () => {
 
 const openPublicProfile = () => {
   if (profileStore.voiceActor) {
-    router.push(`/voice-actor/${profileStore.voiceActor.id}`)
+    router.push({ name: 'VoiceActorDetails', params: { id: profileStore.voiceActor.id } })
   }
 }
 

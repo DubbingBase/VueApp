@@ -107,14 +107,14 @@ const onProfileChange = async (event: any) => {
 
   if (value === 'add-new') {
     // Handle adding new voice actor profile
-    router.push('/tabs/admin/add-voice-actor')
+    router.push({ name: 'AddVoiceCast', params: { id: 'new' } })
     return
   }
 
   if (value === 'create-user-profile') {
     // Handle creating new user profile
     profileStore.selectUserProfile()
-    router.push('/tabs/profile')
+    router.push({ name: 'Profile' })
     return
   }
 
@@ -134,11 +134,11 @@ const onProfileChange = async (event: any) => {
       await profileStore.selectVoiceActor(voiceActorId, {})
       // Update route if needed
       if (voiceActorId !== profileStore.currentVoiceActorId) {
-        router.push(`/tabs/profile/${voiceActorId}`)
+        router.push({ name: 'Profile', params: { voiceActorId } })
       }
     } else if (value === 'user-profile') {
       profileStore.selectUserProfile()
-      router.push('/tabs/profile')
+      router.push({ name: 'Profile' })
     }
   } catch (error) {
     console.error('Error switching profile:', error)

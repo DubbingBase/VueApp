@@ -3,7 +3,7 @@
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button default-href="/" />
+          <ion-back-button :default-href="{ name: 'Home' }" />
         </ion-buttons>
         <ion-title>Voix</ion-title>
         <ion-buttons slot="end" v-if="isAdmin">
@@ -32,6 +32,7 @@
         :confirm-delete-voice-actor-link="confirmDeleteVoiceActorLink"
         :open-voice-actor-search="openVoiceActorSearch"
         :get-image="getImage"
+        :loading="isLoading"
       />
 
 

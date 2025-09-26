@@ -4,7 +4,7 @@
       <ion-toolbar color="primary">
         <ion-title>{{ isRegister ? 'Créer un compte' : 'Connexion' }}</ion-title>
         <ion-buttons slot="start">
-          <ion-back-button default-href="/tabs/home" />
+          <ion-back-button :default-href="{ name: 'Home' }" />
         </ion-buttons>
       </ion-toolbar>
     </ion-header>

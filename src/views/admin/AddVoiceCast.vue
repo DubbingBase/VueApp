@@ -3,7 +3,7 @@
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button default-href="/" />
+          <ion-back-button :default-href="{ name: 'Home' }" />
         </ion-buttons>
         <ion-title>Add Voice Cast</ion-title>
       </ion-toolbar>
