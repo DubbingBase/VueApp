@@ -38,6 +38,7 @@ const props = defineProps<{
   person: PersonData;
   type?: 'actor' | 'voice-actor';
   getImage?: (path: string) => string;
+  subtitleOverride?: string;
 }>();
 
 const emit = defineEmits<{
@@ -60,14 +61,17 @@ const image = computed(() => {
 });
 
 const subtitle = computed(() => {
-   if (props.type === 'actor' && props.person.character) {
-     return props.person.character;
-   }
-   if (props.type === 'voice-actor' && props.person.performance) {
-     return props.person.performance;
-   }
-   return undefined;
- });
+    if (props.subtitleOverride) {
+      return props.subtitleOverride;
+    }
+    if (props.type === 'actor' && props.person.character) {
+      return props.person.character;
+    }
+    if (props.type === 'voice-actor' && props.person.performance) {
+      return props.person.performance;
+    }
+    return undefined;
+  });
 
 const tags = computed(() => {
    if (!props.person.tags) return [];

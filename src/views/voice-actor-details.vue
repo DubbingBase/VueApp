@@ -30,6 +30,7 @@
         <VoiceActorWorksGrouped
           v-if="voiceActor"
           :works="enhancedWork"
+          :getImage="getImage"
         />
       </div>
     </ion-content>
@@ -178,7 +179,11 @@ const enhancedWork = computed(() => {
   });
 });
 
-
+// Methods
+const getImage = (path: string | null, size: string = 'w185') => {
+  if (!path) return 'https://placehold.co/48x72?text=?';
+  return `https://image.tmdb.org/t/p/${size}${path}`;
+};
 
 onMounted(async () => {
   const id = route.params.id;

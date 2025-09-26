@@ -46,14 +46,18 @@ const props = defineProps({
 
 const { path, height, width, rawPath, radius, fromStorage } = toRefs(props);
 
+const defaultSrc = computed(() => {
+  return `https://placehold.co/${width.value}x${height.value}?text=?`;
+});
+
 const src = computed(() => {
   console.log("---");
-  if (!path?.value) { 
+  if (!path?.value) {
     console.log("path is undefined");
     return defaultSrc.value;
   }
 
-  if(rawPath.value){      
+  if(rawPath.value){
     console.log("rawPath is true");
     return path.value;
   }
@@ -68,22 +72,29 @@ const src = computed(() => {
 });
 
 const getImageUrl = computedAsync(async () => {
+  if (!path?.value) {
+    console.log("path is undefined in getImageUrl");
+    return defaultSrc.value;
+  }
+
   const oldImage = supabase.storage
     .from('voice_actor_profile_pictures')
-    .getPublicUrl(path.value!);
+    .getPublicUrl(path.value);
   console.log("oldImage", oldImage)
+
+  if (!oldImage.data?.publicUrl) {
+    console.log("publicUrl is undefined, using default");
+    return defaultSrc.value;
+  }
+
   return oldImage.data.publicUrl;
-}, undefined);
+}, defaultSrc.value);
 
 const heightStyle = computed(() => {
   return `${height.value}px`;
 });
 const widthStyle = computed(() => {
   return `${width.value}px`;
-});
-
-const defaultSrc = computed(() => {
-  return `https://placehold.co/${width.value}x${height.value}?text=?`;
 });
 </script>
 

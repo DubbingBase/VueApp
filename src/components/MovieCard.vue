@@ -1,0 +1,124 @@
+<template>
+  <div class="movie-card">
+    <div class="media-poster">
+      <router-link :to="{
+        name: mediaType === 'movie' ? 'MovieDetails' : 'SerieDetails',
+        params: { id: media.id },
+      }">
+        <MediaThumbnail :path="media.poster_path" />
+      </router-link>
+    </div>
+
+    <div class="movie-info">
+      <h5 class="media-title">
+        <router-link :to="{
+          name: mediaType === 'movie' ? 'MovieDetails' : 'SerieDetails',
+          params: { id: media.id },
+        }" class="title-link">
+          {{ title }}
+        </router-link>
+      </h5>
+
+      <div class="character-info">
+        <span class="character-name">{{ character }}</span>
+      </div>
+
+      <div class="release-date">
+        <span class="date-value">
+          {{ releaseDate }}
+        </span>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed } from "vue";
+import MediaThumbnail from "@/components/MediaThumbnail.vue";
+import type { Movie as MovieModel } from "../../supabase/functions/_shared/movie";
+import type { Serie as SerieModel } from "../../supabase/functions/_shared/serie";
+
+type Props = {
+  media: MovieModel | SerieModel;
+  character: string;
+  mediaType: 'movie' | 'serie';
+};
+
+const props = defineProps<Props>();
+
+const title = computed(() => {
+  return (props.media as any).title ?? (props.media as any).name;
+});
+
+const releaseDate = computed(() => {
+  return (props.media as any).release_date || (props.media as any).first_air_date;
+});
+</script>
+
+<style scoped lang="scss">
+.movie-card {
+  display: flex;
+  gap: 12px;
+  padding: 8px;
+  background: var(--ion-color-card);
+
+  @media (max-width: 768px) {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .media-poster {
+    flex-shrink: 0;
+
+    img {
+      width: 80px;
+      height: 120px;
+      object-fit: cover;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+
+      @media (max-width: 768px) {
+        width: 70px;
+        height: 105px;
+      }
+    }
+  }
+
+  .movie-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .media-title {
+      margin: 0 0 6px 0;
+      font-size: 0.95rem;
+      font-weight: 600;
+
+      .title-link {
+        color: var(--ion-color-text-secondary);
+        text-decoration: none;
+        transition: color 0.2s ease;
+
+        &:hover {
+          color: var(--ion-color-text-muted);
+          text-decoration: underline;
+        }
+      }
+    }
+
+    .character-info,
+    .release-date {
+      font-size: 0.85rem;
+
+      .character-name {
+        color: var(--ion-color-text-secondary);
+        font-style: italic;
+      }
+
+      .date-value {
+        color: var(--ion-color-text-secondary);
+      }
+    }
+  }
+}
+</style>

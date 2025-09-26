@@ -145,7 +145,6 @@ const uploadImage = async () => {
   .actor-name {
     font-size: 1.8rem;
     font-weight: 700;
-    color: var(--ion-color-primary);
     line-height: 1.2;
     margin: 0;
 
