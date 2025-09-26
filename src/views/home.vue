@@ -190,6 +190,7 @@ onMounted(async () => {
 .trending-movies, .trending-series, .recent-voice-actors {
   margin-bottom: 32px;
   padding-left: 12px;
+  margin-top: 32px;
 }
 
 .list-header {
