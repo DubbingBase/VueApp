@@ -86,7 +86,7 @@ const items = computed(() => {
     });
   }
 
-  if (authStore.isAuthenticated && !authStore.isAnonymous) {
+  if (authStore.isAuthenticated) {
     items.push({
       label: "Profil",
       icon: SolarUserLinear,

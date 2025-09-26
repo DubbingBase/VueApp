@@ -34,7 +34,8 @@ const routes: readonly RouteRecordRaw[] = [
       { path: '/tabs/home', name: 'Home', component: Home },
       { name: 'Search', path: '/tabs/search', component: Search },
       { name: 'Settings', path: '/tabs/settings', component: () => import('../views/settings.vue') },
-      { name: 'Profile', path: '/tabs/profile/:voiceActorId?', component: () => import('../views/profile.vue') },
+      { name: 'Profile', path: '/tabs/profile', component: () => import('../views/profile.vue') },
+      { name: 'VoiceActorProfile', path: '/tabs/voice-actor-profile/:id', component: () => import('../views/voice-actor-profile.vue') },
       {
         name: 'Admin',
         path: '/tabs/admin',
@@ -92,21 +93,28 @@ export const router = createRouter({
   routes,
 });
 
-// Public routes that don't require authentication
-const publicRoutes = ['/login'];
+// Routes that allow anonymous access (both authenticated and anonymous users can access)
+const anonymousAllowedRoutes = ['/login', '/tabs/profile', '/tabs/voice-actor-profile'];
 
 router.beforeEach(async (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
   const authStore = useAuthStore();
 
   await authStore.initialize();
 
-  // Allow access to public routes
-  if (publicRoutes.includes(to.path)) {
+  // Allow access to routes that permit anonymous users
+  if (anonymousAllowedRoutes.includes(to.path) || anonymousAllowedRoutes.some(route => {
+    // Handle parameterized routes like /tabs/voice-actor-profile/:id
+    if (route.includes(':id')) {
+      const baseRoute = route.split('/:id')[0];
+      return to.path.startsWith(baseRoute);
+    }
+    return false;
+  })) {
     return next();
   }
 
   console.log('will redirect  ', authStore.isAuthenticated)
-  // Check if user is authenticated
+  // Check if user is authenticated for protected routes
   if (!authStore.isAuthenticated) {
     // If not authenticated, redirect to login with the attempted URL as a query parameter
     return next({

@@ -8,9 +8,22 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { data, error } = await supabase
+    // Parse request body to get optional query parameter
+    const requestBody = await req.json().catch(() => ({}));
+    const query = requestBody.query;
+
+    let queryBuilder = supabase
       .from('voice_actors')
-      .select('id, firstname, lastname')
+      .select('id, firstname, lastname');
+
+    // Apply filtering if query is provided
+    if (query && typeof query === 'string' && query.trim()) {
+      // Use ilike with concatenated firstname and lastname for case-insensitive search
+      const searchQuery = query.trim();
+      queryBuilder = queryBuilder.or(`firstname.ilike.%${searchQuery}%,lastname.ilike.%${searchQuery}%,firstname.ilike.%${searchQuery.split(' ')[0]}%`);
+    }
+
+    const { data, error } = await queryBuilder
       .order('lastname', { ascending: true })
       .order('firstname', { ascending: true });
 
@@ -25,8 +38,9 @@ Deno.serve(async (req) => {
       }
     )
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: errorMessage }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,

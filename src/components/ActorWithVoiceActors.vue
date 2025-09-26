@@ -17,14 +17,24 @@
     <div v-if="voiceActors && voiceActors.length" class="voice-actors-section">
       <div class="voice-actors-scroll">
         <div class="voice-actors-container">
-          <PersonItem
-            v-for="voiceActor in voiceActors"
-            :key="voiceActor.id"
-            :person="voiceActor"
-            type="voice-actor"
-            :getImage="getImage"
-            @click="handleVoiceActorClick"
-          />
+          <template v-for="voiceActor in voiceActors" :key="voiceActor.id">
+            <div
+              v-if="voiceActor.tmdb_id === actor.id"
+              class="himself-item"
+              @click="handleVoiceActorClick(voiceActor)"
+            >
+              <div class="himself-content">
+                <div class="himself-text">{{ $t('common.himself') }}</div>
+              </div>
+            </div>
+            <PersonItem
+              v-else
+              :person="voiceActor"
+              type="voice-actor"
+              :getImage="getImage"
+              @click="handleVoiceActorClick"
+            />
+          </template>
         </div>
       </div>
     </div>
@@ -126,6 +136,34 @@ const handleVoiceActorClick = (voiceActor: PersonData) => {
       display: flex;
       gap: 12px;
       min-width: max-content;
+
+      .himself-item {
+        display: flex;
+        align-items: center;
+        padding: 8px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background-color: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.05);
+          border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .himself-content {
+          flex: 1;
+          min-width: 0;
+
+          .himself-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e0e0e0;
+            line-height: 1.4;
+          }
+        }
+      }
     }
   }
 
@@ -150,6 +188,16 @@ const handleVoiceActorClick = (voiceActor: PersonData) => {
 
       .voice-actors-container {
         gap: 8px;
+
+        .himself-item {
+          padding: 6px;
+
+          .himself-content {
+            .himself-text {
+              font-size: 12px;
+            }
+          }
+        }
       }
     }
   }
