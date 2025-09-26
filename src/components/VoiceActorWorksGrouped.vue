@@ -1,7 +1,5 @@
 <template>
   <div class="voice-actor-works-grouped">
-    <h3>Œuvres (Groupées par Acteur)</h3>
-
     <div v-if="works.length === 0" class="no-works">
       <p>Aucune œuvre trouvée</p>
     </div>
