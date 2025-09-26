@@ -51,7 +51,8 @@ const title = computed(() => {
 });
 
 const releaseDate = computed(() => {
-  return (props.media as any).release_date || (props.media as any).first_air_date;
+  const date = (props.media as any).release_date || (props.media as any).first_air_date;
+  return date ? new Date(date).toLocaleDateString(navigator.language, { year: 'numeric' }) : '';
 });
 </script>
 

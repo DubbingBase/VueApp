@@ -18,7 +18,7 @@
       </div>
       <div class="actor-details">
         <div v-if="voiceActor.date_of_birth" class="detail-item">
-          <span class="detail-value">{{ voiceActor.date_of_birth }}</span>
+          <span class="detail-value">{{ new Date(voiceActor.date_of_birth).toLocaleDateString() }}</span>
         </div>
         <div v-if="voiceActor.years_active" class="detail-item">
           <span class="detail-value">{{ voiceActor.years_active }}</span>
