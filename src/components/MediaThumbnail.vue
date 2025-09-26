@@ -10,6 +10,7 @@ import { computed, toRefs } from "vue";
 import { IonImg } from "@ionic/vue";
 import { supabase } from "@/api/supabase";
 import { computedAsync } from "@vueuse/core";
+import { THUMBNAIL_DEFAULT_WIDTH, THUMBNAIL_DEFAULT_HEIGHT } from '@/constants/thumbnails';
 
 const props = defineProps({
   path: {
@@ -20,12 +21,12 @@ const props = defineProps({
   height: {
     type: Number,
     required: false,
-    default: 72,
+    default: THUMBNAIL_DEFAULT_HEIGHT,
   },
   width: {
     type: Number,
     required: false,
-    default: 48,
+    default: THUMBNAIL_DEFAULT_WIDTH,
   },
   radius: {
     type: String,
@@ -103,8 +104,10 @@ const widthStyle = computed(() => {
   display: block;
   overflow: hidden;
   object-fit: cover;
-  border-radius: v-bind(radius);
+  border-radius: var(--thumbnail-border-radius);
   height: v-bind(heightStyle);
   width: v-bind(widthStyle);
+  border: var(--thumbnail-border);
+  box-shadow: var(--thumbnail-box-shadow-small);
 }
 </style>

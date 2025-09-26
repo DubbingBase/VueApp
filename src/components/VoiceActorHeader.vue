@@ -122,11 +122,12 @@ const uploadImage = async () => {
     }
 
     img {
-      height: 120px;
-      width: 90px;
+       height: var(--thumbnail-height);
+       width: var(--thumbnail-width);
       object-fit: cover;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-radius: var(--thumbnail-border-radius);
+      border: var(--thumbnail-border);
+      box-shadow: var(--thumbnail-box-shadow);
 
       @media (max-width: 768px) {
         height: 100px;

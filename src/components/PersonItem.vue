@@ -2,7 +2,7 @@
   <div class="person-item" @click="handleClick" tabindex="0" role="button" :aria-label="`Go to details for ${displayName}`">
     <div class="person-avatar">
       <img v-if="image" :src="image" :alt="`${displayName} photo`" />
-      <img v-else src="https://placehold.co/48x72?text=?" alt="No photo" />
+      <img v-else :src="`https://placehold.co/${width}x${height}?text=?`" alt="No photo" />
     </div>
 
     <div class="person-info">
@@ -21,6 +21,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { THUMBNAIL_DEFAULT_WIDTH, THUMBNAIL_DEFAULT_HEIGHT } from '@/constants/thumbnails';
 
 export interface PersonData {
   id: number;
@@ -34,12 +35,17 @@ export interface PersonData {
   tags?: string[] | string;
 }
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   person: PersonData;
   type?: 'actor' | 'voice-actor';
   getImage?: (path: string) => string;
   subtitleOverride?: string;
-}>();
+  width?: number;
+  height?: number;
+}>(), {
+  width: THUMBNAIL_DEFAULT_WIDTH,
+  height: THUMBNAIL_DEFAULT_HEIGHT,
+});
 
 const emit = defineEmits<{
   click: [person: PersonData];
@@ -74,15 +80,18 @@ const subtitle = computed(() => {
   });
 
 const tags = computed(() => {
-   if (!props.person.tags) return [];
-   if (Array.isArray(props.person.tags)) {
-     return props.person.tags;
-   }
-   if (typeof props.person.tags === 'string') {
-     return props.person.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
-   }
-   return [];
- });
+    if (!props.person.tags) return [];
+    if (Array.isArray(props.person.tags)) {
+      return props.person.tags;
+    }
+    if (typeof props.person.tags === 'string') {
+      return props.person.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+    }
+    return [];
+  });
+
+const widthStyle = computed(() => `${props.width}px`);
+const heightStyle = computed(() => `${props.height}px`);
 
 const handleClick = () => {
   emit('click', props.person);
@@ -110,18 +119,19 @@ const handleClick = () => {
 }
 
 .person-avatar {
-  width: 48px;
-  height: 72px;
-  border-radius: 8px;
-  overflow: hidden;
-  flex-shrink: 0;
+   width: v-bind(widthStyle);
+   height: v-bind(heightStyle);
+   border-radius: var(--thumbnail-border-radius);
+   border: var(--thumbnail-border);
+   overflow: hidden;
+   flex-shrink: 0;
 
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-}
+   img {
+     width: 100%;
+     height: 100%;
+     object-fit: cover;
+   }
+ }
 
 .person-info {
   flex: 1;
@@ -169,21 +179,16 @@ const handleClick = () => {
 }
 
 @media (max-width: 768px) {
-   .person-item {
-     padding: 6px;
-     gap: 8px;
-   }
+    .person-item {
+      padding: 6px;
+      gap: 8px;
+    }
 
-   .person-avatar {
-     width: 40px;
-     height: 60px;
-   }
-
-   .person-tags {
-     .tag {
-       font-size: 9px;
-       padding: 1px 4px;
-     }
-   }
- }
+    .person-tags {
+      .tag {
+        font-size: 9px;
+        padding: 1px 4px;
+      }
+    }
+  }
 </style>

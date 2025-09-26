@@ -5,7 +5,10 @@
         name: mediaType === 'movie' ? 'MovieDetails' : 'SerieDetails',
         params: { id: media.id },
       }">
-        <MediaThumbnail :path="media.poster_path" />
+        <MediaThumbnail
+          :path="media.poster_path"
+          :radius="'8px'"
+        />
       </router-link>
     </div>
 
@@ -71,16 +74,8 @@ const releaseDate = computed(() => {
   .media-poster {
     flex-shrink: 0;
 
-    img {
-      width: 80px;
-      height: 120px;
-      object-fit: cover;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-
-      @media (max-width: 768px) {
-        width: 70px;
-        height: 105px;
-      }
+    @media (max-width: 768px) {
+      // Mobile responsive adjustments handled by MediaThumbnail props
     }
   }
 

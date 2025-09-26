@@ -1,0 +1,2 @@
+export const THUMBNAIL_DEFAULT_WIDTH = 53;
+export const THUMBNAIL_DEFAULT_HEIGHT = 80;
