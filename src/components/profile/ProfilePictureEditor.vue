@@ -30,15 +30,15 @@
     />
 
     <div v-if="isUploading" class="upload-status">
-      <ion-spinner name="crescent" size="small"></ion-spinner>
-      <span>Upload en cours...</span>
+      <LoadingSpinner name="crescent" size="small" text="Upload en cours..." :inline="true"></LoadingSpinner>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { IonButton, IonIcon, IonSpinner } from '@ionic/vue'
+import { IonButton, IonIcon } from '@ionic/vue'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import { useProfileStore } from '@/stores/profile'
 import { supabase } from '@/api/supabase'
 

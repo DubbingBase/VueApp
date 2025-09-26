@@ -13,8 +13,7 @@
 
     <ion-content :fullscreen="true">
       <div v-if="profileStore.isLoadingProfile && !profileStore.isUpdating" class="loading-container">
-        <ion-spinner name="crescent"></ion-spinner>
-        <p>Chargement du profil...</p>
+        <LoadingSpinner name="crescent" text="Chargement du profil..." />
       </div>
 
       <div v-else-if="profileStore.profileError" class="error-container">
@@ -61,7 +60,7 @@
           </ion-list>
 
           <ion-button expand="block" @click="handleSave" :disabled="profileStore.isUpdating">
-            <ion-spinner v-if="profileStore.isUpdating" name="crescent"></ion-spinner>
+            <LoadingSpinner v-if="profileStore.isUpdating" name="crescent" inline />
             Enregistrer les modifications
           </ion-button>
 
@@ -100,7 +99,7 @@
             </ion-list>
 
             <ion-button expand="block" @click="handleCreateProfile" :disabled="profileStore.isUpdating">
-              <ion-spinner v-if="profileStore.isUpdating" name="crescent"></ion-spinner>
+              <LoadingSpinner v-if="profileStore.isUpdating" name="crescent" inline />
               Créer mon profil
             </ion-button>
           </div>
@@ -124,7 +123,6 @@ import {
   IonToolbar,
   IonTitle,
   IonContent,
-  IonSpinner,
   IonIcon,
   IonButton,
   IonList,
@@ -140,6 +138,7 @@ import VoiceActorSelector from '@/components/profile/VoiceActorSelector.vue';
 import ProfileSelector from '@/components/profile/ProfileSelector.vue';
 import WorkList from '@/components/profile/WorkList.vue';
 import AddWorkModal from '@/components/profile/AddWorkModal.vue';
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue';
 import { alertCircle, personCircle, refresh, add, eye } from 'ionicons/icons';
 import type { Tables } from '../../supabase/functions/_shared/database.types';
 
@@ -275,9 +274,6 @@ const openPublicProfile = () => {
   padding: 2rem;
 }
 
-.loading-container ion-spinner {
-  margin-bottom: 1rem;
-}
 
 .error-container ion-icon,
 .no-profile-container ion-icon {

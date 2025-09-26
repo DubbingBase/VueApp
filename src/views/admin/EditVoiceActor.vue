@@ -55,10 +55,10 @@
             <ion-label>Profile Picture</ion-label>
             <div class="upload-container">
               <div class="image-preview">
-                <MediaThumbnail 
-                  v-if="previewImage || profilePicture" 
-                  :path="previewImage || profilePicture" 
-                  alt="Profile Preview" 
+                <MediaThumbnail
+                  v-if="previewImage || profilePicture"
+                  :path="previewImage || profilePicture"
+                  alt="Profile Preview"
                   class="preview-image"
                 />
                 <div v-else class="no-image">
@@ -70,18 +70,18 @@
                   <ion-icon :icon="cameraOutline" slot="start"></ion-icon>
                   {{ previewImage ? 'Change' : 'Upload' }} Photo
                 </ion-button>
-                <input 
+                <input
                   ref="fileInput"
-                  type="file" 
-                  accept="image/*" 
-                  @change="onProfilePictureChange" 
+                  type="file"
+                  accept="image/*"
+                  @change="onProfilePictureChange"
                   class="file-input"
                 />
-                <ion-button 
-                  v-if="previewImage" 
-                  fill="clear" 
-                  color="danger" 
-                  size="small" 
+                <ion-button
+                  v-if="previewImage"
+                  fill="clear"
+                  color="danger"
+                  size="small"
                   @click="clearImage"
                 >
                   <ion-icon :icon="trashOutline" slot="icon-only"></ion-icon>
@@ -91,7 +91,7 @@
           </ion-item>
           <div class="action-buttons">
             <ion-button expand="block" type="submit" :disabled="isSaving">
-              <ion-spinner v-if="isSaving" name="crescent"></ion-spinner>
+              <LoadingSpinner v-if="isSaving" name="crescent" :inline="true"></LoadingSpinner>
               <span v-else>Save</span>
             </ion-button>
           </div>
@@ -107,8 +107,9 @@ import { useRoute } from 'vue-router';
 import { useIonRouter } from '@ionic/vue';
 
 import {
-  IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonSpinner, IonItem, IonLabel, IonInput, IonBackButton, IonButtons, toastController, IonIcon
+  IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonItem, IonLabel, IonInput, IonBackButton, IonButtons, toastController, IonIcon
 } from '@ionic/vue';
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import { cameraOutline, personOutline, trashOutline } from 'ionicons/icons';
 import { supabase } from '@/api/supabase';
 import MediaThumbnail from "@/components/MediaThumbnail.vue";
@@ -173,7 +174,7 @@ function onProfilePictureChange(event: Event) {
   if (files && files.length > 0) {
     const file = files[0];
     profilePictureFile.value = file;
-    
+
     // Create preview
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -202,7 +203,7 @@ async function uploadProfilePicture(voiceActorId: string | number) {
 
 async function saveVoiceActor() {
   isSaving.value = true;
-  let upsertData: any = {
+  const upsertData: any = {
     firstname: firstname.value,
     lastname: lastname.value,
     bio: bio.value,

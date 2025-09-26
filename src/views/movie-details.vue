@@ -45,7 +45,7 @@
         @fetch-infos="fetchInfos"
         @take-photo="takePhoto"
       />
-      <ion-spinner v-if="isLoading" class="main-spinner"></ion-spinner>
+      <LoadingSpinner v-if="isLoading" />
     </ion-content>
 
     <ion-toast
@@ -96,6 +96,7 @@ import MovieInfoCard from "@/components/MovieInfoCard.vue";
 import ActorList from "@/components/ActorList.vue";
 import ActionButtons from "@/components/ActionButtons.vue";
 import VoiceActorSearchModal from "@/components/VoiceActorSearchModal.vue";
+import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 
 
@@ -331,9 +332,3 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped lang="scss">
-.main-spinner {
-  display: block;
-  margin: 32px auto;
-}
-</style>

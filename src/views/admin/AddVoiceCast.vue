@@ -10,8 +10,7 @@
     </ion-header>
     <ion-content :fullscreen="true">
       <div v-if="loading" class="loading-spinner">
-        <ion-spinner></ion-spinner>
-        <p>Loading movie data...</p>
+        <LoadingSpinner text="Loading movie data..."></LoadingSpinner>
       </div>
 
       <div v-else-if="error" class="error-message">
@@ -41,10 +40,10 @@
           <div v-else class="cast-list">
             <div v-for="actor in actors" :key="actor.id" class="cast-item">
               <div class="actor-info">
-                <img 
-                  v-if="actor.profile_path" 
-                  :src="getImage(actor.profile_path, 'w185')" 
-                  :alt="actor.name" 
+                <img
+                  v-if="actor.profile_path"
+                  :src="getImage(actor.profile_path, 'w185')"
+                  :alt="actor.name"
                   class="actor-image"
                 />
                 <div class="actor-details">
@@ -71,12 +70,12 @@
 
         <!-- Save Button -->
         <div class="action-buttons">
-          <ion-button 
-            expand="block" 
+          <ion-button
+            expand="block"
             :disabled="isSaving || !hasChanges"
             @click="saveVoiceCast"
           >
-            <ion-spinner v-if="isSaving" name="crescent"></ion-spinner>
+            <LoadingSpinner v-if="isSaving" name="crescent" :inline="true"></LoadingSpinner>
             <span v-else>Save Changes</span>
           </ion-button>
         </div>
@@ -96,8 +95,7 @@
         <ion-content>
           <ion-searchbar v-model="modalSearchTerm" @ionInput="handleModalSearch" placeholder="Search voice actors..."></ion-searchbar>
           <div v-if="modalLoading" class="loading-spinner">
-            <ion-spinner></ion-spinner>
-            <p>Searching...</p>
+            <LoadingSpinner text="Searching..."></LoadingSpinner>
           </div>
           <div v-else-if="modalError" class="error-message">
             <p>Error: {{ modalError }}</p>
@@ -130,7 +128,6 @@ import {
   IonTitle,
   IonContent,
   IonButton,
-  IonSpinner,
   IonItem,
   IonLabel,
   IonNote,
@@ -143,6 +140,7 @@ import {
   IonIcon,
   toastController
 } from '@ionic/vue';
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import { closeCircle } from 'ionicons/icons';
 import { supabase } from '@/api/supabase';
 
@@ -331,23 +329,23 @@ const fetchMovieData = async () => {
   try {
     loading.value = true;
     error.value = null;
-    
+
     // Fetch movie data using edge function
     const { data: movieResponse, error: fetchError } = await supabase.functions.invoke('movie', {
       body: { id: movieId.value },
     });
-    
+
     if (fetchError) throw fetchError;
-    
+
     // Type assertion to ensure we have the correct shape
     const response = movieResponse as MovieResponse;
-    
+
     movie.value = response.movie;
     voiceActors.value = response.voiceActors || [];
-    
+
     // Map actors from the credits
     actors.value = response.movie.credits?.cast || [];
-    
+
     // Initialize voice actor assignments
     voiceActorAssignments.value = actors.value.reduce((acc, actor) => {
       // Find if there's an existing voice actor for this actor
@@ -355,7 +353,7 @@ const fetchMovieData = async () => {
       acc[actor.id] = voiceActor?.voice_actor_id || null;
       return acc;
     }, {} as Record<number, number | null>);
-    
+
   } catch (err) {
     console.error('Error fetching movie data:', err);
     error.value = 'Failed to load movie data. Please try again.';
@@ -377,10 +375,10 @@ const clearVoiceActor = (actorId: number) => {
 
 const saveVoiceCast = async () => {
   if (!hasChanges.value) return;
-  
+
   try {
     isSaving.value = true;
-    
+
     // Get all assignments that have a voice actor selected
     const assignments = Object.entries(voiceActorAssignments.value)
       .filter(([_, voiceActorId]) => voiceActorId !== null)
@@ -391,28 +389,28 @@ const saveVoiceCast = async () => {
         content_type: 'movie',
         performance: 'voice'
       }));
-    
+
     // Delete existing assignments for this movie
     const { error: deleteError } = await supabase
       .from('work')
       .delete()
       .eq('content_id', movieId.value)
       .eq('content_type', 'movie');
-    
+
     if (deleteError) throw deleteError;
-    
+
     // Insert new assignments
     if (assignments.length > 0) {
       const { error: insertError } = await supabase
         .from('work')
         .insert(assignments);
-      
+
       if (insertError) throw insertError;
     }
-    
+
     await showSuccess('Voice cast saved successfully!');
     ionRouter.push(`/movie/${movieId.value}`);
-    
+
   } catch (err) {
     console.error('Error saving voice cast:', err);
     showError('Failed to save voice cast');
@@ -448,7 +446,7 @@ onMounted(async () => {
     loading.value = false;
     return;
   }
-  
+
   await fetchMovieData();
 });
 </script>
@@ -587,16 +585,16 @@ onMounted(async () => {
     align-items: center;
     text-align: center;
   }
-  
+
   .movie-poster {
     width: 120px;
   }
-  
+
   .actor-info {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .actor-image {
     width: 80px;
     height: 120px;

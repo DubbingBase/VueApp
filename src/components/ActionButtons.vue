@@ -1,7 +1,7 @@
 <template>
   <div class="action-buttons">
     <ion-button :disabled="isFetching" v-if="hasWikidataId && !hasData" class="fetch-infos-btn" @click="$emit('fetch-infos')">
-      <ion-spinner v-if="isFetching"></ion-spinner>
+      <LoadingSpinner v-if="isFetching" :inline="true"></LoadingSpinner>
       <span v-else>Récupérer les informations</span>
     </ion-button>
 
@@ -11,7 +11,7 @@
       @click="$emit('take-photo')"
       :disabled="isScanning"
     >
-      <ion-spinner v-if="isScanning"></ion-spinner>
+      <LoadingSpinner v-if="isScanning" :inline="true"></LoadingSpinner>
       <ion-icon v-else :icon="cameraOutline" slot="start"></ion-icon>
       Scanner
     </ion-button>
@@ -20,7 +20,8 @@
 </template>
 
 <script setup lang="ts">
-import { IonButton, IonSpinner, IonIcon } from "@ionic/vue";
+import { IonButton, IonIcon } from "@ionic/vue";
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import { cameraOutline } from 'ionicons/icons';
 
 defineProps<{

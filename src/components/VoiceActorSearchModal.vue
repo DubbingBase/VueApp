@@ -22,7 +22,7 @@
     <ion-content class="ion-padding">
       <ion-list v-if="searchResults.length > 0">
         <ion-item v-if="isSearching" class="ion-text-center">
-          <ion-spinner></ion-spinner>
+          <LoadingSpinner></LoadingSpinner>
         </ion-item>
         <ion-item v-else-if="searchError" class="ion-text-center">
           <ion-text color="danger">{{ searchError }}</ion-text>
@@ -67,9 +67,9 @@ import {
   IonItem,
   IonText,
   IonAvatar,
-  IonLabel,
-  IonSpinner
+  IonLabel
 } from "@ionic/vue";
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import { ref } from "vue";
 import { closeCircle } from 'ionicons/icons';
 

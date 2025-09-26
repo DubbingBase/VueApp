@@ -16,7 +16,7 @@
         :isScanning="false"
         @fetch-infos="fetchInfos"
       />
-      <ion-spinner v-if="isLoading" class="loading-spinner" name="crescent" />
+      <LoadingSpinner v-if="isLoading" name="crescent" />
       <div v-if="season && !isLoading" class="season-details">
         <SeasonBanner :season="season" :getImage="getImage" />
         <ion-segment scrollable v-model="activeTab" class="season-tabs">
@@ -68,7 +68,6 @@ import {
   IonBackButton,
   IonTitle,
   IonContent,
-  IonSpinner,
   IonSegment,
   IonSegmentButton,
   toastController,
@@ -79,6 +78,7 @@ import SeasonBanner from "../components/SeasonBanner.vue";
 import EpisodesList from "../components/EpisodesList.vue";
 import ActionButtons from "../components/ActionButtons.vue";
 import ActorList from "../components/ActorList.vue";
+import LoadingSpinner from "../components/common/LoadingSpinner.vue";
 
 const route = useRoute();
 const router = useRouter();

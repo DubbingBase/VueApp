@@ -79,7 +79,7 @@
           :disabled="!isFormValid || isSubmitting"
           expand="block"
         >
-          <ion-spinner v-if="isSubmitting" slot="start"></ion-spinner>
+          <LoadingSpinner v-if="isSubmitting" slot="start" :inline="true"></LoadingSpinner>
           Ajouter le projet
         </ion-button>
       </div>
@@ -89,7 +89,8 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { modalController, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent, IonList, IonItem, IonSearchbar, IonThumbnail, IonLabel, IonSpinner } from '@ionic/vue'
+import { modalController, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent, IonList, IonItem, IonSearchbar, IonThumbnail, IonLabel } from '@ionic/vue'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import { useProfileStore } from '@/stores/profile'
 import { supabase } from '@/api/supabase'
 import type { Movie, CastMember as MovieCastMember } from '../../../supabase/functions/_shared/movie'
@@ -169,9 +170,9 @@ const onCharacterSearch = (event: any) => {
     characterSearchResults.value = cast.value.slice(0, 10)
     return
   }
-  
-  characterSearchResults.value = cast.value.filter(member => 
-    member.name.toLowerCase().includes(lowerCaseQuery) || 
+
+  characterSearchResults.value = cast.value.filter(member =>
+    member.name.toLowerCase().includes(lowerCaseQuery) ||
     (member.character && member.character.toLowerCase().includes(lowerCaseQuery))
   )
 }

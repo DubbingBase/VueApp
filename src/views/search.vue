@@ -27,9 +27,7 @@
         <p v-if="!isLoading && matches.length === 0 && query.length >= 3" class="empty-state">No results found</p>
         <p v-if="!isLoading && matches.length === 0 && query.length < 3" class="empty-state">Start typing to search...</p>
       </div>
-      <div v-if="isLoading" class="loading-overlay">
-        <ion-spinner name="crescent"></ion-spinner>
-      </div>
+      <LoadingSpinner v-if="isLoading" :overlay="true" />
       <ion-toast :is-open="!!error" :message="error" @didDismiss="error=''"></ion-toast>
     </ion-content>
   </ion-page>
@@ -45,12 +43,12 @@ import {
   IonList,
   IonToolbar,
   IonPage,
-  IonSpinner,
   IonToast,
   SearchbarInputEventDetail,
 } from "@ionic/vue";
 import { IonSearchbarCustomEvent } from "@ionic/core";
 import SearchResultItem from "@/components/SearchResultItem.vue";
+import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
 import { supabase } from '@/api/supabase';
 
 type SearchResult = {
@@ -127,18 +125,6 @@ const search = async (
 }
 .content-wrapper {
   position: relative;
-}
-.loading-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(255, 255, 255, 0.8);
-  z-index: 10;
 }
 </style>
 

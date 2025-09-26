@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
   ]
 
   // Limit to the top 5 most popular items
-  const top5Trending = allTrending.sort(t => t.popularity).slice(0, 25);
+  const top5Trending = allTrending.sort(t => t.popularity).slice(0, 15);
 
   console.log('top5Trending', top5Trending)
 
@@ -89,6 +89,9 @@ Deno.serve(async (req) => {
     })();
 
     allResults.push(result);
+
+    // Add 1-second delay to prevent rate limiting
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }
 
   // Generate Summary

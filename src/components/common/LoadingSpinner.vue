@@ -1,11 +1,21 @@
 <template>
-  <div class="loading-container" :class="{ 'inline': inline }">
+  <div v-if="props.overlay" class="loading-overlay">
+    <div class="loading-container" :class="{ 'inline': props.inline }">
+      <ion-spinner
+        :name="props.name"
+        :color="props.color"
+        :size="props.size"
+      ></ion-spinner>
+      <span v-if="props.text" class="loading-text">{{ props.text }}</span>
+    </div>
+  </div>
+  <div v-else class="loading-container" :class="{ 'inline': props.inline }">
     <ion-spinner
-      :name="name"
-      :color="color"
-      :size="size"
+      :name="props.name"
+      :color="props.color"
+      :size="props.size"
     ></ion-spinner>
-    <span v-if="text" class="loading-text">{{ text }}</span>
+    <span v-if="props.text" class="loading-text">{{ props.text }}</span>
   </div>
 </template>
 
@@ -18,6 +28,7 @@ interface Props {
   size?: string
   text?: string
   inline?: boolean
+  overlay?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -25,17 +36,32 @@ const props = withDefaults(defineProps<Props>(), {
   color: 'primary',
   size: undefined,
   text: '',
-  inline: false
+  inline: false,
+  overlay: false
 })
 </script>
 
 <style scoped>
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
 .loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  min-height: 50vh;
 }
 
 .loading-container.inline {

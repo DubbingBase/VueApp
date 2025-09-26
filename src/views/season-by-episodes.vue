@@ -10,7 +10,7 @@
     </ion-header>
     <ion-content>
       <ActionButtons :hasWikidataId="hasWikidataId" :hasData="hasData" :isFetching="isFetching" :isScanning="false" @fetch-infos="fetchEpisodeInfos" />
-      <ion-spinner v-if="isLoading" class="loading-spinner" name="crescent" />
+      <LoadingSpinner v-if="isLoading" name="crescent" />
       <div v-if="error" class="error">{{ error }}</div>
       <div v-if="episode && !isLoading" class="episode-detail">
         <EpisodeBanner :episode="episode" :getImage="getImage" />
@@ -27,6 +27,7 @@
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { IonPage, IonHeader, IonToolbar, IonButtons, IonBackButton, IonTitle, IonContent, toastController } from "@ionic/vue";
+import LoadingSpinner from "../components/common/LoadingSpinner.vue";
 import { getImage } from "../utils";
 import { supabase } from "../api/supabase";
 import ActionButtons from "../components/ActionButtons.vue";

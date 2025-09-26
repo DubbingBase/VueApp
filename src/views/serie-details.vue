@@ -31,11 +31,7 @@
 
       <MediaInfoCard :media="show" :getImage="getImage" />
 
-      <ion-spinner
-        v-if="isLoading"
-        class="loading-spinner"
-        name="crescent"
-      ></ion-spinner>
+      <LoadingSpinner v-if="isLoading" />
 
       <div class="tabs" v-show="!isLoading">
         <ion-segment scrollable>
@@ -169,7 +165,6 @@ import {
   IonSegmentButton,
   IonSegmentContent,
   IonSegmentView,
-  IonSpinner,
   toastController,
   IonToast,
 } from "@ionic/vue";
@@ -181,6 +176,7 @@ import MediaInfoCard from "@/components/MediaInfoCard.vue";
 import ActorList from "@/components/ActorList.vue";
 import ActionButtons from "@/components/ActionButtons.vue";
 import VoiceActorSearchModal from "@/components/VoiceActorSearchModal.vue";
+import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
 import { useVoiceActorManagement } from "@/composables/useVoiceActorManagement";
 // Removed unused imports
 import SolarSettingsMinimalisticOutline from "~icons/solar/settings-minimalistic-outline";
