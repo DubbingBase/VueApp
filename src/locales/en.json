@@ -1,0 +1,52 @@
+{
+  "app": {
+    "title": "Dubbing Database",
+    "description": "Discover voice actors and their works"
+  },
+  "navigation": {
+    "home": "Home",
+    "search": "Search",
+    "profile": "Profile",
+    "admin": "Administration",
+    "login": "Login",
+    "logout": "Logout"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort"
+  },
+  "voiceActor": {
+    "name": "Name",
+    "biography": "Biography",
+    "works": "Works",
+    "movies": "Movies",
+    "series": "Series",
+    "episodes": "Episodes"
+  },
+  "media": {
+    "title": "Title",
+    "year": "Year",
+    "genre": "Genre",
+    "director": "Director",
+    "cast": "Cast"
+  },
+  "home": {
+    "welcome": "Welcome!",
+    "trendingMovies": "Trending - Movies",
+    "trendingSeries": "Trending - Series",
+    "recentVoiceActors": "Recent Voice Actors",
+    "moviesError": "Unable to load popular movies. Please try again later.",
+    "moviesEmpty": "No trending movies found.",
+    "seriesError": "Unable to load popular series. Please try again later.",
+    "seriesEmpty": "No trending series found.",
+    "voiceActorsError": "Unable to load recent voices. Please try again later.",
+    "voiceActorsEmpty": "No recent voices found."
+  }
+}

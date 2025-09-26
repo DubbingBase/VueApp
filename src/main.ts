@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 
 import { IonicVue } from '@ionic/vue';
+import i18n from './i18n';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/vue/css/core.css';
@@ -49,7 +50,8 @@ import { useAuthStore } from '@/stores/auth';
 const app = createApp(App)
 .use(IonicVue)
 .use(router)
-.use(createPinia());
+.use(createPinia())
+.use(i18n);
 
 
 
@@ -58,11 +60,11 @@ router.isReady().then(async () => {
   try {
     // Initialize auth first
     await authStore.initialize();
-    
+
     // Check if we have a valid session
     const { isAuthenticated } = authStore;
     console.log('Initial auth state:', { isAuthenticated });
-    
+
   } catch (error) {
     console.error('Error during app initialization:', error);
   }

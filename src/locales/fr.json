@@ -1,0 +1,52 @@
+{
+  "app": {
+    "title": "Base de Données de Doublage",
+    "description": "Découvrez les acteurs de doublage et leurs œuvres"
+  },
+  "navigation": {
+    "home": "Accueil",
+    "search": "Recherche",
+    "profile": "Profil",
+    "admin": "Administration",
+    "login": "Connexion",
+    "logout": "Déconnexion"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "sort": "Trier"
+  },
+  "voiceActor": {
+    "name": "Nom",
+    "biography": "Biographie",
+    "works": "Œuvres",
+    "movies": "Films",
+    "series": "Séries",
+    "episodes": "Épisodes"
+  },
+  "media": {
+    "title": "Titre",
+    "year": "Année",
+    "genre": "Genre",
+    "director": "Réalisateur",
+    "cast": "Distribution"
+  },
+  "home": {
+    "welcome": "Bienvenue !",
+    "trendingMovies": "Tendances - Films",
+    "trendingSeries": "Tendances - Séries",
+    "recentVoiceActors": "Doubleurs récents",
+    "moviesError": "Impossible de charger les films populaires. Veuillez réessayer plus tard.",
+    "moviesEmpty": "Aucun film tendance trouvé.",
+    "seriesError": "Impossible de charger les séries populaires. Veuillez réessayer plus tard.",
+    "seriesEmpty": "Aucune série tendance trouvée.",
+    "voiceActorsError": "Impossible de charger les voix récentes. Veuillez réessayer plus tard.",
+    "voiceActorsEmpty": "Aucune voix récente trouvée."
+  }
+}

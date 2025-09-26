@@ -2,18 +2,18 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Accueil</ion-title>
+        <ion-title>{{ t('navigation.home') }}</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
       <ion-header collapse="condense">
         <ion-toolbar>
-          <ion-title size="large">Bienvenue !</ion-title>
+          <ion-title size="large">{{ t('home.welcome') }}</ion-title>
         </ion-toolbar>
       </ion-header>
 
       <div class="trending-movies">
-        <div class="list-header">🎬 Tendances - Films</div>
+        <div class="list-header">{{ t('home.trendingMovies') }}</div>
         <div class="movies">
           <template v-if="isLoadingMovies">
             <MediaItem
@@ -27,10 +27,10 @@
             />
           </template>
           <template v-else-if="errorMovies">
-            <div class="error-message">Impossible de charger les films populaires. Veuillez réessayer plus tard.</div>
+            <div class="error-message">{{ t('home.moviesError') }}</div>
           </template>
           <template v-else-if="trendingMovies.length === 0">
-            <div class="empty-message">Aucun film tendance trouvé.</div>
+            <div class="empty-message">{{ t('home.moviesEmpty') }}</div>
           </template>
           <template v-else>
             <MediaItem
@@ -45,7 +45,7 @@
         </div>
       </div>
       <div class="trending-series">
-        <div class="list-header">📺 Tendances - Séries</div>
+        <div class="list-header">{{ t('home.trendingSeries') }}</div>
         <div class="series">
           <template v-if="isLoadingSeries">
             <MediaItem
@@ -59,10 +59,10 @@
             />
           </template>
           <template v-else-if="errorSeries">
-            <div class="error-message">Impossible de charger les séries populaires. Veuillez réessayer plus tard.</div>
+            <div class="error-message">{{ t('home.seriesError') }}</div>
           </template>
           <template v-else-if="trendingSeries.length === 0">
-            <div class="empty-message">Aucune série tendance trouvée.</div>
+            <div class="empty-message">{{ t('home.seriesEmpty') }}</div>
           </template>
           <template v-else>
             <MediaItem
@@ -77,7 +77,7 @@
         </div>
       </div>
       <div class="recent-voice-actors">
-        <div class="list-header">🎤 Voice Actors Récents</div>
+        <div class="list-header">{{ t('home.recentVoiceActors') }}</div>
         <div class="voice-actors">
           <template v-if="isLoadingVoiceActors">
             <MediaItem
@@ -91,10 +91,10 @@
             />
           </template>
           <template v-else-if="errorVoiceActors">
-            <div class="error-message">Impossible de charger les voix récentes. Veuillez réessayer plus tard.</div>
+            <div class="error-message">{{ t('home.voiceActorsError') }}</div>
           </template>
           <template v-else-if="recentVoiceActors.length === 0">
-            <div class="empty-message">Aucune voix récente trouvée.</div>
+            <div class="empty-message">{{ t('home.voiceActorsEmpty') }}</div>
           </template>
           <template v-else>
             <MediaItem
@@ -114,12 +114,15 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { useI18n } from "vue-i18n";
 import type { TrendingResponse } from "../../supabase/functions/_shared/movie";
 import type { TrendingResponse as SerieTrendingResponse } from "../../supabase/functions/_shared/serie";
 import type { Tables } from "../../supabase/functions/_shared/database.types";
 import MediaItem from "../components/MediaItem.vue";
 import { supabase } from "../api/supabase";
 import { IonPage, IonContent, IonHeader, IonTitle, IonToolbar } from "@ionic/vue";
+
+const { t } = useI18n();
 
 const trendingMovies = ref<TrendingResponse["results"]>([]);
 const trendingSeries = ref<SerieTrendingResponse["results"]>([]);
