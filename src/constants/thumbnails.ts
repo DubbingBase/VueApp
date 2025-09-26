@@ -1,2 +1,5 @@
 export const THUMBNAIL_DEFAULT_WIDTH = 53;
 export const THUMBNAIL_DEFAULT_HEIGHT = 80;
+
+export const MEDIA_ITEM_DEFAULT_WIDTH = 133;
+export const MEDIA_ITEM_DEFAULT_HEIGHT = 200;

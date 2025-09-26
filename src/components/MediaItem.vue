@@ -1,17 +1,23 @@
 <template>
-  <router-link class="media-item" :to="{ name: routeName, params: routeParams }">
+  <router-link class="media-item" :to="{ name: routeName, params: routeParams }" :style="{ flexBasis: MEDIA_ITEM_DEFAULT_WIDTH + 'px', minWidth: MEDIA_ITEM_DEFAULT_WIDTH + 'px', maxWidth: MEDIA_ITEM_DEFAULT_WIDTH + 'px' }">
     <div class="poster">
-      <img :src="getImage(imagePath)" alt="" />
+      <img v-if="!loading" :src="getImage(imagePath)" alt="" :style="{ width: MEDIA_ITEM_DEFAULT_WIDTH + 'px', height: MEDIA_ITEM_DEFAULT_HEIGHT + 'px' }" />
+      <ion-skeleton-text :animated="true" v-else :style="{ width: MEDIA_ITEM_DEFAULT_WIDTH + 'px', height: MEDIA_ITEM_DEFAULT_HEIGHT + 'px', borderRadius: '12px', margin: 0 }"></ion-skeleton-text>
     </div>
-    <div class="caption">{{ title }}</div>
+    <div class="caption">
+      <template v-if="!loading">{{ title }}</template>
+      <ion-skeleton-text :animated="true" v-else :style="{ width: '100%', height: '32px', borderRadius: '4px', margin: 0 }"></ion-skeleton-text>
+    </div>
   </router-link>
 </template>
 
 <script lang="ts" setup>
 import { PropType } from "vue";
+import { IonSkeletonText } from "@ionic/vue";
 import { getImage } from "@/utils";
+import { MEDIA_ITEM_DEFAULT_WIDTH, MEDIA_ITEM_DEFAULT_HEIGHT } from "@/constants/thumbnails";
 
-const props = defineProps({
+defineProps({
   imagePath: {
     type: String as PropType<string | undefined>,
     required: true,
@@ -28,29 +34,30 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  loading: {
+    type: Boolean,
+    default: false,
+  },
 });
 </script>
 <style lang="scss" scoped>
 .media-item {
-  flex-basis: 28%;
-  min-width: 120px;
-  max-width: 180px;
-  margin: 4px;
+  margin: 0;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   vertical-align: top;
   height: auto;
   flex: 1 0 auto;
   color: inherit;
   text-decoration: none;
   border-radius: 12px;
-  background-color: #2e2e2e;
-  padding: 4px;
+  padding: 0;
 
   .poster {
-    max-height: 160px;
     display: flex;
-    align-items: start;
+    justify-content: center;
+    align-items: center;
     flex: 0;
 
     img {
@@ -77,35 +84,8 @@ const props = defineProps({
     -webkit-box-orient: vertical;
     margin: 8px 4px;
     word-break: break-word;
+    text-align: left;
   }
 }
 
-@media (max-width: 768px) {
-  .media-item {
-    flex-basis: 45%;
-    min-width: 100px;
-    max-width: 140px;
-  }
-
-  .poster {
-    max-height: 120px;
-  }
-}
-
-@media (max-width: 480px) {
-  .media-item {
-    flex-basis: 48%;
-    min-width: 80px;
-    max-width: 120px;
-  }
-
-  .poster {
-    max-height: 100px;
-  }
-
-  .caption {
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-  }
-}
 </style>

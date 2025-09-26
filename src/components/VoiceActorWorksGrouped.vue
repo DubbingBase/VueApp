@@ -13,13 +13,14 @@
         class="actor-group"
       >
         <div class="actor-header">
-          <PersonItem
-            :person="{ ...actorGroup.actor, profile_path: actorGroup.actor.profile_path || undefined }"
-            type="actor"
-            :getImage="getImage"
-            :subtitle-override="`${actorGroup.works.length} œuvre${actorGroup.works.length > 1 ? 's' : ''}`"
-            @click="$emit('actor-click', actorGroup.actor)"
-          />
+          <RouterLink :to="{ name: 'ActorDetails', params: { id: actorGroup.actor.id } }">
+            <PersonItem
+              :person="{ ...actorGroup.actor, profile_path: actorGroup.actor.profile_path || undefined }"
+              type="actor"
+              :getImage="getImage"
+              :subtitle-override="`${actorGroup.works.length} œuvre${actorGroup.works.length > 1 ? 's' : ''}`"
+            />
+          </RouterLink>
         </div>
 
         <div class="works-list">
@@ -28,11 +29,13 @@
             :key="work.media.id"
             class="work-item"
           >
-            <MovieCard
-              :media="work.media"
-              :character="work.data.character || ''"
-              :media-type="work.media.media_type === 'movie' ? 'movie' : 'serie'"
-            />
+            <RouterLink :to="{ name: work.media.media_type === 'movie' ? 'MovieDetails' : 'SerieDetails', params: { id: work.media.id } }">
+              <MovieCard
+                :media="work.media"
+                :character="work.data.character || ''"
+                :media-type="work.media.media_type === 'movie' ? 'movie' : 'serie'"
+              />
+            </RouterLink>
           </div>
         </div>
       </div>
@@ -42,6 +45,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { RouterLink } from "vue-router";
 import MovieCard from "@/components/MovieCard.vue";
 import PersonItem from "@/components/PersonItem.vue";
 import type { Movie as MovieModel } from "../../supabase/functions/_shared/movie";
@@ -153,5 +157,16 @@ const groupedWorks = computed(() => {
       }
     }
   }
+}
+
+// Remove link underlines and hover styles from anchor tags
+:deep(a) {
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+:deep(a:hover) {
+  text-decoration: none !important;
+  color: inherit !important;
 }
 </style>
