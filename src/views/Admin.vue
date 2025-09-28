@@ -26,6 +26,9 @@
             <ion-icon :icon="micOutline"></ion-icon>
             <ion-label>User -- VA </ion-label>
           </ion-tab-button>
+          <ion-tab-button tab="suggestions" @click="navigateToSuggestions">
+            <ion-label>Suggestions</ion-label>
+          </ion-tab-button>
         </ion-tab-bar>
         <div v-if="activeTab === 'duplicates'">
           <DuplicateVATool />
@@ -79,6 +82,10 @@ const activeTab = ref('duplicates');
 
 const navigateToNewVoiceActor = () => {
   ionRouter.push('/admin/edit-voice-actor/new');
+};
+
+const navigateToSuggestions = () => {
+  ionRouter.push({ name: 'AdminSuggestions' });
 };
 </script>
 
