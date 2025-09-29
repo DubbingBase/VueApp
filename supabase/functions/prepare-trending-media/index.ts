@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
     allResults.push(result);
 
     // Add 1-second delay to prevent rate limiting
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 5000));
   }
 
   // Generate Summary
