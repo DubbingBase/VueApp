@@ -1,0 +1,63 @@
+# Constantsfile for DubbingBase Android app
+# Contains constants used across different lanes
+
+# App configuration
+APP_IDENTIFIER = "com.dubbingbase.app"
+APP_NAME = "DubbingBase"
+PACKAGE_NAME = "com.dubbingbase.app"
+
+# Build configuration
+MIN_SDK_VERSION = 23
+COMPILE_SDK_VERSION = 35
+TARGET_SDK_VERSION = 35
+
+# Version configuration
+DEFAULT_VERSION_CODE = 1
+DEFAULT_VERSION_NAME = "1.0"
+
+# Build types
+BUILD_TYPE_DEBUG = "Debug"
+BUILD_TYPE_RELEASE = "Release"
+
+# Output paths
+AAB_OUTPUT_PATH = "app/build/outputs/bundle/release/app-release.aab"
+APK_OUTPUT_PATH = "app/build/outputs/apk/release/app-release.apk"
+DEBUG_AAB_OUTPUT_PATH = "app/build/outputs/bundle/debug/app-debug.aab"
+DEBUG_APK_OUTPUT_PATH = "app/build/outputs/apk/debug/app-debug.apk"
+
+# Environment variables
+REQUIRED_ENV_VARS = [
+  "SUPABASE_URL",
+  "SUPABASE_ANON_KEY",
+  "KEYSTORE_FILE",
+  "KEYSTORE_PASSWORD",
+  "KEY_ALIAS",
+  "KEY_PASSWORD"
+]
+
+# Keystore configuration
+KEYSTORE_PATH = "app/keystore.jks"
+KEYSTORE_TYPE = "jks"
+
+# Gradle tasks
+GRADLE_TASK_ASSEMBLE = "assemble"
+GRADLE_TASK_BUNDLE = "bundle"
+GRADLE_TASK_CLEAN = "clean"
+GRADLE_TASK_VERSION_UPDATE = "versionUpdate"
+
+# PNPM commands
+PNPM_INSTALL = "pnpm install"
+PNPM_IONIC_BUILD = "pnpm ionic build"
+PNPM_CAPACITOR_SYNC = "pnpm cap sync android"
+
+# Error messages
+ERROR_MISSING_ENV_VARS = "Missing required environment variables"
+ERROR_BUILD_FAILED = "Build failed"
+ERROR_KEYSTORE_SETUP_FAILED = "Keystore setup failed"
+ERROR_VERSION_UPDATE_FAILED = "Version update failed"
+
+# Success messages
+SUCCESS_BUILD_COMPLETED = "Build completed successfully"
+SUCCESS_KEYSTORE_SETUP = "Keystore setup completed"
+SUCCESS_VERSION_UPDATED = "Version updated successfully"
+SUCCESS_ARTIFACTS_CREATED = "Artifacts created successfully"

@@ -1,0 +1,206 @@
+# PrivateLanesfile for DubbingBase Android app
+# Contains private lanes for shared functionality
+
+platform :android do
+  # Private lane to validate environment before build
+  private_lane :validate_build_environment do
+    UI.message("Validating build environment...")
+
+    # Check for required tools
+    unless system("which pnpm > /dev/null 2>&1")
+      UI.user_error!("PNPM is not installed or not in PATH")
+    end
+
+    unless system("which ionic > /dev/null 2>&1")
+      UI.user_error!("Ionic CLI is not installed or not in PATH")
+    end
+
+    unless system("which capacitor > /dev/null 2>&1")
+      UI.user_error!("Capacitor CLI is not installed or not in PATH")
+    end
+
+    # Check for required environment variables
+    required_vars = Constantsfile::REQUIRED_ENV_VARS
+    missing_vars = []
+
+    required_vars.each do |var|
+      if ENV[var].nil? || ENV[var].empty?
+        missing_vars << var
+      end
+    end
+
+    if missing_vars.any?
+      UI.user_error!("Missing required environment variables: #{missing_vars.join(', ')}")
+    end
+
+    UI.success("Build environment validation passed!")
+  end
+
+  # Private lane to prepare project for build
+  private_lane :prepare_project do
+    UI.message("Preparing project for build...")
+
+    # Clean previous builds
+    gradle(task: Constantsfile::GRADLE_TASK_CLEAN)
+
+    # Ensure node_modules exists
+    unless Dir.exist?("../node_modules")
+      Dir.chdir("..") do
+        sh(Constantsfile::PNPM_INSTALL)
+      end
+    end
+
+    UI.success("Project preparation completed!")
+  end
+
+  # Private lane to handle version management
+  private_lane :manage_version do |options|
+    bump_type = options[:bump_type] || "patch" # patch, minor, major
+
+    UI.message("Managing version (bump type: #{bump_type})...")
+
+    # Read current version from build.gradle
+    build_gradle_path = "app/build.gradle"
+    build_gradle_content = File.read(build_gradle_path)
+
+    # Extract current version code and name
+    current_version_code = build_gradle_content.match(/versionCode (\d+)/)[1].to_i
+    current_version_name = build_gradle_content.match(/versionName "([\d.]+)"/)[1]
+
+    # Calculate new version
+    version_parts = current_version_name.split(".")
+    case bump_type
+    when "major"
+      new_version_name = "#{version_parts[0].to_i + 1}.0"
+    when "minor"
+      new_version_name = "#{version_parts[0]}.#{version_parts[1].to_i + 1}"
+    else # patch
+      new_version_name = "#{version_parts[0]}.#{version_parts[1]}.#{version_parts[2].to_i + 1}"
+    end
+
+    new_version_code = current_version_code + 1
+
+    # Update build.gradle
+    build_gradle_content.gsub!(/versionCode \d+/, "versionCode #{new_version_code}")
+    build_gradle_content.gsub!(/versionName "[\d.]+"+/, "versionName \"#{new_version_name}\"")
+    File.write(build_gradle_path, build_gradle_content)
+
+    UI.success("Version updated: #{current_version_name} (#{current_version_code}) -> #{new_version_name} (#{new_version_code})")
+
+    { version_code: new_version_code, version_name: new_version_name }
+  end
+
+  # Private lane to setup signing configuration
+  private_lane :setup_signing do
+    UI.message("Setting up signing configuration...")
+
+    # Create keystore directory if it doesn't exist
+    FileUtils.mkdir_p("app")
+
+    # Decode keystore from base64
+    keystore_content = Base64.decode64(ENV[Constantsfile::REQUIRED_ENV_VARS[2]]) # KEYSTORE_FILE
+    File.write(Constantsfile::KEYSTORE_PATH, keystore_content)
+
+    # Verify keystore file was created
+    unless File.exist?(Constantsfile::KEYSTORE_PATH)
+      UI.user_error!("Failed to create keystore file")
+    end
+
+    UI.success("Signing configuration setup completed!")
+  end
+
+  # Private lane to build ionic app with environment
+  private_lane :build_ionic_with_env do
+    UI.message("Building Ionic app with environment variables...")
+
+    Dir.chdir("..") do
+      # Set environment variables for the build
+      ENV["IONIC_PLATFORM"] = "android"
+      ENV["VITE_SUPABASE_URL"] = ENV["SUPABASE_URL"]
+      ENV["VITE_SUPABASE_KEY"] = ENV["SUPABASE_ANON_KEY"]
+
+      sh(Constantsfile::PNPM_IONIC_BUILD)
+    end
+
+    UI.success("Ionic build completed!")
+  end
+
+  # Private lane to sync capacitor with environment
+  private_lane :sync_capacitor_with_env do
+    UI.message("Syncing Capacitor with environment...")
+
+    Dir.chdir("..") do
+      ENV["IONIC_PLATFORM"] = "android"
+      ENV["CAPACITOR_ANDROID_STUDIO_PATH"] = ENV["ANDROID_STUDIO_PATH"] if ENV["ANDROID_STUDIO_PATH"]
+
+      sh(Constantsfile::PNPM_CAPACITOR_SYNC)
+    end
+
+    UI.success("Capacitor sync completed!")
+  end
+
+  # Private lane to handle build artifacts
+  private_lane :process_artifacts do |options|
+    build_type = options[:build_type] || "release"
+    create_apk = options[:create_apk].nil? ? true : options[:create_apk]
+
+    UI.message("Processing build artifacts...")
+
+    artifacts = []
+
+    # Check for AAB
+    aab_path = "app/build/outputs/bundle/#{build_type}/app-#{build_type}.aab"
+    if File.exist?(aab_path)
+      artifacts << aab_path
+      UI.success("AAB artifact found: #{aab_path}")
+    end
+
+    # Check for APK if requested
+    if create_apk
+      apk_path = "app/build/outputs/apk/#{build_type}/app-#{build_type}.apk"
+      if File.exist?(apk_path)
+        artifacts << apk_path
+        UI.success("APK artifact found: #{apk_path}")
+      end
+    end
+
+    if artifacts.empty?
+      UI.error("No build artifacts found!")
+    else
+      UI.success("Build artifacts processed: #{artifacts.join(', ')}")
+    end
+
+    artifacts
+  end
+
+  # Private lane to clean up temporary files
+  private_lane :cleanup_temp_files do
+    UI.message("Cleaning up temporary files...")
+
+    # Remove temporary keystore file
+    if File.exist?(Constantsfile::KEYSTORE_PATH)
+      File.delete(Constantsfile::KEYSTORE_PATH)
+      UI.message("Temporary keystore removed")
+    end
+
+    # Clean gradle daemon
+    gradle(task: "--stop")
+
+    UI.success("Cleanup completed!")
+  end
+
+  # Private lane to log build information
+  private_lane :log_build_info do |options|
+    build_type = options[:build_type] || "unknown"
+    version_code = options[:version_code]
+    version_name = options[:version_name]
+
+    UI.message("=== Build Information ===")
+    UI.message("Build Type: #{build_type}")
+    UI.message("Version Code: #{version_code}") if version_code
+    UI.message("Version Name: #{version_name}") if version_name
+    UI.message("Timestamp: #{Time.now.strftime('%Y-%m-%d %H:%M:%S')}")
+    UI.message("Platform: Android")
+    UI.message("=======================")
+  end
+end
