@@ -6,8 +6,8 @@ fastlane_version "2.219.0"
 default_platform :android
 
 # Import required fastlane actions
-import "android/Constantsfile"
-import "android/PrivateLanesfile"
+import "Constantsfile"
+import "PrivateLanesfile"
 
 platform :android do
   # Private lanes for shared functionality
