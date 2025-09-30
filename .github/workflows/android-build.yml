@@ -55,6 +55,9 @@ jobs:
         cd android
         bundle check || bundle install
         bundle exec fastlane validate
+      env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
     - name: Validate build environment
       run: |
