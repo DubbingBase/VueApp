@@ -26,3 +26,6 @@ dist-ssr
 .env*
 supabase/seed.sql
 backup_*/**
+android/.bundle/
+android/vendor/
+android/Gemfile.lock

@@ -256,8 +256,8 @@ platform :android do
 
     # Check required files
     required_files = [
-      File.expand_path("../package.json", File.dirname(__FILE__)),
-      File.expand_path("app/build.gradle", File.dirname(__FILE__))
+      File.expand_path("../../package.json", File.dirname(__FILE__)),
+      File.expand_path("../app/build.gradle", File.dirname(__FILE__))
     ]
     missing_files = []
 
