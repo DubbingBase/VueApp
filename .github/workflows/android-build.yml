@@ -65,6 +65,9 @@ jobs:
         echo "Validating build environment..."
         bundle exec fastlane validate
         echo "Build environment validation completed successfully"
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
     - name: Build Android Debug (Pull Requests)
       if: github.event_name == 'pull_request'
