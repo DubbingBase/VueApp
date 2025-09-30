@@ -53,3 +53,9 @@ run = "pnpm supabase db reset --local"
 description = "Backups the database"
 depends = ["install"]
 run = "./backup_db.sh"
+
+[tasks.build-android]
+description = "Builds the Android app"
+depends = ["install"]
+run = "pnpm cap build android"
+env = { JAVA_HOME="/usr/lib/jvm/java-21-openjdk" }
