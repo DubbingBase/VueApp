@@ -30,7 +30,7 @@ platform :android do
   private_lane :build_ionic_app do
     Dir.chdir("..") do
       UI.message("Building Ionic app...")
-      sh("pnpm cap build")
+      sh("pnpm cap build android")
     end
   end
 
@@ -229,7 +229,7 @@ platform :android do
     end
 
     Dir.chdir("..") do
-      sh("pnpm cap build --prod") if Dir.exist?("dist")
+      sh("pnpm cap build android --prod") if Dir.exist?("dist")
     end
 
     UI.success("Clean completed successfully!")
