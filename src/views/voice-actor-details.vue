@@ -19,7 +19,7 @@
           v-if="voiceActor"
           :voiceActor="voiceActor"
           :profilePicture="profilePicture"
-          @profile-picture-changed="profilePicture = $event"
+          @profile-picture-changed="onProfilePictureChanged"
         />
 
         <VoiceActorBio
@@ -183,6 +183,17 @@ const enhancedWork = computed(() => {
 const getImage = (path: string | null, size: string = 'w185') => {
   if (!path) return 'https://placehold.co/48x72?text=?';
   return `https://image.tmdb.org/t/p/${size}${path}`;
+};
+
+const onProfilePictureChanged = (newImagePath: string) => {
+  console.log('Profile picture changed:', newImagePath);
+  profilePicture.value = newImagePath;
+
+  // Update the voice actor's profile picture as well
+  if (voiceActor.value) {
+    voiceActor.value.profile_picture = newImagePath;
+    console.log('Updated voiceActor profile_picture:', voiceActor.value.profile_picture);
+  }
 };
 
 onMounted(async () => {

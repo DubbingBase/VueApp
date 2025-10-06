@@ -52,8 +52,17 @@ Deno.serve(async (req) => {
   console.log("data2", data2);
   console.log("error2", error2);
 
+  // Get the public URL for the uploaded file
+  const { data: publicUrlData } = supabase.storage
+    .from("voice_actor_profile_pictures")
+    .getPublicUrl(data.path);
+
   return new Response(
-    JSON.stringify({ ok: true }),
+    JSON.stringify({
+      ok: true,
+      fullPath: data.path,
+      publicUrl: publicUrlData.publicUrl
+    }),
     {
       headers: {
         ...corsHeaders,

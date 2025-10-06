@@ -79,12 +79,21 @@ onChange(async (files) => {
     formData.append('voice_actor_id', props.voiceActor.id.toString());
   }
 
-  const { data } = await supabase.functions.invoke('upload_profile_picture', {
-    body: formData
-  });
+  try {
+    const { data } = await supabase.functions.invoke('upload_profile_picture', {
+      body: formData
+    });
 
-  if (data?.fullPath) {
-    emit('profilePictureChanged', data.fullPath);
+    console.log('Upload response:', data);
+
+    if (data?.fullPath) {
+      console.log('Emitting profilePictureChanged with:', data.fullPath);
+      emit('profilePictureChanged', data.fullPath);
+    } else {
+      console.error('No fullPath in upload response:', data);
+    }
+  } catch (error) {
+    console.error('Error uploading profile picture:', error);
   }
 });
 
