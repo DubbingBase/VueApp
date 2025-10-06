@@ -14,21 +14,24 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
-      <div class="actor">
+      <LoadingSpinner
+        v-if="loading"
+        :overlay="true"
+        text="Loading voice actor..."
+      />
+
+      <div v-if="!loading && voiceActor" class="actor">
         <VoiceActorHeader
-          v-if="voiceActor"
           :voiceActor="voiceActor"
           :profilePicture="profilePicture"
           @profile-picture-changed="onProfilePictureChanged"
         />
 
         <VoiceActorBio
-          v-if="voiceActor"
           :bio="voiceActor.bio"
         />
 
         <VoiceActorWorksGrouped
-          v-if="voiceActor"
           :works="enhancedWork"
           :getImage="getImage"
         />
@@ -57,6 +60,7 @@ import { supabase } from "../api/supabase";
 import VoiceActorHeader from "@/components/VoiceActorHeader.vue";
 import VoiceActorBio from "@/components/VoiceActorBio.vue";
 import VoiceActorWorksGrouped from "@/components/VoiceActorWorksGrouped.vue";
+import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
 import { storeToRefs } from 'pinia';
 import { useAuthStore } from '@/stores/auth';
 
@@ -100,6 +104,7 @@ type VoiceActorResponse = {
 const voiceActor = ref<VoiceActorResponse["voiceActor"] | undefined>();
 const medias = ref<VoiceActorResponse["medias"]>([]);
 const profilePicture = ref<string | null | undefined>();
+const loading = ref<boolean>(true);
 
 // Define a type for our enhanced work item
 type EnhancedWorkItem = {
@@ -197,6 +202,8 @@ const onProfilePictureChanged = (newImagePath: string) => {
 };
 
 onMounted(async () => {
+  loading.value = true;
+
   const id = route.params.id;
 
   console.log('Fetching voice actor with ID:', id);
@@ -211,6 +218,7 @@ onMounted(async () => {
 
   if (!voiceActorResponse) {
     console.error("voiceActorResponse is null");
+    loading.value = false;
     return;
   }
 
@@ -238,6 +246,8 @@ onMounted(async () => {
   medias.value = voiceActorResponse.medias;
 
   profilePicture.value = voiceActorResponse.voiceActor.profile_picture;
+
+  loading.value = false;
 
   // Add a small delay to ensure computed properties are updated
   setTimeout(() => {
