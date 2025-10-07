@@ -104,6 +104,7 @@
               :title="`${va.firstname} ${va.lastname}`"
               routeName="VoiceActorDetails"
               :routeParams="{ id: va.id }"
+              :fallbackImagePath="`https://api.dicebear.com/9.x/initials/svg?scale=50&backgroundColor=212121&seed=${va.firstname} ${va.lastname}`"
             ></MediaItem>
           </template>
         </div>

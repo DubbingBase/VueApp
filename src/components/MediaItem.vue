@@ -1,43 +1,73 @@
 <template>
-  <router-link class="media-item" :to="{ name: routeName, params: routeParams }" :style="{ flexBasis: MEDIA_ITEM_DEFAULT_WIDTH + 'px', minWidth: MEDIA_ITEM_DEFAULT_WIDTH + 'px', maxWidth: MEDIA_ITEM_DEFAULT_WIDTH + 'px' }">
+  <router-link
+    class="media-item"
+    :to="{ name: routeName, params: routeParams }"
+    :style="{
+      flexBasis: widthStyle ,
+      minWidth: widthStyle ,
+      maxWidth: widthStyle ,
+    }"
+  >
     <div class="poster">
-      <img v-if="!loading" :src="getImage(imagePath)" alt="" :style="{ width: MEDIA_ITEM_DEFAULT_WIDTH + 'px', height: MEDIA_ITEM_DEFAULT_HEIGHT + 'px' }" />
-      <ion-skeleton-text :animated="true" v-else :style="{ width: MEDIA_ITEM_DEFAULT_WIDTH + 'px', height: MEDIA_ITEM_DEFAULT_HEIGHT + 'px', borderRadius: '12px', margin: 0 }"></ion-skeleton-text>
+      <img
+        v-if="!loading"
+        :src="imagePath ?? fallbackImagePath"
+        alt=""
+        :style="{ width: widthStyle, height: heightStyle }"
+      />
+      <ion-skeleton-text
+        :animated="true"
+        v-else
+        :style="{
+          width: widthStyle,
+          height: heightStyle,
+          borderRadius: '12px',
+          margin: 0,
+        }"
+      ></ion-skeleton-text>
     </div>
-    <div class="caption">
+    <div class="caption" v-if="title">
       <template v-if="!loading">{{ title }}</template>
-      <ion-skeleton-text :animated="true" v-else :style="{ width: '100%', height: '42px', borderRadius: '4px', margin: 0 }"></ion-skeleton-text>
+      <ion-skeleton-text
+        :animated="true"
+        v-else
+        :style="{
+          width: '100%',
+          height: '42px',
+          borderRadius: '4px',
+          margin: 0,
+        }"
+      ></ion-skeleton-text>
     </div>
   </router-link>
 </template>
 
 <script lang="ts" setup>
-import { PropType } from "vue";
 import { IonSkeletonText } from "@ionic/vue";
-import { getImage } from "@/utils";
-import { MEDIA_ITEM_DEFAULT_WIDTH, MEDIA_ITEM_DEFAULT_HEIGHT } from "@/constants/thumbnails";
+import {
+  MEDIA_ITEM_DEFAULT_WIDTH,
+  MEDIA_ITEM_DEFAULT_HEIGHT,
+} from "@/constants/thumbnails";
+import { computed } from "vue";
 
-defineProps({
-  imagePath: {
-    type: String as PropType<string | undefined>,
-    required: true,
-  },
-  title: {
-    type: String,
-    required: true,
-  },
-  routeName: {
-    type: String,
-    required: true,
-  },
-  routeParams: {
-    type: Object,
-    required: true,
-  },
-  loading: {
-    type: Boolean,
-    default: false,
-  },
+interface Props {
+  imagePath: string | undefined;
+  title?: string;
+  routeName: string;
+  routeParams: Record<string, any>;
+  loading?: boolean;
+  fallbackImagePath?: string;
+  height?: number;
+  width?: number;
+}
+
+const props = defineProps<Props>();
+
+const heightStyle = computed(() => {
+  return `${props.height ?? MEDIA_ITEM_DEFAULT_HEIGHT}px`;
+});
+const widthStyle = computed(() => {
+  return `${props.width ?? MEDIA_ITEM_DEFAULT_WIDTH}px`;
 });
 </script>
 <style lang="scss" scoped>
@@ -87,5 +117,4 @@ defineProps({
     text-align: left;
   }
 }
-
 </style>

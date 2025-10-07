@@ -1,5 +1,5 @@
-import { corsHeaders } from '../_shared/cors.ts';
-import { supabase } from '../_shared/supabase.ts';
+import { corsHeaders } from "../_shared/http-utils.ts"
+import { supabase } from "../_shared/database.ts"
 
 console.log('delete-voice-actor-link function started');
 

@@ -4,9 +4,10 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { corsHeaders } from "../_shared/cors.ts"
-import { supabase } from "../_shared/supabase.ts"
+import { corsHeaders } from "../_shared/http-utils.ts"
+import { supabase } from "../_shared/database.ts"
 import { Tables } from "../_shared/database.types.ts"
+import { processMedia } from "../_shared/tmdb-urls.ts";
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -31,7 +32,8 @@ Deno.serve(async (req) => {
     })
 
     const res = await response.json()
-    resp.push(...res.results)
+    const withImages = res.results.map(x => processMedia(x))
+    resp.push(...withImages)
   } catch (e) {
     console.error('e', e)
   }
@@ -64,7 +66,7 @@ Deno.serve(async (req) => {
             media_type: 'voice_actor'
           })
         } else {
-          respMap.set(key, { ...voiceActor, media_type: 'voice_actor' })
+          respMap.set(key, { ...voiceActor, media_type: 'voice_actor', popularity: 9999, known_for_department: 'Dubbing' })
         }
       })
       // Update resp with deduplicated results
@@ -73,6 +75,8 @@ Deno.serve(async (req) => {
   } catch (e) {
     console.log('e', e)
   }
+
+  resp = resp.sort((a, b) => b.popularity - a.popularity)
 
   return new Response(
     JSON.stringify(resp),

@@ -4,38 +4,26 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { corsHeaders } from "../_shared/cors.ts"
-import { supabase } from "../_shared/supabase.ts"
+import { TMDBClient } from "../_shared/tmdb.ts"
+import { DatabaseClient } from "../_shared/database.ts"
+import { createResponse, createErrorResponse, handleOptions } from "../_shared/http-utils.ts"
 
-async function getActor(actorId: number) {
+async function getActor(actorId: number, tmdbClient: TMDBClient) {
   try {
-    // fetch actor from tmdb
-    const response = await fetch(`https://api.themoviedb.org/3/person/${actorId}?append_to_response=credits,external_ids&language=fr-FR`, {
-      headers: {
-        "Content-Type": "application/json",
-        'Authorization': `Bearer ${Deno.env.get('TMDB_API_KEY')}`,
-        'Accept': 'application/json',
-      },
+    // Use shared TMDBClient for API calls
+    return await tmdbClient.get(`person/${actorId}`, {
+      append_to_response: 'credits,external_ids'
     });
-    
-    return await response.json();
   } catch (e) {
     console.error('Error fetching actor details:', e);
     return null;
   }
 }
 
-async function fetchMediaDetails(contentId: number, contentType: string) {
+async function fetchMediaDetails(contentId: number, contentType: string, tmdbClient: TMDBClient) {
   try {
-    const response = await fetch(`https://api.themoviedb.org/3/${contentType}/${contentId}?language=fr-FR`, {
-      headers: {
-        "Content-Type": "application/json",
-        'Authorization': `Bearer ${Deno.env.get('TMDB_API_KEY')}`,
-        'Accept': 'application/json',
-      },
-    });
-    
-    return await response.json();
+    // Use shared TMDBClient for API calls
+    return await tmdbClient.get(`${contentType}/${contentId}`);
   } catch (e) {
     console.error('Error fetching media details:', e);
     return null;
@@ -43,21 +31,12 @@ async function fetchMediaDetails(contentId: number, contentType: string) {
 }
 
 // Get voice roles for an actor
-async function getVoiceRoles(actorId: number): Promise<VoiceRole[]> {
+async function getVoiceRoles(actorId: number, tmdbClient: TMDBClient, dbClient: DatabaseClient): Promise<VoiceRole[]> {
   try {
-    const { data, error } = await supabase
-      .from('work')
-      .select(`
-        *,
-        voice_actors (*)
-      `)
-      .eq('actor_id', actorId)
-      
-    if (error) throw error;
-    if (!data) return [];
-    
-    // Cast the data to our WorkWithVoiceActor type
-    const workData = data as unknown as WorkWithVoiceActor[];
+    // Use shared DatabaseClient for database queries
+    const workData = await dbClient.getWorkByActor(actorId);
+
+    if (!workData) return [];
 
     // Count occurrences per voice_actor_id
     const counts: Record<number, number> = {};
@@ -77,11 +56,11 @@ async function getVoiceRoles(actorId: number): Promise<VoiceRole[]> {
       workData.map(async (row) => {
         const { voice_actors, ...work } = row;
         let mediaDetails = null;
-        
+
         if (work.content_id && work.content_type) {
-          mediaDetails = await fetchMediaDetails(work.content_id, work.content_type);
+          mediaDetails = await fetchMediaDetails(work.content_id, work.content_type, tmdbClient);
         }
-        
+
         return {
           ...work,
           highlight: top3.includes(work.voice_actor_id),
@@ -118,92 +97,49 @@ async function getVoiceRoles(actorId: number): Promise<VoiceRole[]> {
 
 // Main request handler
 Deno.serve(async (req: Request): Promise<Response> => {
-  // Handle CORS preflight
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { 
-      headers: { ...corsHeaders }
-    });
+    return handleOptions()
   }
-  
-  const { id } = await req.json()
-
-  console.log('id', id)
-  
 
   try {
+    const { id } = await req.json()
+
     if (!id) {
-      return new Response(
-        JSON.stringify({ error: 'Missing id parameter' }), 
-        { 
-          status: 400,
-          headers: { 
-            'Content-Type': 'application/json', 
-            ...corsHeaders 
-          },
-        }
-      );
+      return createErrorResponse('Missing id parameter', 400)
     }
 
-    const actorId = parseInt(id, 10);
+    const actorId = parseInt(id, 10)
     if (isNaN(actorId)) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid id parameter' }), 
-        { 
-          status: 400,
-          headers: { 
-            'Content-Type': 'application/json', 
-            ...corsHeaders 
-          },
-        }
-      );
+      return createErrorResponse('Invalid id parameter', 400)
     }
+
+    // Initialize shared clients
+    const tmdbClient = new TMDBClient()
+    const dbClient = new DatabaseClient()
 
     const [actor, voiceRoles] = await Promise.all([
-      getActor(actorId),
-      getVoiceRoles(actorId)
+      getActor(actorId, tmdbClient),
+      getVoiceRoles(actorId, tmdbClient, dbClient)
     ]);
 
     if (!actor) {
-      return new Response(
-        JSON.stringify({ error: 'Actor not found' }), 
-        { 
-          status: 404,
-          headers: { 
-            'Content-Type': 'application/json', 
-            ...corsHeaders 
-          },
-        }
-      );
+      return createErrorResponse('Actor not found', 404)
     }
 
-    return new Response(
-      JSON.stringify({
-        actor: {
-          ...actor,
-          voice_roles: voiceRoles,
-        },
-        voiceActors: voiceRoles,
-      }),
-      {
-        headers: { 
-          'Content-Type': 'application/json', 
-          ...corsHeaders 
-        },
+    const result = {
+      actor: {
+        ...actor,
+        voice_roles: voiceRoles,
       },
-    );
+      voiceActors: voiceRoles,
+    }
+
+    return createResponse(result)
   } catch (error) {
-    console.error('Error:', error);
-    return new Response(
-      JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'An unknown error occurred' 
-      }), 
-      {
-        status: 500,
-        headers: { 
-          'Content-Type': 'application/json', 
-          ...corsHeaders 
-        },
-      }
-    );
+    console.error('Error in actor function:', error)
+    return createErrorResponse(
+      error instanceof Error ? error.message : 'An unknown error occurred'
+    )
   }
 });

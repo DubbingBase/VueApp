@@ -15,21 +15,22 @@
     </ion-header>
     <ion-content>
       <!-- Banner with backdrop and metadata -->
-      <!-- <div class="banner" v-if="show">
-        <img
-          class="banner-backdrop"
-          width="100%"
-          :src="getImage(show.backdrop_path)"
-          alt="Backdrop"
+      <div class="banner" v-if="show">
+        <MediaItem
           v-if="show.backdrop_path"
+          :imagePath="show.backdrop_path"
+          :title="show.name"
+          :routeName="'SerieDetails'"
+          :routeParams="{ id: show.id }"
+          class="banner-backdrop"
         />
         <div class="banner-overlay"></div>
       </div>
       <div v-else class="banner banner-placeholder">
         <div class="banner-title">Chargement…</div>
-      </div> -->
+      </div>
 
-      <MediaInfoCard :media="show" :getImage="getImage" />
+      <MediaInfoCard :media="show" />
 
       <LoadingSpinner v-if="isLoading" />
 
@@ -77,7 +78,6 @@
               :edit-voice-actor-link="editVoiceActorLink"
               :confirm-delete-voice-actor-link="confirmDeleteVoiceActorLink"
               :open-voice-actor-search="openVoiceActorSearch"
-              :get-image="getImage"
               :loading="isLoading"
             />
           </ion-segment-content>
@@ -135,6 +135,7 @@ import { useRoute } from "vue-router";
 import { useIonRouter } from "@ionic/vue";
 import MediaThumbnail from "@/components/MediaThumbnail.vue";
 import MediaInfoCard from "@/components/MediaInfoCard.vue";
+import MediaItem from "@/components/MediaItem.vue";
 import ActorList from "@/components/ActorList.vue";
 import ActionButtons from "@/components/ActionButtons.vue";
 import VoiceActorSearchModal from "@/components/VoiceActorSearchModal.vue";
@@ -146,6 +147,7 @@ import { storeToRefs } from "pinia";
 import { useAuthStore } from "@/stores/auth";
 import { supabase } from "@/api/supabase";
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { actorToPersonData } from "@/utils/convert";
 
 const authStore = useAuthStore();
 const { isAdmin } = storeToRefs(authStore);
@@ -169,7 +171,6 @@ const {
   voiceActors,
 
   // Methods
-  getImage,
   getVoiceActorByTmdbId,
   openVoiceActorSearch,
   searchVoiceActors,
@@ -180,7 +181,7 @@ const {
 } = useVoiceActorManagement("tv");
 
 const actors = computed(() => {
-  return show.value?.credits?.cast || [];
+  return show.value?.credits.cast.map(cast => actorToPersonData(cast));
 });
 
 // Voice actor methods are now provided by the composable
@@ -342,6 +343,40 @@ $border: #1b1b1b;
     object-fit: cover;
     width: 100%;
     height: 100%;
+  }
+}
+
+.banner-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+
+  :deep(.media-item) {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+  }
+
+  :deep(.poster) {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+  }
+
+  :deep(.poster img) {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    object-fit: cover;
+  }
+
+  :deep(.caption) {
+    display: none; // Hide caption in banner context
   }
 }
 

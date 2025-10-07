@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { corsHeaders } from "../_shared/cors.ts"
-import { supabase } from "../_shared/supabase.ts"
+import { corsHeaders } from "../_shared/http-utils.ts"
+import { supabase } from "../_shared/database.ts"
 import { Database } from "../_shared/database.types.ts"
 
 type UserProfile = Database['public']['Tables']['user_profiles']['Row']

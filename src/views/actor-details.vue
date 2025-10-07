@@ -11,7 +11,7 @@
     <ion-content>
       <div class="actor">
         <div class="header" v-if="actor">
-          <img :src="getImage(actor.profile_path)" alt="" />
+          <img :src="processImageUrl(actor.profile_path)" alt="" />
           <div class="actor-name">{{ actor.name }}</div>
         </div>
 
@@ -70,16 +70,13 @@
           <!-- Group voice roles by media -->
           <div v-for="(roles, mediaId) in groupVoiceRolesByMedia()" :key="mediaId" class="media-voice-roles">
             <div class="media-header" @click="goToMedia(roles[0].mediaDetails.id)">
-              <ion-thumbnail class="media-poster">
-                <img
-                  v-if="roles[0].mediaDetails.poster_path"
-                  :src="getImage(roles[0].mediaDetails.poster_path, 'w92')"
-                  :alt="roles[0].mediaDetails.title || roles[0].mediaDetails.name"
+              <div class="media-item-container">
+                <MediaItem
+                  :imagePath="getMediaImagePath(roles[0].mediaDetails)"
+                  :title="roles[0].mediaDetails.title || roles[0].mediaDetails.name"
+                  v-bind="getMediaRouteInfo(roles[0].mediaDetails)"
                 />
-                <div v-else class="fallback-poster">
-                  <ion-icon :icon="film" />
-                </div>
-              </ion-thumbnail>
+              </div>
               <div class="media-title-wrapper">
                 <h3 class="media-title">
                   {{ roles[0].mediaDetails.title || roles[0].mediaDetails.name }}
@@ -113,7 +110,7 @@
                   <ion-avatar slot="start" class="voice-actor-avatar">
                     <img
                       v-if="voiceActor.profile_picture"
-                      :src="getImage(voiceActor.profile_picture)"
+                      :src="processImageUrl(voiceActor.profile_picture)"
                       :alt="`${voiceActor.firstname} ${voiceActor.lastname}`"
                     />
                     <div v-else class="fallback-avatar">
@@ -132,41 +129,6 @@
               </div>
             </ion-list>
 
-            <!-- Double loop to group roles by media -->
-            <div v-for="(roles, character) in groupRolesByCharacter(mediaRoles)" :key="character" class="character-roles">
-              <h4 class="character-name">{{ character }}</h4>
-              <ion-list lines="none" class="character-roles-list">
-                <ion-item
-                  v-for="role in roles"
-                  :key="role.id"
-                  class="character-role-item"
-                  button
-                  detail
-                  @click="goToVoiceActor(role.id)"
-                  :aria-label="`Voir les détails de la voix de ${role.name || role.firstname + ' ' + role.lastname}`"
-                >
-                  <ion-avatar slot="start" class="voice-actor-avatar">
-                    <img
-                      v-if="role.profile_picture"
-                      :src="getImage(role.profile_picture)"
-                      :alt="role.name || role.firstname + ' ' + role.lastname"
-                    />
-                    <div v-else class="fallback-avatar">
-                      <ion-icon :icon="person" />
-                    </div>
-                  </ion-avatar>
-                  <ion-label class="voice-actor-details">
-                    <h3 class="voice-actor-name">
-                      {{ role.firstname }} {{ role.lastname }}
-                    </h3>
-                    <p class="voice-role-performance" v-if="role.performance">
-                      <ion-icon :icon="mic" />
-                      {{ role.performance }}
-                    </p>
-                  </ion-label>
-                </ion-item>
-              </ion-list>
-            </div>
           </div>
         </div>
       </div>
@@ -195,20 +157,42 @@ import {
   IonSegmentButton,
   IonSegmentView,
   IonSegmentContent,
-  IonThumbnail,
   IonContent,
 } from "@ionic/vue";
-import { mic, person, language, film } from 'ionicons/icons';
-import { getImage } from "../utils";
+import { mic, person } from 'ionicons/icons';
 import { Actor } from "../../supabase/functions/_shared/actor";
 import MediaItem from "../components/MediaItem.vue";
 import type { Serie } from "../../supabase/functions/_shared/serie";
 import type { Movie } from "../../supabase/functions/_shared/movie";
 import { supabase } from "../api/supabase";
+import { actorToPersonData } from "@/utils/convert";
+import { PersonData } from "@/components/PersonItem.vue";
+
+// TMDB Configuration for image URLs
+const TMDB_CONFIG = {
+  baseUrl: 'https://image.tmdb.org/t/p',
+  defaultSize: 'w500'
+} as const;
+
+/**
+ * Processes image path for TMDB URLs
+ */
+function processImageUrl(imagePath: string | null | undefined, size: string = TMDB_CONFIG.defaultSize): string {
+  if (!imagePath) return '';
+
+  // If it's already a full URL, use it directly (backend processed URL)
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+
+  // For TMDB image paths, construct the full TMDB URL
+  const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
+  return `${TMDB_CONFIG.baseUrl}/${size}/${cleanPath}`;
+}
 
 const route = useRoute();
 
-const actor = ref<Actor | undefined>();
+const actor = ref<PersonData>();
 
 const active = ref(0);
 
@@ -245,7 +229,7 @@ onMounted(async () => {
     body: { id },
   });
   const actorResponse = (await actorResponseRaw.data) as { actor: Actor };
-  actor.value = actorResponse.actor;
+  actor.value = actorToPersonData(actorResponse.actor);
 });
 function goToVoiceActor(id: number) {
   const { push } = useIonRouter();
@@ -261,38 +245,33 @@ function goToMedia(media: any) {
   }
 }
 
-function hasVoiceActors(actor: any): actor is { voice_actors: any[] } {
-  return actor && Array.isArray(actor.voice_actors);
+function getMediaRouteInfo(mediaDetails: any) {
+  const routeName = mediaDetails.media_type === 'movie' || mediaDetails.title
+    ? 'MovieDetails'
+    : 'SerieDetails';
+
+  return {
+    routeName,
+    routeParams: { id: mediaDetails.id }
+  };
 }
 
-function groupRolesByCharacter(actorRoles: any) {
-  if (!actorRoles) return {};
-
-  const grouped = {};
-
-  actorRoles.forEach(role => {
-    if (!role.id) return;
-
-    const mediaId = role.id;
-    if (!grouped[mediaId]) {
-      grouped[mediaId] = [];
-    }
-
-    grouped[mediaId].push(role);
-  });
-
-  console.log('grouped', grouped);
-
-  return grouped;
+function getMediaImagePath(mediaDetails: any) {
+  if (!mediaDetails.poster_path) {
+    // Use a placeholder image when no poster is available
+    return `https://via.placeholder.com/133x200/cccccc/666666?text=No+Image`;
+  }
+  return processImageUrl(mediaDetails.poster_path, 'w92');
 }
+
 
 // Group voice roles by media
-function groupVoiceRolesByMedia() {
+function groupVoiceRolesByMedia(): Record<string, any[]> {
   if (!actor.value?.voice_roles) return {};
 
-  const grouped = {};
+  const grouped: Record<string, any[]> = {};
 
-  actor.value.voice_roles.forEach(role => {
+  actor.value.voice_roles.forEach((role: any) => {
     if (!role.id) return;
 
     const mediaId = role.id;
@@ -457,30 +436,22 @@ function groupVoiceRolesByMedia() {
   }
 }
 
-.media-poster {
-  width: 60px;
-  height: 90px;
-  margin: 0;
-  background: var(--ion-color-light-shade);
-  border-radius: 4px;
-  overflow: hidden;
+.media-item-container {
+  width: 80px;
+  height: auto;
+  margin-right: 1rem;
+  flex-shrink: 0;
 
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+  .media-item {
+    width: 100% !important;
+    height: auto !important;
+    min-width: 80px !important;
+    max-width: 80px !important;
 
-  .fallback-poster {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    color: var(--ion-color-medium);
-
-    ion-icon {
-      font-size: 2rem;
+    .poster img {
+      width: 80px !important;
+      height: 120px !important;
+      border-radius: 8px;
     }
   }
 }

@@ -33,7 +33,6 @@
 
         <VoiceActorWorksGrouped
           :works="enhancedWork"
-          :getImage="getImage"
         />
       </div>
     </ion-content>
@@ -63,6 +62,9 @@ import VoiceActorWorksGrouped from "@/components/VoiceActorWorksGrouped.vue";
 import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
 import { storeToRefs } from 'pinia';
 import { useAuthStore } from '@/stores/auth';
+import { PersonData } from "@/components/PersonItem.vue";
+import { Actor } from "../../supabase/functions/_shared/types";
+import { actorToPersonData } from "@/utils/convert";
 
 const authStore = useAuthStore();
 const route = useRoute();
@@ -112,12 +114,7 @@ type EnhancedWorkItem = {
   work: { id: number; actor_id: number; content_id: number };
   data: {
     character: string | undefined;
-    actor: {
-      id: number;
-      name: string;
-      character?: string;
-      profile_path?: string | null;
-    };
+    actor: PersonData<Actor>;
   };
   sortDate: string;
 };
@@ -154,12 +151,7 @@ const baseEnhancedWork = computed<EnhancedWorkItem[]>(() => {
       const character = actor.character;
       const data = {
         character,
-        actor: {
-          id: actor.id,
-          name: actor.name,
-          character: actor.character,
-          profile_path: actor.profile_path
-        },
+        actor: actorToPersonData(actor),
       };
 
       return {
@@ -183,12 +175,6 @@ const enhancedWork = computed(() => {
     return a.sortDate > b.sortDate ? -1 : 1; // Newest first
   });
 });
-
-// Methods
-const getImage = (path: string | null, size: string = 'w185') => {
-  if (!path) return 'https://placehold.co/48x72?text=?';
-  return `https://image.tmdb.org/t/p/${size}${path}`;
-};
 
 const onProfilePictureChanged = (newImagePath: string) => {
   console.log('Profile picture changed:', newImagePath);

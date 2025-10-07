@@ -5,10 +5,12 @@
       name: 'ActorDetails',
       params: { id: actor.id },
     }" tabindex="0" role="button" aria-label="Go to details for {{ actor.name }}">
-      <ion-thumbnail class="avatar">
-        <img v-if="actor.profile_path" :src="getImage(actor.profile_path)" :alt="actor.name + ' photo'" />
-        <img v-else src="https://placehold.co/48x72?text=?" alt="No photo" />
-      </ion-thumbnail>
+      <MediaItem
+        :imagePath="actor.profile_picture"
+        :title="actor.name"
+        :routeName="'ActorDetails'"
+        :routeParams="{ id: actor.id }"
+      />
       <ion-label class="line-label">
         <span class="ellipsis label actor">{{ actor.name }}</span>
       </ion-label>
@@ -19,13 +21,14 @@
 
 <script setup lang="ts">
 import {
-  IonThumbnail,
   IonLabel,
 } from "@ionic/vue";
+import MediaItem from "@/components/MediaItem.vue";
 import VoiceActorList from "@/components/VoiceActorList.vue";
+import { PersonData } from "./PersonItem.vue";
 
 defineProps<{
-  actor: any;
+  actor: PersonData;
   voiceActors: any[];
   isAdmin: boolean;
   goToActor: (id: number) => void;
@@ -33,7 +36,6 @@ defineProps<{
   editVoiceActorLink: (item: any) => void;
   confirmDeleteVoiceActorLink: (item: any) => void;
   openVoiceActorSearch: (actor: any) => void;
-  getImage: (path: string) => string;
 }>();
 </script>
 

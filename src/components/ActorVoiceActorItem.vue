@@ -2,10 +2,12 @@
   <div v-if="type === 'actor' && actor" class="actor-voice-actor-wrapper">
     <div class="character-name">{{ actor.character || actor.name }}</div>
     <div class="actor" @click="goToActor && goToActor(actor.id)" tabindex="0" role="button" :aria-label="`Go to details for ${actor.name}`">
-      <ion-thumbnail class="avatar">
-        <img v-if="actor.profile_path && getImage" :src="getImage(actor.profile_path)" :alt="actor.name + ' photo'" />
-        <img v-else src="https://placehold.co/48x72?text=?" alt="No photo" />
-      </ion-thumbnail>
+      <MediaItem
+        :imagePath="actor.profile_picture"
+        :title="actor.name"
+        routeName="ActorDetails"
+        :routeParams="{ id: actor.id }"
+      />
       <ion-label class="line-label">
         <span class="ellipsis label actor">{{ actor.name }}</span>
       </ion-label>
@@ -59,20 +61,21 @@
 </template>
 
 <script setup lang="ts">
-import { IonLabel, IonThumbnail, IonButton, IonIcon } from "@ionic/vue";
+import { IonLabel, IonButton, IonIcon } from "@ionic/vue";
 import { createOutline, trashOutline } from 'ionicons/icons';
+import MediaItem from "@/components/MediaItem.vue";
 import MediaThumbnail from "@/components/MediaThumbnail.vue";
 import VoiceActorList from "@/components/VoiceActorList.vue";
+import { PersonData } from "./PersonItem.vue";
 
 export type ItemType = 'actor' | 'voice-actor';
 
 const props = defineProps<{
   type: ItemType;
-  actor?: any;
+  actor?: PersonData;
   item?: any;
   goToActor?: (id: number) => void;
   goToVoiceActor: (id: number) => void;
-  getImage?: (path: string) => string;
   isAdmin?: boolean;
   editVoiceActorLink?: (item: any) => void;
   confirmDeleteVoiceActorLink?: (item: any) => void;

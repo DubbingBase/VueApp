@@ -4,16 +4,12 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { corsHeaders } from "../_shared/cors.ts"
-import { supabase } from "../_shared/supabase.ts"
+import { corsHeaders } from "../_shared/http-utils.ts"
 import { dubbingTerm } from "../_shared/extract/constants.ts"
 import { getEntity, getWikipediaPage, getWikipediaPageSectionAsWikitext, wikipediaPageFindSections } from "../_shared/extract/constants.ts"
-import { MistralMovieExtractOutput, MistralVoiceActorExtractOutput } from "../_shared/mistral.ts";
-import { WithCast } from "../_shared/other.ts";
-import { Database } from "../_shared/database.types.ts";
-import { PostgrestError } from "jsr:@supabase/supabase-js";
 import { flatTocToTree } from './toc.ts'
 import { exploreDubbingSectionChilds } from './extract.ts'
+import { MistralVoiceActorExtractOutput } from "../_shared/types.ts";
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {

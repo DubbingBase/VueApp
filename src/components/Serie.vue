@@ -8,9 +8,12 @@
         },
       }"
     >
-      <div class="poster">
-        <img :src="getImage(value.poster_path)" alt="" />
-      </div>
+      <MediaItem
+        :image-path="value.poster_path"
+        :title="value.name"
+        :route-name="'SerieDetails'"
+        :route-params="{ id: value.id }"
+      />
     </router-link>
       <div class="caption">{{ value.name }}</div>
   </div>
@@ -19,7 +22,7 @@
 <script lang="ts" setup>
 import { PropType, toRefs } from "vue";
 import { Serie } from "../../supabase/functions/_shared/serie";
-import { getImage } from "../utils";
+import MediaItem from "./MediaItem.vue";
 
 const props = defineProps({
   value: {

@@ -39,10 +39,6 @@ export function useVoiceActorManagement(workType: 'movie' | 'tv' | 'season' | 'e
   const isLoading = ref(false);
   const error = ref('');
 
-  const getImage = (path: string) => {
-    return `https://image.tmdb.org/t/p/w500/${path}`;
-  };
-
   const getVoiceActorByTmdbId = (tmdbId: number): WorkAndVoiceActor[] => {
     console.log('tmdbId', tmdbId);
     console.log('voiceActors.value', voiceActors.value);
@@ -238,7 +234,6 @@ export function useVoiceActorManagement(workType: 'movie' | 'tv' | 'season' | 'e
     isAdmin,
     
     // Methods
-    getImage,
     getVoiceActorByTmdbId,
     openVoiceActorSearch,
     searchVoiceActors,

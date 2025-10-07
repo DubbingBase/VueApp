@@ -1,16 +1,13 @@
 <template>
   <div class="actor-with-voice-actors">
     <!-- Character Name -->
-    <div v-if="actor.character" class="character-name">{{ actor.character }}</div>
+    <div v-if="actor.character" class="character-name">
+      {{ actor.character }}
+    </div>
 
     <!-- Main Actor Display -->
     <div class="main-actor">
-      <PersonItem
-        :person="actor"
-        type="actor"
-        :getImage="getImage"
-        @click="handleActorClick"
-      />
+      <PersonItem :person="actor" type="actor" />
     </div>
 
     <!-- Voice Actors List -->
@@ -18,22 +15,32 @@
       <div class="voice-actors-scroll">
         <div class="voice-actors-container">
           <template v-for="voiceActor in voiceActors" :key="voiceActor.id">
-            <div
-              v-if="voiceActor.tmdb_id === actor.id"
-              class="himself-item"
-              @click="handleVoiceActorClick(voiceActor)"
+            <router-link
+              class="voice-actor-item no-link"
+              :to="{ name: 'VoiceActorDetails', params: { id: voiceActor.id } }"
             >
-              <div class="himself-content">
-                <div class="himself-text">{{ $t('common.himself') }}</div>
+              <div
+                v-if="voiceActor.tmdb_id === actor.id"
+                class="himself-item"
+                :to="{
+                  name: 'VoiceActorDetails',
+                  params: { id: voiceActor.id },
+                }"
+              >
+                <div class="himself-content">
+                  <div class="himself-text">{{ $t("common.himself") }}</div>
+                </div>
               </div>
-            </div>
-            <PersonItem
-              v-else
-              :person="voiceActor"
-              type="voice-actor"
-              :getImage="getImage"
-              @click="handleVoiceActorClick"
-            />
+              <PersonItem
+                class="voice-actor-item"
+                v-else
+                :person="{
+                  ...voiceActor,
+                  profile_picture: voiceActor.profile_picture,
+                }"
+                type="voice-actor"
+              />
+            </router-link>
           </template>
         </div>
       </div>
@@ -42,12 +49,11 @@
 </template>
 
 <script setup lang="ts">
-import PersonItem, { PersonData } from './PersonItem.vue';
+import PersonItem, { PersonData } from "./PersonItem.vue";
 
 export interface ActorWithVoiceActorsProps {
   actor: PersonData;
   voiceActors?: PersonData[];
-  getImage?: (path: string) => string;
   onActorClick?: (actor: PersonData) => void;
   onVoiceActorClick?: (voiceActor: PersonData) => void;
 }
@@ -57,21 +63,6 @@ const props = withDefaults(defineProps<ActorWithVoiceActorsProps>(), {
   onActorClick: () => {},
   onVoiceActorClick: () => {},
 });
-
-const emit = defineEmits<{
-  actorClick: [actor: PersonData];
-  voiceActorClick: [voiceActor: PersonData];
-}>();
-
-const handleActorClick = () => {
-  props.onActorClick(props.actor);
-  emit('actorClick', props.actor);
-};
-
-const handleVoiceActorClick = (voiceActor: PersonData) => {
-  props.onVoiceActorClick(voiceActor);
-  emit('voiceActorClick', voiceActor);
-};
 </script>
 
 <style scoped lang="scss">
@@ -201,5 +192,9 @@ const handleVoiceActorClick = (voiceActor: PersonData) => {
       }
     }
   }
+}
+
+.voice-actor-item {
+  width: 100%;
 }
 </style>

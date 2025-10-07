@@ -13,9 +13,8 @@
         <div class="actor-header">
           <RouterLink :to="{ name: 'ActorDetails', params: { id: actorGroup.actor.id } }">
             <PersonItem
-              :person="{ ...actorGroup.actor, profile_path: actorGroup.actor.profile_path || undefined }"
+              :person="actorGroup.actor"
               type="actor"
-              :getImage="getImage"
               :subtitle-override="`${actorGroup.works.length} œuvre${actorGroup.works.length > 1 ? 's' : ''}`"
             />
           </RouterLink>
@@ -45,28 +44,23 @@
 import { computed } from "vue";
 import { RouterLink } from "vue-router";
 import MovieCard from "@/components/MovieCard.vue";
-import PersonItem from "@/components/PersonItem.vue";
+import PersonItem, { PersonData } from "@/components/PersonItem.vue";
 import type { Movie as MovieModel } from "../../supabase/functions/_shared/movie";
 import type { Serie as SerieModel } from "../../supabase/functions/_shared/serie";
+import { Actor } from "../../supabase/functions/_shared/types";
 
 type EnhancedWorkItem = {
   media: MovieModel | SerieModel;
   work: { id: number; actor_id: number; content_id: number };
   data: {
     character: string | undefined;
-    actor: {
-      id: number;
-      name: string;
-      character?: string;
-      profile_path?: string | null;
-    };
+    actor: PersonData<Actor>;
   };
   sortDate: string;
 };
 
 interface Props {
   works: EnhancedWorkItem[];
-  getImage?: (path: string) => string;
 }
 
 const props = defineProps<Props>();

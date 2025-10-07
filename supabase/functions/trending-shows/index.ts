@@ -4,7 +4,8 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { corsHeaders } from "../_shared/cors.ts"
+import { corsHeaders } from "../_shared/http-utils.ts"
+import { buildTmdbImageUrl } from "../_shared/tmdb-urls.ts";
 
 console.log("Hello from Functions!")
 
@@ -23,7 +24,14 @@ Deno.serve(async (req) => {
   })
 
   const json = await response.json()
-  const trendingMovies = json
+  const trendingMovies = {
+    ...json,
+    results: json.results.map(result => ({
+      ...result,
+      backdrop_path: buildTmdbImageUrl(result.backdrop_path, 'w780'),
+      poster_path: buildTmdbImageUrl(result.poster_path, 'w342'),
+    }))
+  }
 
   console.log('trendingMovies', trendingMovies)
 

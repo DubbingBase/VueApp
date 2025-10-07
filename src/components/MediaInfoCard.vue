@@ -1,7 +1,12 @@
 <template>
   <div v-if="media" class="media-info-card">
-    <img v-if="media.poster_path" class="media-poster" :src="getImage(media.poster_path)"
-      :alt="(media.title || media.name) + ' poster'" />
+    <MediaItem
+      v-if="media.poster_path"
+      :imagePath="media.poster_path"
+      :routeName="media.title ? 'MovieDetails' : 'SerieDetails'"
+      :routeParams="{ id: media.id }"
+      class="media-poster"
+    />
     <div class="media-info">
       <div class="media-title-row">
         <h2 class="media-title">{{ media.title || media.name }}</h2>
@@ -16,18 +21,31 @@
         {{ media.overview }}
       </div>
       <div class="media-meta">
-        <span v-if="media.runtime && !media.first_air_date">⏱ {{ media.runtime }} min</span>
+        <span v-if="(media as MovieType).runtime && !(media as SerieType).first_air_date">⏱ {{ (media as MovieType).runtime }} min</span>
         <span v-if="media.original_language">🌐 {{ media.original_language.toUpperCase() }}</span>
-        <span v-if="media.release_date || media.first_air_date">📅 {{ media.release_date || media.first_air_date }}</span>
+        <span v-if="media.release_date || (media as SerieType).first_air_date">📅 {{ media.release_date || (media as SerieType).first_air_date }}</span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { MovieResponse } from '../../supabase/functions/_shared/movie';
+import MediaItem from './MediaItem.vue';
 
-type MovieType = MovieResponse["movie"] & { runtime?: number };
+type MovieType = {
+  id: number;
+  title?: string;
+  name?: string;
+  poster_path?: string;
+  backdrop_path?: string;
+  overview?: string;
+  vote_average?: number;
+  original_language?: string;
+  release_date?: string;
+  runtime?: number;
+  genres?: { id: number; name: string }[];
+};
+
 type SerieType = {
   id: number;
   name?: string;
@@ -45,14 +63,12 @@ type SerieType = {
   seasons?: any[];
   external_ids?: { wikidata_id?: string };
   credits?: { cast?: any[] };
-  runtime?: number;
 };
 
 type MediaType = MovieType | SerieType;
 
 interface Props {
   media: MediaType | undefined;
-  getImage: (path: string) => string;
 }
 
 defineProps<Props>();
@@ -65,7 +81,7 @@ defineProps<Props>();
   align-items: flex-start;
   background: rgba(20, 20, 20, 0.95);
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
-  max-width: 700px;
+  width: 100%;
   padding: 16px;
   position: relative;
   z-index: 2;
@@ -75,9 +91,9 @@ defineProps<Props>();
   width: 120px;
   height: 180px;
   border-radius: 0.5rem;
-  object-fit: cover;
   margin-right: 16px;
   background: #222;
+  overflow: hidden;
 }
 
 .media-info {

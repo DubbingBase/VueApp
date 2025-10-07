@@ -1,6 +1,6 @@
 // supabase/functions/list_users/index.ts
-import { corsHeaders } from '../_shared/cors.ts'
-import { supabaseAdmin } from '../_shared/supabase.ts'
+import { corsHeaders } from "../_shared/http-utils.ts"
+import { supabase, supabaseAdmin } from "../_shared/database.ts"
 import type { Response } from '../../../src/types/UserList.ts'
 
 Deno.serve(async (req) => {

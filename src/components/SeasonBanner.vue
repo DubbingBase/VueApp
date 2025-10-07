@@ -1,10 +1,12 @@
 <template>
   <div class="banner">
-    <img
+    <MediaItem
       v-if="season.poster_path"
-      :src="getImage(season.poster_path)"
-      class="poster"
-      :alt="season.name"
+      :imagePath="season.poster_path"
+      :title="season.name"
+      :routeName="'SeasonDetails'"
+      :routeParams="{ id: serieId, season: seasonNumber }"
+      :loading="false"
     />
     <div class="meta">
       <h2>{{ season.name }}</h2>
@@ -20,9 +22,12 @@
 </template>
 
 <script lang="ts" setup>
+import MediaItem from "@/components/MediaItem.vue";
+
 interface Props {
   season: any;
-  getImage: (path: string) => string;
+  serieId: number;
+  seasonNumber: number;
 }
 
 defineProps<Props>();

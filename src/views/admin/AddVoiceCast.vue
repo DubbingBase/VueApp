@@ -22,7 +22,12 @@
         <!-- Movie Info Section -->
         <div class="movie-header">
           <div class="movie-poster">
-            <img :src="getImage(movie.poster_path)" :alt="movie.title + ' poster'" />
+            <MediaItem
+              :imagePath="movie?.poster_path || null"
+              :title="movie?.title || ''"
+              :routeName="'MovieDetails'"
+              :routeParams="{ id: movie?.id }"
+            />
           </div>
           <div class="movie-info">
             <h1>{{ movie.title }}</h1>
@@ -40,10 +45,12 @@
           <div v-else class="cast-list">
             <div v-for="actor in actors" :key="actor.id" class="cast-item">
               <div class="actor-info">
-                <img
+                <MediaItem
                   v-if="actor.profile_path"
-                  :src="getImage(actor.profile_path, 'w185')"
-                  :alt="actor.name"
+                  :imagePath="actor.profile_path"
+                  :title="actor.name"
+                  :routeName="'ActorDetails'"
+                  :routeParams="{ id: actor.id }"
                   class="actor-image"
                 />
                 <div class="actor-details">
@@ -141,6 +148,7 @@ import {
   toastController
 } from '@ionic/vue';
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
+import MediaItem from '@/components/MediaItem.vue'
 import { closeCircle } from 'ionicons/icons';
 import { supabase } from '@/api/supabase';
 
@@ -318,12 +326,6 @@ const getVoiceActorByActorId = (actorId: number): WorkAndVoiceActor[] => {
 const hasChanges = computed(() => {
   return Object.values(voiceActorAssignments.value).some(assignment => assignment !== null);
 });
-
-// Methods
-const getImage = (path: string | null, size: string = 'w500') => {
-  if (!path) return 'https://via.placeholder.com/500x750?text=No+Poster';
-  return `https://image.tmdb.org/t/p/${size}${path}`;
-};
 
 const fetchMovieData = async () => {
   try {

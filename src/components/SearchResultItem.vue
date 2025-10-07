@@ -8,7 +8,7 @@
     button
   >
     <ion-card-content class="card-content">
-      <MediaThumbnail :path="image" class="thumbnail" />
+      <MediaThumbnail :path="image ?? `https://api.dicebear.com/9.x/initials/svg?scale=50&backgroundColor=212121&seed=${name}`" class="thumbnail" />
       <div class="info">
         <h3 class="title">{{ name }}</h3>
         <p class="subtitle">{{ formattedDate }}</p>

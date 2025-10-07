@@ -1,10 +1,12 @@
 <template>
   <div class="banner">
-    <img
+    <MediaItem
       v-if="episode.still_path"
-      :src="getImage(episode.still_path)"
-      class="poster"
-      :alt="episode.name"
+      :imagePath="episode.still_path"
+      :title="episode.name"
+      :routeName="'SeasonByEpisodes'"
+      :routeParams="{id: serieId, season: seasonNumber, episode: episode.episode_number}"
+      :loading="false"
     />
     <div class="meta">
       <h2>Episode {{ episode.episode_number }}: {{ episode.name }}</h2>
@@ -19,9 +21,12 @@
 </template>
 
 <script lang="ts" setup>
+import MediaItem from "@/components/MediaItem.vue";
+
 interface Props {
   episode: any;
-  getImage: (path: string) => string;
+  serieId: number;
+  seasonNumber: number;
 }
 
 defineProps<Props>();
@@ -34,11 +39,6 @@ defineProps<Props>();
   align-items: flex-start;
   margin-bottom: 1.5rem;
 
-  .poster {
-    width: 120px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px #0003;
-  }
 
   .meta {
     flex: 1;

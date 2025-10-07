@@ -1,11 +1,11 @@
-import { corsHeaders } from "../_shared/cors.ts";
-import { supabaseAdmin } from "../_shared/supabase.ts";
+import { corsHeaders } from "../_shared/http-utils.ts"
+import { supabase, supabaseAdmin } from "../_shared/database.ts"
 
 Deno.serve(async (req) => {
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders })
       }
-      
+
   const body = await req.json();
   console.log("body", body);
   const { keepId, ids } = body;

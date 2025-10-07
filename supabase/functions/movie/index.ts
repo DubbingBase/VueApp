@@ -4,71 +4,55 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { corsHeaders } from "../_shared/cors.ts"
-import { supabase } from "../_shared/supabase.ts"
+import { TMDBClient } from "../_shared/tmdb.ts"
+import { DatabaseClient } from "../_shared/database.ts"
+import { createResponse, createErrorResponse, handleOptions } from "../_shared/http-utils.ts"
+import { processMedia } from "../_shared/tmdb-urls.ts";
+import { processVoiceActor } from "../_shared/supabase-urls.ts";
 
 Deno.serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return handleOptions()
   }
 
-  const { id } = await req.json()
-
-  console.log('id', id)
-  console.log('typeof id', typeof id)
-
-  let movie = undefined
-
   try {
+    const { id } = await req.json()
 
-    const response = await fetch(`https://api.themoviedb.org/3/movie/${id}?append_to_response=credits,external_ids&language=fr-FR`, {
-      headers: {
-        "Content-Type": "application/json",
-        'Authorization': `Bearer ${Deno.env.get('TMDB_API_KEY')}`,
-        'Accept': 'application/json',
-      },
-    })
-
-    movie = await response.json()
-  } catch (e) {
-    console.error('e', e)
-  }
-
-  let va: unknown[] = []
-
-  try {
-    const { data, error } = await supabase.from('work')
-      .select(`
-        *,
-        voiceActorDetails:voice_actors (
-          *
-        )
-      `)
-      .eq('content_id', id)
-    if (error) {
-      console.error('error', error)
-      throw error
+    if (!id) {
+      return createErrorResponse('Missing id parameter', 400)
     }
 
-    va = data
-  } catch (e) {
-    console.error('e', e)
+    const movieId = parseInt(id, 10)
+    if (isNaN(movieId)) {
+      return createErrorResponse('Invalid id parameter', 400)
+    }
+
+    // Use shared TMDBClient for API calls
+    const tmdbClient = new TMDBClient()
+    const movie = await tmdbClient.get(`movie/${movieId}`, {
+      append_to_response: 'credits,external_ids'
+    })
+    const movieWithImageUrls = processMedia(movie)
+
+    // Use shared DatabaseClient for database queries
+    const dbClient = new DatabaseClient()
+    const voiceActors = await dbClient.getWorkWithVoiceActors(movieId)
+    const voiceActorsWithImages = voiceActors.map(va => ({
+      ...va,
+      voiceActorDetails: processVoiceActor(va.voiceActorDetails)
+    }))
+
+    const result = {
+      movie: movieWithImageUrls,
+      voiceActors: voiceActorsWithImages,
+    }
+
+    return createResponse(result)
+  } catch (error) {
+    console.error('Error in movie function:', error)
+    return createErrorResponse(
+      error instanceof Error ? error.message : 'An unknown error occurred'
+    )
   }
-
-  console.log('va', va)
-
-  const result = {
-    movie,
-    voiceActors: va,
-  }
-
-  return new Response(
-    JSON.stringify(result),
-    {
-      headers: {
-        ...corsHeaders,
-        "Content-Type": "application/json"
-      }
-    },
-  )
 })

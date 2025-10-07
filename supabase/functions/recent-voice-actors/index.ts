@@ -1,6 +1,6 @@
-import { corsHeaders } from '../_shared/cors.ts';
-import { supabase } from '../_shared/supabase.ts';
-
+import { corsHeaders } from "../_shared/http-utils.ts"
+import { supabase } from "../_shared/database.ts"
+import { buildSupabaseImageUrl } from "../_shared/supabase-urls.ts";
 interface RecentVoiceActorsParams {
   limit?: number;
 }
@@ -43,9 +43,13 @@ Deno.serve(async (req) => {
     }
 
     const results = await getRecentVoiceActors(limit);
+    const resultsWithImageUrls = results.map(result => ({
+      ...result,
+      profile_picture: buildSupabaseImageUrl(result.profile_picture, 'voice_actor_profile_pictures', '500')
+    }));
 
     return new Response(
-      JSON.stringify(results),
+      JSON.stringify(resultsWithImageUrls),
       {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

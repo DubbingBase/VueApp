@@ -4,104 +4,64 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { corsHeaders } from "../_shared/cors.ts"
-import { supabase } from "../_shared/supabase.ts"
+import { TMDBClient } from "../_shared/tmdb.ts"
+import { DatabaseClient } from "../_shared/database.ts"
+import { createResponse, createErrorResponse, handleOptions } from "../_shared/http-utils.ts"
+import { processMedia } from "../_shared/tmdb-urls.ts";
+import { processVoiceActor } from "../_shared/supabase-urls.ts";
 
 Deno.serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return handleOptions()
   }
 
-  const { id } = await req.json()
-
-  console.log('id', id)
-
-  let serie = undefined
-
   try {
-    const response = await fetch(`https://api.themoviedb.org/3/tv/${id}?append_to_response=credits,external_ids&language=fr-FR`, {
-      headers: {
-        "Content-Type": "application/json",
-        'Authorization': `Bearer ${Deno.env.get('TMDB_API_KEY')}`,
-        'Accept': 'application/json',
-      },
-    })
+    const { id } = await req.json()
 
-    serie = await response.json()
-  } catch (e) {
-    console.error('e', e)
-  }
-
-  // Fetch aggregate credits data
-  let aggregateCredits = null
-  try {
-    const creditsResponse = await fetch(`https://api.themoviedb.org/3/tv/${id}/aggregate_credits`, {
-      headers: {
-        "Content-Type": "application/json",
-        'Authorization': `Bearer ${Deno.env.get('TMDB_API_KEY')}`,
-        'Accept': 'application/json',
-      },
-    })
-
-    if (creditsResponse.ok) {
-      aggregateCredits = await creditsResponse.json()
-    } else {
-      console.error('Failed to fetch aggregate credits:', creditsResponse.status, creditsResponse.statusText)
+    if (!id) {
+      return createErrorResponse('Missing id parameter', 400)
     }
-  } catch (e) {
-    console.error('Error fetching aggregate credits:', e)
+
+    const showId = parseInt(id, 10)
+    if (isNaN(showId)) {
+      return createErrorResponse('Invalid id parameter', 400)
+    }
+
+    // Use shared TMDBClient for API calls
+    const tmdbClient = new TMDBClient()
+
+    // Fetch show details and aggregate credits in parallel
+    const [serie, aggregateCredits] = await Promise.all([
+      tmdbClient.get(`tv/${showId}`, {
+        append_to_response: 'credits,external_ids'
+      }),
+      tmdbClient.get(`tv/${showId}/aggregate_credits`).catch(() => null) // Aggregate credits might not be available for all shows
+    ])
+
+    // Use shared DatabaseClient for database queries
+    const dbClient = new DatabaseClient()
+    const voiceActors = await dbClient.getWorkWithVoiceActors(showId)
+    const voiceActorsWithImages = voiceActors.map(va => ({
+      ...va,
+      voiceActorDetails: processVoiceActor(va.voiceActorDetails)
+    }))
+
+    const creditsWithImages = processMedia({
+      credits: aggregateCredits
+    })
+
+    const result = {
+      serie: processMedia(serie),
+      voiceActors: voiceActorsWithImages,
+      aggregateCredits: creditsWithImages.credits
+    }
+
+    return createResponse(result)
+  } catch (error) {
+    console.error('Error in show function:', error)
+    return createErrorResponse(
+      error instanceof Error ? error.message : 'An unknown error occurred'
+    )
   }
-
-  let va: unknown[] = []
-
-  try {
-    const { data, error } = await supabase.from('work')
-      .select(`
-        *,
-        voiceActorDetails:voice_actors (
-          id,
-          firstname,
-          lastname,
-          bio,
-          nationality,
-          date_of_birth,
-          awards,
-          years_active,
-          social_media_links
-        )
-      `)
-      // .select(`
-      //   id,
-      //   content_id,
-      //   actor_id,
-      //   voice_actors (
-      //     id,
-      //     name,
-      //   )
-      //   `)
-      .eq('content_id', id)
-    if (error) throw error
-
-    va = data
-  } catch (e) {
-    console.error('e', e)
-  }
-
-  console.log('va', va)
-
-  const result = {
-    serie,
-    voiceActors: va,
-    aggregateCredits
-  }
-
-  return new Response(
-    JSON.stringify(result),
-    {
-      headers: {
-        ...corsHeaders,
-        "Content-Type": "application/json"
-      }
-    },
-  )
 })

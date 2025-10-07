@@ -18,7 +18,7 @@
       />
       <LoadingSpinner v-if="isLoading" name="crescent" />
       <div v-if="season && !isLoading" class="season-details">
-        <SeasonBanner :season="season" :getImage="getImage" />
+        <SeasonBanner :season="season" :serieId="Number(route.params.id)" :seasonNumber="Number(route.params.season)" />
         <ion-segment scrollable v-model="activeTab" class="season-tabs">
           <ion-segment-button value="details">Détails</ion-segment-button>
           <ion-segment-button value="episodes">Épisodes</ion-segment-button>
@@ -34,7 +34,7 @@
         </div>
         <div v-else-if="activeTab === 'episodes'">
           <!-- Episodes Tab Content -->
-          <EpisodesList :episodes="season.episodes" :getImage="getImage" :goToEpisode="goToEpisode" />
+          <EpisodesList :episodes="season.episodes" :goToEpisode="goToEpisode" />
         </div>
         <div v-else-if="activeTab === 'voices'">
           <!-- Voices Tab Content -->
@@ -49,7 +49,6 @@
             :editVoiceActorLink="editVoiceActorLink"
             :confirmDeleteVoiceActorLink="confirmDeleteVoiceActorLink"
             :openVoiceActorSearch="openVoiceActorSearch"
-            :getImage="getImage"
             :loading="isLoading"
           />
         </div>
@@ -73,7 +72,6 @@ import {
   IonSegmentButton,
   toastController,
 } from "@ionic/vue";
-import { getImage } from "../utils";
 import { supabase } from "../api/supabase";
 import SeasonBanner from "../components/SeasonBanner.vue";
 import EpisodesList from "../components/EpisodesList.vue";

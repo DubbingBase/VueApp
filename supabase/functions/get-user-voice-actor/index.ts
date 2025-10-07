@@ -1,9 +1,8 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { corsHeaders } from "../_shared/cors.ts"
-import { supabase } from "../_shared/supabase.ts"
+import { corsHeaders } from "../_shared/http-utils.ts"
+import { supabase } from "../_shared/database.ts"
 import { Database } from "../_shared/database.types.ts"
-import { Movie } from "../_shared/movie.ts";
-import { Serie } from "../_shared/serie.ts";
+import { Movie, Serie } from "../_shared/types.ts";
 
 type VoiceActor = Database['public']['Tables']['voice_actors']['Row']
 

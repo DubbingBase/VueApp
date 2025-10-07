@@ -1,56 +1,54 @@
 <template>
-  <div class="person-item" @click="handleClick" tabindex="0" role="button" :aria-label="`Go to details for ${displayName}`">
-    <div class="person-avatar">
-      <img v-if="image" :src="image" :alt="`${displayName} photo`" />
-      <img v-else :src="`https://placehold.co/${width}x${height}?text=?`" alt="No photo" />
-    </div>
+  <div class="person-item">
+    <MediaItem
+      :image-path="image"
+      :route-name="routeName"
+      :route-params="routeParams"
+      :width="THUMBNAIL_DEFAULT_WIDTH"
+      :height="THUMBNAIL_DEFAULT_HEIGHT"
+      :fallbackImagePath="`https://api.dicebear.com/9.x/initials/svg?scale=50&backgroundColor=212121&seed=${displayName}`"
+
+    />
 
     <div class="person-info">
-       <div class="person-name">{{ displayName }}</div>
-       <div v-if="subtitle" class="person-subtitle">{{ subtitle }}</div>
-       <div v-if="tags.length > 0" class="person-tags">
-         <span v-for="tag in tags" :key="tag" class="tag">{{ tag }}</span>
-       </div>
-     </div>
+        <div class="person-name">{{ displayName }}</div>
+        <div v-if="subtitle" class="person-subtitle">{{ subtitle }}</div>
+        <div v-if="tags.length > 0" class="person-tags">
+          <span v-for="tag in tags" :key="tag" class="tag">{{ tag }}</span>
+        </div>
+      </div>
 
-    <div class="person-actions">
-      <slot name="actions"></slot>
-    </div>
-  </div>
+     <div class="person-actions">
+       <slot name="actions"></slot>
+     </div>
+   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { THUMBNAIL_DEFAULT_WIDTH, THUMBNAIL_DEFAULT_HEIGHT } from '@/constants/thumbnails';
+import MediaItem from '@/components/MediaItem.vue';
+import { THUMBNAIL_DEFAULT_HEIGHT, THUMBNAIL_DEFAULT_WIDTH } from '@/constants/thumbnails';
 
-export interface PersonData {
+export interface PersonData<T = unknown> {
   id: number;
   name?: string;
   firstname?: string;
   lastname?: string;
   character?: string;
-  profile_path?: string;
   profile_picture?: string;
   performance?: string;
   tags?: string[] | string;
   tmdb_id: number
+  data?: T;
 }
 
 const props = withDefaults(defineProps<{
   person: PersonData;
   type?: 'actor' | 'voice-actor';
-  getImage?: (path: string) => string;
   subtitleOverride?: string;
-  width?: number;
-  height?: number;
 }>(), {
-  width: THUMBNAIL_DEFAULT_WIDTH,
-  height: THUMBNAIL_DEFAULT_HEIGHT,
 });
 
-const emit = defineEmits<{
-  click: [person: PersonData];
-}>();
 
 const displayName = computed(() => {
   if (props.person.name) return props.person.name;
@@ -61,10 +59,7 @@ const displayName = computed(() => {
 });
 
 const image = computed(() => {
-  if (props.getImage && props.person.profile_path) {
-    return props.getImage(props.person.profile_path);
-  }
-  return props.person.profile_picture || props.person.profile_path;
+  return props.person.profile_picture
 });
 
 const subtitle = computed(() => {
@@ -91,48 +86,32 @@ const tags = computed(() => {
     return [];
   });
 
-const widthStyle = computed(() => `${props.width}px`);
-const heightStyle = computed(() => `${props.height}px`);
 
-const handleClick = () => {
-  emit('click', props.person);
-};
+const routeName = computed(() => {
+  return props.type === 'actor' ? 'ActorDetails' : 'VoiceActorDetails';
+});
+
+const routeParams = computed(() => {
+  const id = props.type === 'actor' ? props.person.tmdb_id : props.person.id;
+  return { id };
+});
 </script>
 
 <style scoped lang="scss">
 .person-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   padding: 8px;
   border-radius: 8px;
-  cursor: pointer;
   transition: all 0.3s ease;
 
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
-
-  &:focus {
+  &:focus-within {
     outline: 2px solid #007bff;
     outline-offset: 2px;
   }
 }
 
-.person-avatar {
-   width: v-bind(widthStyle);
-   height: v-bind(heightStyle);
-   border-radius: var(--thumbnail-border-radius);
-   border: var(--thumbnail-border);
-   overflow: hidden;
-   flex-shrink: 0;
-
-   img {
-     width: 100%;
-     height: 100%;
-     object-fit: cover;
-   }
- }
 
 .person-info {
   flex: 1;
@@ -183,6 +162,16 @@ const handleClick = () => {
     .person-item {
       padding: 6px;
       gap: 8px;
+    }
+
+    .person-info {
+      .person-name {
+        font-size: 13px;
+      }
+
+      .person-subtitle {
+        font-size: 11px;
+      }
     }
 
     .person-tags {

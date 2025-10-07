@@ -4,10 +4,9 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { corsHeaders } from "../_shared/cors.ts"
-import { supabase } from "../_shared/supabase.ts"
-import { Movie, MovieResponse } from "../_shared/movie.ts";
-import { Serie } from "../_shared/serie.ts";
+import { corsHeaders } from "../_shared/http-utils.ts"
+import { supabase } from "../_shared/database.ts"
+import { Movie, MovieResponse, Serie } from "../_shared/types.ts";
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {

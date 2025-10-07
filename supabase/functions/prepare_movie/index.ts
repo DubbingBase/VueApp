@@ -4,97 +4,17 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { corsHeaders } from "../_shared/cors.ts"
-import { supabase } from "../_shared/supabase.ts"
+import { corsHeaders } from "../_shared/http-utils.ts"
+import { supabase } from "../_shared/database.ts"
 import { getEntity, getWikipediaPage, getWikipediaPageSectionAsWikitext, wikipediaPageFindSections } from "../_shared/extract/constants.ts"
-import { MistralMovieExtractOutput } from "../_shared/mistral.ts";
-import { WithCast } from "../_shared/other.ts";
+import { MistralMovieExtractOutput } from "../_shared/types.ts";
+import { WithCast } from "../_shared/types.ts";
 import { Database } from "../_shared/database.types.ts";
 import { PostgrestError } from "jsr:@supabase/supabase-js";
 
-const insertVoiceActor = async (voiceActorFirstName: string, voiceActorLastName: string) => {
-  console.log('upserting voice actor', {
-    firstname: voiceActorFirstName,
-    lastname: voiceActorLastName,
-  })
-  const insertResult = await supabase.from('voice_actors').upsert({
-    firstname: voiceActorFirstName,
-    lastname: voiceActorLastName,
-  }, {
-    onConflict: 'firstname, lastname',
-  }).select()
-  return insertResult
-}
+import { VoiceActorService } from "../_shared/voice-actor-service.ts"
 
-const insertVoiceActorWork = async (
-  voiceActorId: number,
-  tmdbId: number,
-  actorId: number,
-  contentType: string,
-  performance?: string,
-) => {
-  console.log('inserting work', {
-    voice_actor_id: voiceActorId,
-    content_id: tmdbId,
-    actor_id: actorId,
-  })
-
-  const { data, error } = await supabase
-    .from('work')
-    .upsert(
-      {
-        voice_actor_id: voiceActorId,
-        content_id: tmdbId,
-        actor_id: actorId,
-        performance,
-        content_type: contentType,
-      },
-      { onConflict: ['voice_actor_id', 'content_id', 'actor_id', 'content_type'] } // requires unique constraint
-    )
-    .select()
-
-  if (error) {
-    console.error('Error inserting/upserting work:', error)
-    throw error
-  }
-
-  return data
-}
-
-const insertVoiceActorAndWork = async (
-  voiceActorFirstName: string,
-  voiceActorLastName: string,
-  tmdbId: number,
-  actorId: number,
-  contentType: string,
-  performance?: string
-) => {
-  let result: Database['public']['Tables']['voice_actors']['Insert'][] | null
-  let error: PostgrestError | null
-  try {
-    const insertVoiceResult = await insertVoiceActor(voiceActorFirstName, voiceActorLastName)
-    result = insertVoiceResult.data
-    error = insertVoiceResult.error
-    console.log('insert voice actor result', result, error)
-  } catch (e) {
-    console.error('e', e)
-  }
-  const voiceActorId = result?.[0]?.id
-  if (voiceActorId) {
-    try {
-      const { data: result2, error: error2 } = await insertVoiceActorWork(
-        voiceActorId,
-        tmdbId,
-        actorId,
-        contentType,
-        performance
-      )
-      console.log('insert voice actor work result', result2, error2)
-    } catch (e) {
-      console.error('e', e)
-    }
-  }
-}
+const voiceActorService = new VoiceActorService()
 
 
 Deno.serve(async (req) => {
@@ -238,7 +158,7 @@ Deno.serve(async (req) => {
 
         const { id: actorId } = foundActor
 
-        await insertVoiceActorAndWork(
+        await voiceActorService.insertVoiceActorAndWork(
           voiceActorFirstname,
           voiceActorName,
           tmdbId,

@@ -14,12 +14,12 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
-      <!-- <div class="background">
-        <img width="100%" v-if="movie" :src="getImage(movie.backdrop_path)" alt="Movie background image" />
-        <div class="background-overlay"></div>
-      </div> -->
 
-      <MediaInfoCard :media="movie" :getImage="getImage" />
+      <div class="background" v-if="movie">
+      <img width="100%" v-if="movie" :src="movie.backdrop_path" alt="Movie background image" />
+      </div>
+
+      <MediaInfoCard :media="movie" />
 
       <ActorList
         :actors="actors"
@@ -31,7 +31,6 @@
         :edit-voice-actor-link="editVoiceActorLink"
         :confirm-delete-voice-actor-link="confirmDeleteVoiceActorLink"
         :open-voice-actor-search="openVoiceActorSearch"
-        :get-image="getImage"
         :loading="isLoading"
       />
 
@@ -97,7 +96,9 @@ import ActorList from "@/components/ActorList.vue";
 import ActionButtons from "@/components/ActionButtons.vue";
 import VoiceActorSearchModal from "@/components/VoiceActorSearchModal.vue";
 import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
+import MediaItem from "@/components/MediaItem.vue";
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { actorToPersonData } from "@/utils/convert";
 
 
 const authStore = useAuthStore();
@@ -118,7 +119,6 @@ const {
   isLoading,
 
   // Methods
-  getImage,
   getVoiceActorByTmdbId,
   openVoiceActorSearch,
   searchVoiceActors,
@@ -131,7 +131,7 @@ const {
 
 const movie = ref<MovieResponse["movie"] | undefined>();
 const actors = computed(() => {
-  return movie.value?.credits.cast;
+  return movie.value?.credits.cast.map(cast => actorToPersonData(cast));
 });
 
 const wikiDataId = computed(() => {

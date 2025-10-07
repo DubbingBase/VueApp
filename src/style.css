@@ -8,3 +8,8 @@
     overflow: hidden !important;
     text-overflow: ellipsis !important;
 }
+
+.no-link {
+    text-decoration: none !important;
+    color: inherit !important;
+}

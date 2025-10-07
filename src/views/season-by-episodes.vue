@@ -13,10 +13,10 @@
       <LoadingSpinner v-if="isLoading" name="crescent" />
       <div v-if="error" class="error">{{ error }}</div>
       <div v-if="episode && !isLoading" class="episode-detail">
-        <EpisodeBanner :episode="episode" :getImage="getImage" />
+        <EpisodeBanner :episode="episode" :serieId="Number(route.params.id)" :seasonNumber="Number(route.params.season)" />
         <div class="voices">
           <h3>Distribution originale et voix françaises</h3>
-          <ActorList :actors="episode?.credits?.cast || []" :voiceActors="[]" :getVoiceActorByTmdbId="getVoiceActorByTmdbId" :goToActor="goToActor" :goToVoiceActor="goToVoiceActor" :isAdmin="false" :editVoiceActorLink="editVoiceActorLink" :confirmDeleteVoiceActorLink="confirmDeleteVoiceActorLink" :openVoiceActorSearch="openVoiceActorSearch" :getImage="getImage" :loading="isLoading" />
+          <ActorList :actors="episode?.credits?.cast || []" :voiceActors="[]" :getVoiceActorByTmdbId="getVoiceActorByTmdbId" :goToActor="goToActor" :goToVoiceActor="goToVoiceActor" :isAdmin="false" :editVoiceActorLink="editVoiceActorLink" :confirmDeleteVoiceActorLink="confirmDeleteVoiceActorLink" :openVoiceActorSearch="openVoiceActorSearch" :loading="isLoading" />
         </div>
       </div>
     </ion-content>
@@ -28,7 +28,6 @@ import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { IonPage, IonHeader, IonToolbar, IonButtons, IonBackButton, IonTitle, IonContent, toastController } from "@ionic/vue";
 import LoadingSpinner from "../components/common/LoadingSpinner.vue";
-import { getImage } from "../utils";
 import { supabase } from "../api/supabase";
 import ActionButtons from "../components/ActionButtons.vue";
 import EpisodeBanner from "../components/EpisodeBanner.vue";

@@ -1,7 +1,12 @@
 <template>
   <div v-if="movie" class="movie-info-card">
-    <img v-if="movie.poster_path" class="movie-poster" :src="getImage(movie.poster_path)"
-      :alt="movie.title + ' poster'" />
+    <MediaItem
+      v-if="movie.poster_path"
+      :imagePath="movie.poster_path"
+      :title="movie.title"
+      :routeName="'MovieDetails'"
+      :routeParams="{ id: movie.id }"
+    />
     <div class="movie-info">
       <div class="movie-title-row">
         <h2 class="movie-title">{{ movie.title }}</h2>
@@ -26,13 +31,13 @@
 </template>
 
 <script setup lang="ts">
-import { MovieResponse } from '../../supabase/functions/_shared/movie';
+import { MovieResponse } from '../../supabase/functions/_shared/types';
+import MediaItem from './MediaItem.vue';
 
 type MovieType = MovieResponse["movie"] & { runtime?: number };
 
 interface Props {
   movie: MovieType | undefined;
-  getImage: (path: string) => string;
 }
 
 defineProps<Props>();
@@ -53,14 +58,6 @@ defineProps<Props>();
   z-index: 2;
 }
 
-.movie-poster {
-  width: 120px;
-  height: 180px;
-  border-radius: 0.5rem;
-  object-fit: cover;
-  margin-right: 16px;
-  background: #222;
-}
 
 .movie-info {
   flex: 1;

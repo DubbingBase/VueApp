@@ -10,7 +10,6 @@
           :key="actor.id"
           :actor="actor"
           :voiceActors="getVoiceActorsForActor(actor.id)"
-          :getImage="getImage"
           :onActorClick="handleActorClick"
           :onVoiceActorClick="handleVoiceActorClick"
         />
@@ -29,11 +28,10 @@ import { PersonData } from './PersonItem.vue';
 
 // Props
 const props = defineProps<{
-  actors?: any[];
-  voiceActors?: any[];
+  actors?: PersonData[];
+  voiceActors?: unknown[];
   goToActor: (id: number) => void;
   goToVoiceActor: (id: number) => void;
-  getImage: (path: string) => string;
   loading?: boolean;
 }>();
 
@@ -49,7 +47,8 @@ const getVoiceActorsForActor = (actorId: number) => {
     firstname: va.voiceActorDetails.firstname,
     lastname: va.voiceActorDetails.lastname,
     tags: [va.performance],
-    tmdb_id: va.voiceActorDetails.actor_id
+    tmdb_id: va.voiceActorDetails.actor_id,
+    profile_picture: va.voiceActorDetails.profile_picture,
   } satisfies PersonData));
 };
 
