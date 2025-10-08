@@ -73,7 +73,7 @@ async function mergeGroup(group: any) {
     },
   });
   if (err) {
-    error.value = err.message || 'Failed to merge.';
+    error.value = err.message ?? err.error ?? 'Failed to merge.';
   } else {
     // Remove group from list
     duplicates.value = duplicates.value.filter((g: any) => g !== group);
