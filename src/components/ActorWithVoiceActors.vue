@@ -7,11 +7,17 @@
 
     <!-- Main Actor Display -->
     <div class="main-actor">
-      <PersonItem :person="actor" type="actor" />
+      <PersonItem :person="actor" type="actor">
+        <template #actions >
+          <ion-button v-if="voiceActors.length === 0 && shouldShowVoiceActors" fill="clear" size="small" @click.stop="" aria-label="Add voice actor link">
+            <ion-icon :icon="addCircle"></ion-icon>
+          </ion-button>
+        </template>
+      </PersonItem>
     </div>
 
     <!-- Voice Actors List -->
-    <div v-if="voiceActors && voiceActors.length" class="voice-actors-section">
+    <div v-if="voiceActors && voiceActors.length && shouldShowVoiceActors" class="voice-actors-section">
       <div class="voice-actors-scroll">
         <div class="voice-actors-container">
           <template v-for="voiceActor in voiceActors" :key="voiceActor.id">
@@ -19,27 +25,20 @@
               class="voice-actor-item no-link"
               :to="{ name: 'VoiceActorDetails', params: { id: voiceActor.id } }"
             >
-              <div
-                v-if="voiceActor.tmdb_id === actor.id"
-                class="himself-item"
-                :to="{
-                  name: 'VoiceActorDetails',
-                  params: { id: voiceActor.id },
-                }"
-              >
-                <div class="himself-content">
-                  <div class="himself-text">{{ $t("common.himself") }}</div>
-                </div>
-              </div>
               <PersonItem
                 class="voice-actor-item"
-                v-else
-                :person="{
-                  ...voiceActor,
-                  profile_picture: voiceActor.profile_picture,
-                }"
+                :person="voiceActor"
                 type="voice-actor"
-              />
+              >
+              <template #actions>
+                <ion-button fill="clear" size="small" @click.stop="editVoiceActorLink && editVoiceActorLink({ id: actor.id, voiceActorDetails: voiceActor })" aria-label="Edit voice actor link">
+                  <ion-icon :icon="createOutline"></ion-icon>
+                </ion-button>
+                <ion-button fill="clear" size="small" @click.stop="confirmDeleteVoiceActorLink && confirmDeleteVoiceActorLink({ id: actor.id, voiceActorDetails: voiceActor })" color="danger" aria-label="Delete voice actor link">
+                  <ion-icon :icon="trashOutline"></ion-icon>
+                </ion-button>
+              </template>
+              </PersonItem>
             </router-link>
           </template>
         </div>
@@ -50,18 +49,35 @@
 
 <script setup lang="ts">
 import PersonItem, { PersonData } from "./PersonItem.vue";
+import { createOutline, trashOutline, addCircle } from 'ionicons/icons';
+import { useLanguagePreference } from '@/composables/useLanguagePreference';
+import { computed } from 'vue';
 
 export interface ActorWithVoiceActorsProps {
   actor: PersonData;
   voiceActors?: PersonData[];
   onActorClick?: (actor: PersonData) => void;
   onVoiceActorClick?: (voiceActor: PersonData) => void;
+  mediaLanguage?: string;
+  editVoiceActorLink?: (workItem: any) => void;
+  confirmDeleteVoiceActorLink?: (workItem: any) => void;
+  addVoiceActorLink?: (actor: PersonData) => void;
 }
 
 const props = withDefaults(defineProps<ActorWithVoiceActorsProps>(), {
   voiceActors: () => [],
   onActorClick: () => {},
   onVoiceActorClick: () => {},
+  mediaLanguage: () => '',
+  editVoiceActorLink: undefined,
+  confirmDeleteVoiceActorLink: undefined,
+});
+
+// Use language preference composable
+const { preferredLanguage } = useLanguagePreference();
+
+const shouldShowVoiceActors = computed(() => {
+  return props.mediaLanguage.toLowerCase() !== preferredLanguage.value.toLowerCase()
 });
 </script>
 

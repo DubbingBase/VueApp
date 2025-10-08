@@ -79,6 +79,8 @@
               :confirm-delete-voice-actor-link="confirmDeleteVoiceActorLink"
               :open-voice-actor-search="openVoiceActorSearch"
               :loading="isLoading"
+              :mediaLanguage="show?.original_language"
+
             />
           </ion-segment-content>
         </ion-segment-view>

@@ -32,6 +32,7 @@
         :confirm-delete-voice-actor-link="confirmDeleteVoiceActorLink"
         :open-voice-actor-search="openVoiceActorSearch"
         :loading="isLoading"
+        :mediaLanguage="movie?.original_language"
       />
 
 

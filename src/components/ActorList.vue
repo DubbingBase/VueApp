@@ -12,6 +12,9 @@
           :voiceActors="getVoiceActorsForActor(actor.id)"
           :onActorClick="handleActorClick"
           :onVoiceActorClick="handleVoiceActorClick"
+          :mediaLanguage="mediaLanguage"
+          :editVoiceActorLink="editVoiceActorLink"
+          :confirmDeleteVoiceActorLink="confirmDeleteVoiceActorLink"
         />
       </template>
       <template v-else>
@@ -29,10 +32,25 @@ import { PersonData } from './PersonItem.vue';
 // Props
 const props = defineProps<{
   actors?: PersonData[];
-  voiceActors?: unknown[];
+  voiceActors?: Array<{
+    id: number;
+    voice_actor_id: number;
+    work_id: number;
+    work_type: string;
+    performance: string;
+    voiceActorDetails: {
+      id: number;
+      firstname: string;
+      lastname: string;
+      profile_picture?: string;
+    };
+  }>;
   goToActor: (id: number) => void;
   goToVoiceActor: (id: number) => void;
   loading?: boolean;
+  mediaLanguage?: string;
+  editVoiceActorLink?: (workItem: any) => void;
+  confirmDeleteVoiceActorLink?: (workItem: any) => void;
 }>();
 
 console.log('actors', props.actors)
@@ -42,12 +60,12 @@ console.log('voiceActors', props.voiceActors)
 const getVoiceActorsForActor = (actorId: number) => {
   if (!props.voiceActors) return [];
   console.log('props.voiceActors', props.voiceActors)
-  return props.voiceActors.filter((item: any) => item.actor_id === actorId).map(va => ({
+  return props.voiceActors.filter((item: any) => item.actor_id === actorId).map((va: any) => ({
     id: va.voiceActorDetails.id,
     firstname: va.voiceActorDetails.firstname,
     lastname: va.voiceActorDetails.lastname,
-    tags: [va.performance],
-    tmdb_id: va.voiceActorDetails.actor_id,
+    tags: va.performance ? [va.performance] : [],
+    tmdb_id: va.voiceActorDetails.tmdb_id,
     profile_picture: va.voiceActorDetails.profile_picture,
   } satisfies PersonData));
 };
