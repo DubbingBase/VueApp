@@ -11,34 +11,35 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
-  // 1. Fetch trending media
-  const trendingMoviesResponse = await fetch(`https://api.themoviedb.org/3/trending/movie/day?language=fr-FR`, {
+  // 1. Fetch new media
+  const today = new Date().toISOString().slice(0, 10);
+  const newMoviesResponse = await fetch(`https://api.themoviedb.org/3/discover/movie?language=fr-FR&primary_release_date.gte=${today}&primary_release_date.lte=${today}`, {
     headers: {
       "Content-Type": "application/json",
       'Authorization': `Bearer ${Deno.env.get('TMDB_API_KEY')}`,
       'Accept': 'application/json',
     },
   })
-  const trendingMovies = await trendingMoviesResponse.json()
+  const newMovies = await newMoviesResponse.json()
 
-  const trendingShowsResponse = await fetch(`https://api.themoviedb.org/3/trending/tv/day?language=fr-FR`, {
+  const newShowsResponse = await fetch(`https://api.themoviedb.org/3/discover/tv?language=fr-FR&air_date.gte=${today}&air_date.lte=${today}`, {
     headers: {
       "Content-Type": "application/json",
       'Authorization': `Bearer ${Deno.env.get('TMDB_API_KEY')}`,
       'Accept': 'application/json',
     },
   })
-  const trendingShows = await trendingShowsResponse.json()
+  const newShows = await newShowsResponse.json()
 
-  const allTrending = [
-    ...(trendingMovies.results || []).map((item: any) => ({ ...item, type: 'movie' })),
-    ...(trendingShows.results || []).map((item: any) => ({ ...item, type: 'tv' })),
+  const allNew = [
+    ...(newMovies.results || []).map((item: any) => ({ ...item, type: 'movie' })),
+    ...(newShows.results || []).map((item: any) => ({ ...item, type: 'tv' })),
   ]
 
-  // Limit to the top 5 most popular items
-  const top5Trending = allTrending.sort((a, b) => b.popularity - a.popularity).slice(0, 15);
+  // Limit to the top 15 most popular items
+  const top15New = allNew.sort((a, b) => b.popularity - a.popularity).slice(0, 15);
 
-  console.log('top5Trending', top5Trending)
+  console.log('top15New', top15New)
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
@@ -52,9 +53,9 @@ Deno.serve(async (req) => {
   }
 
   const allResults = [];
-  console.log(`Starting sequential processing of top ${top5Trending.length} items.`);
+  console.log(`Starting sequential processing of top ${top15New.length} items.`);
 
-  for (const media of top5Trending) {
+  for (const media of top15New) {
     const tmdbId = media.id;
     const type = media.type as 'movie' | 'tv';
     const title = media.title ?? media.name;
@@ -104,7 +105,7 @@ Deno.serve(async (req) => {
     ...successfulShows,
   ]
 
-  let summary = `DubbingBase Top 5 Trending Report:\n`;
+  let summary = `DubbingBase New Media Report:\n`;
   summary += `- ✅ Processed ${successfulMovies.length} movies and ${successfulShows.length} shows successfully.\n`;
   for (const item of jobs) {
     console.log('item', item)
@@ -119,13 +120,13 @@ Deno.serve(async (req) => {
   }
 
   // Send ntfy notification
-const ntfyTopic = 'Armaldio_DubbingBaseTrendingSummary';
+const ntfyTopic = 'Armaldio_DubbingBaseNewMediaSummary';
   try {
     await fetch(`https://ntfy.sh/${ntfyTopic}`, {
       method: 'POST',
       body: summary,
       headers: {
-        'Title': 'DubbingBase Trending Media Report',
+        'Title': 'DubbingBase New Media Report',
       }
     });
     console.log('Sent ntfy notification.');
@@ -133,7 +134,7 @@ const ntfyTopic = 'Armaldio_DubbingBaseTrendingSummary';
     console.error('Failed to send ntfy notification:', e);
   }
 
-  return new Response(JSON.stringify({ ok: true, message: "Trending media processing done.", summary }), {
+  return new Response(JSON.stringify({ ok: true, message: "New media processing done.", summary }), {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
 })
