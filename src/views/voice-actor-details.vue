@@ -247,32 +247,6 @@ onMounted(async () => {
 <style scoped lang="scss">
 .actor {
   padding: 16px;
-  max-width: 1200px;
   margin: 0 auto;
-
-  // Horizontal layout for larger screens
-  @media (min-width: 1024px) {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 24px;
-    align-items: start;
-
-    // Header and bio on the left side
-    > :nth-child(1),
-    > :nth-child(2) {
-      grid-column: 1;
-    }
-
-    // Works on the right side
-    > :nth-child(3) {
-      grid-column: 2;
-      grid-row: 1 / -1;
-    }
-  }
-
-  @media (min-width: 1200px) {
-    grid-template-columns: 350px 1fr;
-    gap: 32px;
-  }
 }
 </style>

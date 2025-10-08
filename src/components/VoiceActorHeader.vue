@@ -3,13 +3,13 @@
     <div class="profile-picture">
       <MediaThumbnail
         v-if="profilePicture"
-        :path="profilePicture || undefined"
-        from-storage
+        :path="profilePicture"
+        @click="uploadImage"
       />
       <MediaThumbnail
         v-else
         @click="uploadImage"
-        :path="profilePicture || undefined"
+        :path="`https://api.dicebear.com/9.x/initials/svg?scale=50&backgroundColor=212121&seed=${voiceActor.firstname} ${voiceActor.lastname}`"
       />
     </div>
     <div class="actor-info">
@@ -18,7 +18,9 @@
       </div>
       <div class="actor-details">
         <div v-if="voiceActor.date_of_birth" class="detail-item">
-          <span class="detail-value">{{ new Date(voiceActor.date_of_birth).toLocaleDateString() }}</span>
+          <span class="detail-value">{{
+            new Date(voiceActor.date_of_birth).toLocaleDateString()
+          }}</span>
         </div>
         <div v-if="voiceActor.years_active" class="detail-item">
           <span class="detail-value">{{ voiceActor.years_active }}</span>
@@ -26,7 +28,9 @@
         <div v-if="voiceActor.awards" class="detail-item">
           <span class="detail-value">{{ voiceActor.awards }}</span>
         </div>
-        <span v-if="voiceActor.nationality" class="nationality-tag">{{ voiceActor.nationality }}</span>
+        <span v-if="voiceActor.nationality" class="nationality-tag">{{
+          voiceActor.nationality
+        }}</span>
       </div>
     </div>
   </div>
@@ -74,26 +78,26 @@ onChange(async (files) => {
   }
 
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append("file", file);
   if (props.voiceActor?.id) {
-    formData.append('voice_actor_id', props.voiceActor.id.toString());
+    formData.append("voice_actor_id", props.voiceActor.id.toString());
   }
 
   try {
-    const { data } = await supabase.functions.invoke('upload_profile_picture', {
-      body: formData
+    const { data } = await supabase.functions.invoke("upload_profile_picture", {
+      body: formData,
     });
 
-    console.log('Upload response:', data);
+    console.log("Upload response:", data);
 
-    if (data?.fullPath) {
-      console.log('Emitting profilePictureChanged with:', data.fullPath);
-      emit('profilePictureChanged', data.fullPath);
+    if (data?.publicUrl) {
+      console.log("Emitting profilePictureChanged with:", data.publicUrl);
+      emit("profilePictureChanged", data.publicUrl);
     } else {
-      console.error('No fullPath in upload response:', data);
+      console.error("No publicUrl in upload response:", data);
     }
   } catch (error) {
-    console.error('Error uploading profile picture:', error);
+    console.error("Error uploading profile picture:", error);
   }
 });
 
@@ -131,8 +135,8 @@ const uploadImage = async () => {
     }
 
     img {
-       height: var(--thumbnail-height);
-       width: var(--thumbnail-width);
+      height: var(--thumbnail-height);
+      width: var(--thumbnail-width);
       object-fit: cover;
       border-radius: var(--thumbnail-border-radius);
       border: var(--thumbnail-border);

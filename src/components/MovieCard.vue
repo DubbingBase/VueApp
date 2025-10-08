@@ -73,10 +73,6 @@ const releaseDate = computed(() => {
 
   .media-poster {
     flex-shrink: 0;
-
-    @media (max-width: 768px) {
-      // Mobile responsive adjustments handled by MediaThumbnail props
-    }
   }
 
   .movie-info {

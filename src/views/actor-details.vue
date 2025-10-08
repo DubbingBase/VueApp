@@ -648,7 +648,6 @@ function groupVoiceRolesByMedia(): Record<string, any[]> {
 /* Responsive adjustments */
 @media (min-width: 768px) {
   .voice-roles-section {
-    max-width: 800px;
     margin: 2rem auto;
     padding: 0 1.5rem;
   }
