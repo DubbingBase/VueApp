@@ -12,7 +12,8 @@ Deno.serve(async (req) => {
   }
 
   // 1. Fetch new media
-  const newMoviesResponse = await fetch(`https://api.themoviedb.org/3/movie/upcoming?language=fr-FR`, {
+  const today = new Date().toISOString().slice(0, 10);
+  const newMoviesResponse = await fetch(`https://api.themoviedb.org/3/discover/movie?language=fr-FR&primary_release_date.gte=${today}&primary_release_date.lte=${today}`, {
     headers: {
       "Content-Type": "application/json",
       'Authorization': `Bearer ${Deno.env.get('TMDB_API_KEY')}`,
@@ -21,7 +22,7 @@ Deno.serve(async (req) => {
   })
   const newMovies = await newMoviesResponse.json()
 
-  const newShowsResponse = await fetch(`https://api.themoviedb.org/3/tv/on_the_air?language=fr-FR`, {
+  const newShowsResponse = await fetch(`https://api.themoviedb.org/3/discover/tv?language=fr-FR&air_date.gte=${today}&air_date.lte=${today}`, {
     headers: {
       "Content-Type": "application/json",
       'Authorization': `Bearer ${Deno.env.get('TMDB_API_KEY')}`,
