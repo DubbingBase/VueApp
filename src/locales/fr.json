@@ -84,5 +84,22 @@
     "seriesEmpty": "Aucune série tendance trouvée.",
     "voiceActorsError": "Impossible de charger les voix récentes. Veuillez réessayer plus tard.",
     "voiceActorsEmpty": "Aucune voix récente trouvée."
+  },
+  "settings": {
+    "title": "Paramètres",
+    "about": "À propos",
+    "email": "Email",
+    "logout": "Se déconnecter",
+    "login": "Se connecter"
+  },
+  "about": {
+    "title": "À propos",
+    "attributions": "Attributions",
+    "usersTitle": "Nos utilisateurs",
+    "usersDescription": "Remerciements spéciaux à tous les acteurs de doublage, réalisateurs et passionnés de cinéma qui contribuent à notre communauté et aident à construire cette base de données complète.",
+    "tvdbTitle": "The TV Database (TVDB)",
+    "tvdbDescription": "Données et images de télévision fournies par The TV Database (TVDB). Visitez-les sur thetvdb.com pour plus d'informations.",
+    "tmdbTitle": "The Movie Database (TMDB)",
+    "tmdbDescription": "Données de films et de télévision fournies par The Movie Database (TMDB). Visitez-les sur themoviedb.org pour plus d'informations."
   }
 }

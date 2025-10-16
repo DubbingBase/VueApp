@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue';
+import { ref, watch, onUnmounted } from 'vue';
 import { useIonRouter } from '@ionic/vue';
 import { alertController } from '@ionic/vue';
 import { storeToRefs } from 'pinia';
@@ -39,10 +39,13 @@ export function useVoiceActorManagement(workType: 'movie' | 'tv' | 'season' | 'e
   const isLoading = ref(false);
   const error = ref('');
 
+  // Search timer for debouncing
+  let searchTimer: NodeJS.Timeout | null = null;
+
   const getVoiceActorByTmdbId = (tmdbId: number): WorkAndVoiceActor[] => {
     console.log('tmdbId', tmdbId);
     console.log('voiceActors.value', voiceActors.value);
-    return voiceActors.value.filter(va => va.actor_id === tmdbId);
+    return voiceActors.value.filter(va => va.voice_actor_id === tmdbId);
   };
 
   const openVoiceActorSearch = (actor: any) => {
@@ -217,6 +220,23 @@ export function useVoiceActorManagement(workType: 'movie' | 'tv' | 'season' | 'e
     });
   };
 
+  // Watch for search term changes and trigger search with debouncing
+  watch(searchTerm, (newTerm) => {
+    if (searchTimer) {
+      clearTimeout(searchTimer);
+    }
+    searchTimer = setTimeout(() => {
+      searchVoiceActors();
+    }, 300); // 300ms debounce
+  });
+
+  // Cleanup timer on unmount
+  onUnmounted(() => {
+    if (searchTimer) {
+      clearTimeout(searchTimer);
+    }
+  });
+
   watch(voiceActors, (newVal) => {
     console.log('voiceActors changed:', newVal);
   });
@@ -232,7 +252,7 @@ export function useVoiceActorManagement(workType: 'movie' | 'tv' | 'season' | 'e
     isLoading,
     error,
     isAdmin,
-    
+
     // Methods
     getVoiceActorByTmdbId,
     openVoiceActorSearch,

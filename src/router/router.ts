@@ -35,6 +35,7 @@ const routes: readonly RouteRecordRaw[] = [
       { name: 'Search', path: '/tabs/search', component: Search },
       { name: 'Settings', path: '/tabs/settings', component: () => import('../views/settings.vue') },
       { name: 'Profile', path: '/tabs/profile', component: () => import('../views/profile.vue') },
+      { name: 'About', path: '/tabs/about', component: () => import('../views/about.vue') },
       { name: 'VoiceActorProfile', path: '/tabs/voice-actor-profile/:id', component: () => import('../views/voice-actor-profile.vue') },
       {
         name: 'Admin',
@@ -94,7 +95,7 @@ export const router = createRouter({
 });
 
 // Routes that allow anonymous access (both authenticated and anonymous users can access)
-const anonymousAllowedRoutes = ['/login', '/tabs/profile', '/tabs/voice-actor-profile'];
+const anonymousAllowedRoutes = ['/login', '/tabs/profile', '/tabs/voice-actor-profile', '/tabs/about'];
 
 router.beforeEach(async (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
   const authStore = useAuthStore();

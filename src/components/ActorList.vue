@@ -15,6 +15,7 @@
           :mediaLanguage="mediaLanguage"
           :editVoiceActorLink="editVoiceActorLink"
           :confirmDeleteVoiceActorLink="confirmDeleteVoiceActorLink"
+          :openVoiceActorSearch="openVoiceActorSearch"
         />
       </template>
       <template v-else>
@@ -51,6 +52,7 @@ const props = defineProps<{
   mediaLanguage?: string;
   editVoiceActorLink?: (workItem: any) => void;
   confirmDeleteVoiceActorLink?: (workItem: any) => void;
+  openVoiceActorSearch?: (actorId: number) => void;
 }>();
 
 console.log('actors', props.actors)

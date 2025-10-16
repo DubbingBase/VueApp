@@ -84,5 +84,22 @@
     "seriesEmpty": "No trending series found.",
     "voiceActorsError": "Unable to load recent voices. Please try again later.",
     "voiceActorsEmpty": "No recent voices found."
+  },
+  "settings": {
+    "title": "Settings",
+    "about": "About",
+    "email": "Email",
+    "logout": "Logout",
+    "login": "Login"
+  },
+  "about": {
+    "title": "About",
+    "attributions": "Attributions",
+    "usersTitle": "Our Users",
+    "usersDescription": "Special thanks to all voice actors, directors, and film enthusiasts who contribute to our community and help build this comprehensive database.",
+    "tvdbTitle": "The TV Database (TVDB)",
+    "tvdbDescription": "Television data and images provided by The TV Database (TVDB). Visit them at thetvdb.com for more information.",
+    "tmdbTitle": "The Movie Database (TMDB)",
+    "tmdbDescription": "Movie and television data provided by The Movie Database (TMDB). Visit them at themoviedb.org for more information."
   }
 }

@@ -70,7 +70,7 @@ import {
   IonLabel
 } from "@ionic/vue";
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { closeCircle } from 'ionicons/icons';
 
 interface VoiceActor {
@@ -94,6 +94,11 @@ const props = defineProps<{
 
 
 const localSearchTerm = ref(props.searchTerm);
+
+// Watch for changes in props.searchTerm and sync with localSearchTerm
+watch(() => props.searchTerm, (newSearchTerm) => {
+  localSearchTerm.value = newSearchTerm;
+});
 
 const handleSearchInput = (event: any) => {
   const value = event.target.value;

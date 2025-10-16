@@ -9,7 +9,7 @@
     <div class="main-actor">
       <PersonItem :person="actor" type="actor">
         <template #actions >
-          <ion-button v-if="voiceActors.length === 0 && shouldShowVoiceActors" fill="clear" size="small" @click.stop="" aria-label="Add voice actor link">
+          <ion-button v-if="voiceActors.length === 0 && shouldShowVoiceActors" fill="clear" size="small" @click.stop="openVoiceActorSearch && openVoiceActorSearch(actor.id)" aria-label="Add voice actor link">
             <ion-icon :icon="addCircle"></ion-icon>
           </ion-button>
         </template>
@@ -62,6 +62,7 @@ export interface ActorWithVoiceActorsProps {
   editVoiceActorLink?: (workItem: any) => void;
   confirmDeleteVoiceActorLink?: (workItem: any) => void;
   addVoiceActorLink?: (actor: PersonData) => void;
+  openVoiceActorSearch?: (actorId: number) => void;
 }
 
 const props = withDefaults(defineProps<ActorWithVoiceActorsProps>(), {
@@ -71,6 +72,7 @@ const props = withDefaults(defineProps<ActorWithVoiceActorsProps>(), {
   mediaLanguage: () => '',
   editVoiceActorLink: undefined,
   confirmDeleteVoiceActorLink: undefined,
+  openVoiceActorSearch: undefined,
 });
 
 // Use language preference composable
