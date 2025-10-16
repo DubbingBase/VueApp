@@ -31,8 +31,6 @@ Deno.serve(async (req) => {
     }))
   }
 
-  console.log('trendingMovies', trendingMovies)
-
   return new Response(
     JSON.stringify(trendingMovies),
     {

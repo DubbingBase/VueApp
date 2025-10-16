@@ -132,7 +132,17 @@ const {
 
 const movie = ref<MovieResponse["movie"] | undefined>();
 const actors = computed(() => {
-  return movie.value?.credits.cast.map(cast => actorToPersonData(cast));
+  return movie.value?.credits.cast.map(cast => {
+    console.log('cast', cast)
+    const person = actorToPersonData(cast);
+
+    for (const role of person.roles ?? []) {
+      const image = ''
+      role.image = image;
+    }
+
+    return person
+  });
 });
 
 const wikiDataId = computed(() => {

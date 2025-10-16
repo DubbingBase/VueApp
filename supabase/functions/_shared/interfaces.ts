@@ -12,3 +12,13 @@ export interface ITMDBClient {
   fetchMediaDetails(contentId: number, contentType: string): Promise<any>;
   fetchMediaCredits(mediaType: string, mediaId: number): Promise<any>;
 }
+
+export interface ITVDBClient {
+  get(endpoint: string, params?: Record<string, string>): Promise<any>;
+  getSeriesById(seriesId: number): Promise<any>;
+  getEpisodesBySeries(seriesId: number, season?: number): Promise<any>;
+  getCharacterById(characterId: number): Promise<any>;
+  getCharactersBySeries(seriesId: number): Promise<any>;
+  getPersonById(personId: number): Promise<any>;
+  searchSeries(query: string): Promise<any>;
+}

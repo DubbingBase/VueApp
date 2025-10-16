@@ -1,8 +1,10 @@
 <template>
   <div class="actor-with-voice-actors">
     <!-- Character Name -->
-    <div v-if="actor.character" class="character-name">
-      {{ actor.character }}
+    <div class="character-name">
+      <div v-for="(role, index) in actor.roles" :key="role.character">
+        {{ index > 0 ? "/ " : "" }} {{ role.character }}
+      </div>
     </div>
 
     <!-- Main Actor Display -->
@@ -87,7 +89,6 @@ const shouldShowVoiceActors = computed(() => {
 .actor-with-voice-actors {
   display: flex;
   flex-direction: column;
-  gap: 16px;
   padding: 12px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.02);
@@ -99,6 +100,9 @@ const shouldShowVoiceActors = computed(() => {
     margin-bottom: 8px;
     padding: 4px 8px;
     border-radius: 8px;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
   }
 
   .main-actor {
@@ -170,41 +174,6 @@ const shouldShowVoiceActors = computed(() => {
             font-weight: 600;
             color: #e0e0e0;
             line-height: 1.4;
-          }
-        }
-      }
-    }
-  }
-
-  @media (max-width: 768px) {
-    padding: 8px;
-    gap: 12px;
-    border-radius: 8px;
-
-    .character-name {
-      font-size: 14px;
-      margin-bottom: 6px;
-      padding: 3px 6px;
-      border-radius: 6px;
-    }
-
-    .voice-actors-section {
-      gap: 6px;
-
-      .voice-actors-label {
-        font-size: 12px;
-      }
-
-      .voice-actors-container {
-        gap: 8px;
-
-        .himself-item {
-          padding: 6px;
-
-          .himself-content {
-            .himself-text {
-              font-size: 12px;
-            }
           }
         }
       }

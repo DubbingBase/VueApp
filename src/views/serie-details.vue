@@ -53,14 +53,14 @@
                 expand="block"
                 @click="goToSeason(show.id, season.season_number)"
                 class="season"
-                v-for="season in show.seasons"
+                v-for="season in formattedSeasons"
                 :key="season.id"
               >
                 <MediaThumbnail :path="season.poster_path"></MediaThumbnail>
                 <div class="text">
                   <div class="season-title">{{ season.name }}</div>
                   <div class="season-subtitle">
-                    {{ season.air_date }} &sdot;
+                    {{ season.formatted_air_date }} &sdot;
                     {{ season.episode_count }} épisodes
                   </div>
                 </div>
@@ -135,6 +135,7 @@ import {
 import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useIonRouter } from "@ionic/vue";
+import { format } from "date-fns";
 import MediaThumbnail from "@/components/MediaThumbnail.vue";
 import MediaInfoCard from "@/components/MediaInfoCard.vue";
 import MediaItem from "@/components/MediaItem.vue";
@@ -162,6 +163,14 @@ const isLoading = ref(true);
 const isFetching = ref(false);
 const error = ref("");
 
+const characterProfilePictures = ref<{
+  "id": number
+  "name": string
+  "image": string
+  "tvdbPeopleId": number
+  "showId": number
+}[]>([]);
+
 // Initialize voice actor management
 const {
   // State
@@ -183,7 +192,16 @@ const {
 } = useVoiceActorManagement("tv");
 
 const actors = computed(() => {
-  return show.value?.credits.cast.map(cast => actorToPersonData(cast));
+  return show.value?.credits.cast.map(cast => {
+    const person = actorToPersonData(cast);
+
+    for (const role of person.roles ?? []) {
+      const image = characterProfilePictures.value.find(character => character.name === role.character)?.image
+      role.image = image ?? '';
+    }
+
+    return person
+  });
 });
 
 // Voice actor methods are now provided by the composable
@@ -198,6 +216,17 @@ const hasWikidataId = computed(() => {
 
 const hasData = computed(() => {
   return voiceActors.value.length > 0;
+});
+
+const formattedSeasons = computed(() => {
+  if (!show.value?.seasons) return [];
+
+  return show.value.seasons.map((season: any) => ({
+    ...season,
+    formatted_air_date: season.air_date
+      ? format(new Date(season.air_date), 'MMM dd, yyyy')
+      : 'TBA'
+  }));
 });
 
 // Scan functionality
@@ -296,6 +325,9 @@ onMounted(async () => {
     // Load voice actors for this serie
     if (response.data.voiceActors) {
       voiceActors.value = response.data.voiceActors;
+    }
+    if (response.data.characterProfilePictures) {
+      characterProfilePictures.value = response.data.characterProfilePictures;
     }
   } catch (err) {
     console.error("Error fetching serie:", err);

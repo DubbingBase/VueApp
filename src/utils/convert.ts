@@ -1,13 +1,26 @@
-import { PersonData } from "@/components/PersonItem.vue";
+import { PersonData, Role } from "@/components/PersonItem.vue";
 import { Actor } from "../../supabase/functions/_shared/types";
 
 export const actorToPersonData = (actor: Actor): PersonData<Actor> => {
+    const roles: Role[] = []
+
+    if (actor.roles) {
+        roles.push(...actor.roles.map(role => ({
+            character: role.character,
+            image: ''
+        })))
+    }
+    if (actor.character) {
+        roles.push({
+            character: actor.character,
+            image: ''
+        })
+    }
+
     return {
         id: actor.id,
         name: actor.name,
-        firstname: actor.firstname,
-        lastname: actor.lastname,
-        character: actor.character,
+        roles,
         profile_picture: actor.profile_path,
         performance: 'acting',
         tags: [],

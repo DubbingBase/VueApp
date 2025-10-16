@@ -1,28 +1,54 @@
 <template>
   <div class="actor-wrapper">
-    <div class="character-name">{{ actor.character || actor.name }}</div>
-    <div class="actor" @click="goToActor(actor.id)" :routerLink="{
-      name: 'ActorDetails',
-      params: { id: actor.id },
-    }" tabindex="0" role="button" aria-label="Go to details for {{ actor.name }}">
-      <MediaItem
-        :imagePath="actor.profile_picture"
-        :title="actor.name"
-        :routeName="'ActorDetails'"
-        :routeParams="{ id: actor.id }"
-      />
+    <div class="character-name">
+      <div v-for="(role, index) in actor.roles" :key="role.character">
+        {{ index > 0 ? "/ " : "" }} {{ role.character }}
+      </div>
+    </div>
+    <div
+      class="actor"
+      @click="goToActor(actor.id)"
+      :routerLink="{
+        name: 'ActorDetails',
+        params: { id: actor.id },
+      }"
+      tabindex="0"
+      role="button"
+      aria-label="Go to details for {{ actor.name }}"
+    >
+      <div>
+        <MediaItem
+          :imagePath="actor.profile_picture"
+          :title="actor.name"
+          :routeName="'ActorDetails'"
+          :routeParams="{ id: actor.id }"
+        />
+        <MediaItem
+          v-for="(role, index) in actor.roles"
+          :key="role.character"
+          :imagePath="role.image"
+          :routeName="'ActorDetails'"
+          :routeParams="{ id: actor.id }"
+        />
+      </div>
       <ion-label class="line-label">
         <span class="ellipsis label actor">{{ actor.name }}</span>
       </ion-label>
     </div>
-    <VoiceActorList :voiceActors="voiceActors" :actor="actor" :isAdmin="isAdmin" :goToVoiceActor="goToVoiceActor" :editVoiceActorLink="editVoiceActorLink" :confirmDeleteVoiceActorLink="confirmDeleteVoiceActorLink" :openVoiceActorSearch="openVoiceActorSearch" />
+    <VoiceActorList
+      :voiceActors="voiceActors"
+      :actor="actor"
+      :isAdmin="isAdmin"
+      :goToVoiceActor="goToVoiceActor"
+      :editVoiceActorLink="editVoiceActorLink"
+      :confirmDeleteVoiceActorLink="confirmDeleteVoiceActorLink"
+      :openVoiceActorSearch="openVoiceActorSearch"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import {
-  IonLabel,
-} from "@ionic/vue";
+import { IonLabel } from "@ionic/vue";
 import MediaItem from "@/components/MediaItem.vue";
 import VoiceActorList from "@/components/VoiceActorList.vue";
 import { PersonData } from "./PersonItem.vue";

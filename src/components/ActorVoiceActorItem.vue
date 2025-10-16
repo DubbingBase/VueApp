@@ -1,13 +1,33 @@
 <template>
   <div v-if="type === 'actor' && actor" class="actor-voice-actor-wrapper">
-    <div class="character-name">{{ actor.character || actor.name }}</div>
-    <div class="actor" @click="goToActor && goToActor(actor.id)" tabindex="0" role="button" :aria-label="`Go to details for ${actor.name}`">
-      <MediaItem
-        :imagePath="actor.profile_picture"
-        :title="actor.name"
-        routeName="ActorDetails"
-        :routeParams="{ id: actor.id }"
-      />
+    <div class="character-name">
+      <div v-for="role in actor.roles" :key="role.character">
+        {{ role.character }}
+      </div>
+    </div>
+    <div
+      class="actor"
+      @click="goToActor && goToActor(actor.id)"
+      tabindex="0"
+      role="button"
+      :aria-label="`Go to details for ${actor.name}`"
+    >
+      <div>
+        <MediaItem
+          :imagePath="actor.profile_picture"
+          :title="actor.name"
+          routeName="ActorDetails"
+          :routeParams="{ id: actor.id }"
+        />
+        <MediaItem
+          v-for="(role, index) in actor.roles"
+          :key="role.character"
+          :imagePath="role.image"
+          :routeName="'ActorDetails'"
+          :routeParams="{ id: actor.id }"
+        />
+      </div>
+
       <ion-label class="line-label">
         <span class="ellipsis label actor">{{ actor.name }}</span>
       </ion-label>
@@ -24,24 +44,32 @@
     />
   </div>
 
-  <div v-else-if="type === 'voice-actor' && item" class="actor-voice-actor-wrapper">
-    <div class="voice-actor" @click="goToVoiceActor && goToVoiceActor(item.voiceActorDetails?.id || item.id)" tabindex="0" role="button" :aria-label="`Go to details for ${getDisplayName()}`">
+  <div
+    v-else-if="type === 'voice-actor' && item"
+    class="actor-voice-actor-wrapper"
+  >
+    <div
+      class="voice-actor"
+      @click="
+        goToVoiceActor && goToVoiceActor(item.voiceActorDetails?.id || item.id)
+      "
+      tabindex="0"
+      role="button"
+      :aria-label="`Go to details for ${getDisplayName()}`"
+    >
       <MediaThumbnail
         v-if="getProfilePicture()"
         :path="getProfilePicture()"
         from-storage
       />
-      <MediaThumbnail
-        v-else
-        :path="undefined"
-      />
+      <MediaThumbnail v-else :path="undefined" />
 
       <ion-label class="line-label">
         <span class="ellipsis label name">
           {{ getDisplayName() }}
         </span>
         <span v-if="getTags().length > 0" class="ellipsis label tags">
-          {{ getTags().join(', ') }}
+          {{ getTags().join(", ") }}
         </span>
         <span v-if="item.performance" class="ellipsis label performance">
           {{ item.performance }}
@@ -49,10 +77,23 @@
       </ion-label>
 
       <div class="voice-actor-actions" v-if="isAdmin">
-        <ion-button fill="clear" size="small" @click.stop="editVoiceActorLink && editVoiceActorLink(item)" aria-label="Edit voice actor link">
+        <ion-button
+          fill="clear"
+          size="small"
+          @click.stop="editVoiceActorLink && editVoiceActorLink(item)"
+          aria-label="Edit voice actor link"
+        >
           <ion-icon :icon="createOutline"></ion-icon>
         </ion-button>
-        <ion-button fill="clear" size="small" @click.stop="confirmDeleteVoiceActorLink && confirmDeleteVoiceActorLink(item)" color="danger" aria-label="Delete voice actor link">
+        <ion-button
+          fill="clear"
+          size="small"
+          @click.stop="
+            confirmDeleteVoiceActorLink && confirmDeleteVoiceActorLink(item)
+          "
+          color="danger"
+          aria-label="Delete voice actor link"
+        >
           <ion-icon :icon="trashOutline"></ion-icon>
         </ion-button>
       </div>
@@ -62,13 +103,13 @@
 
 <script setup lang="ts">
 import { IonLabel, IonButton, IonIcon } from "@ionic/vue";
-import { createOutline, trashOutline } from 'ionicons/icons';
+import { createOutline, trashOutline } from "ionicons/icons";
 import MediaItem from "@/components/MediaItem.vue";
 import MediaThumbnail from "@/components/MediaThumbnail.vue";
 import VoiceActorList from "@/components/VoiceActorList.vue";
 import { PersonData } from "./PersonItem.vue";
 
-export type ItemType = 'actor' | 'voice-actor';
+export type ItemType = "actor" | "voice-actor";
 
 const props = defineProps<{
   type: ItemType;
@@ -84,15 +125,17 @@ const props = defineProps<{
 }>();
 
 const getDisplayName = (): string => {
-  if (!props.item) return '';
+  if (!props.item) return "";
 
   switch (props.type) {
-    case 'actor':
-      return props.item.name || props.item.character || '';
-    case 'voice-actor':
-      return `${props.item.firstname || ''} ${props.item.lastname || ''}`.trim();
+    case "actor":
+      return props.item.name || props.item.character || "";
+    case "voice-actor":
+      return `${props.item.firstname || ""} ${
+        props.item.lastname || ""
+      }`.trim();
     default:
-      return '';
+      return "";
   }
 };
 
@@ -100,9 +143,9 @@ const getProfilePicture = (): string | undefined => {
   if (!props.item) return undefined;
 
   switch (props.type) {
-    case 'actor':
+    case "actor":
       return props.item.profile_path || props.item.profile_picture;
-    case 'voice-actor':
+    case "voice-actor":
       return props.item.profile_picture;
     default:
       return undefined;
@@ -110,21 +153,21 @@ const getProfilePicture = (): string | undefined => {
 };
 
 const getTags = (): string[] => {
-  if (!props.item || props.type !== 'voice-actor') return [];
+  if (!props.item || props.type !== "voice-actor") return [];
 
   // Extract tags from the item, could be in different formats
   if (Array.isArray(props.item.tags)) {
     return props.item.tags;
   }
 
-  if (props.item.tags && typeof props.item.tags === 'string') {
-    return props.item.tags.split(',').map((tag: string) => tag.trim());
+  if (props.item.tags && typeof props.item.tags === "string") {
+    return props.item.tags.split(",").map((tag: string) => tag.trim());
   }
 
   // Default tags based on common use cases
   const tags: string[] = [];
-  if (props.item.dialogue) tags.push('dialogue');
-  if (props.item.songs) tags.push('songs');
+  if (props.item.dialogue) tags.push("dialogue");
+  if (props.item.songs) tags.push("songs");
 
   return tags;
 };

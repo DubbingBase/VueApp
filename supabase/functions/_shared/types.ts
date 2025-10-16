@@ -112,6 +112,12 @@ export interface Actor {
     place_of_birth: string
     profile_path: string
     combined_credits: ActorCredits
+    roles?: {
+        credit_id: string
+        character: string
+        episode_count: number
+    }[]
+    character?: string
 }
 
 // Common types

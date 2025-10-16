@@ -230,6 +230,11 @@ onMounted(async () => {
   });
   const actorResponse = (await actorResponseRaw.data) as { actor: Actor };
   actor.value = actorToPersonData(actorResponse.actor);
+
+  for (const role of actor.value.roles ?? []) {
+    const image = chara
+    role.image = image;
+  }
 });
 function goToVoiceActor(id: number) {
   const { push } = useIonRouter();
