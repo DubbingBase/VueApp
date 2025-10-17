@@ -14,10 +14,16 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
-
+    <!--
       <div class="background" v-if="movie">
-      <img width="100%" v-if="movie" :src="movie.backdrop_path" alt="Movie background image" />
+        <img
+          width="100%"
+          v-if="movie"
+          :src="movie.backdrop_path"
+          alt="Movie background image"
+        />
       </div>
+      -->
 
       <MediaInfoCard :media="movie" />
 
@@ -34,8 +40,6 @@
         :loading="isLoading"
         :mediaLanguage="movie?.original_language"
       />
-
-
 
       <ActionButtons
         :has-wikidata-id="hasWikidataId"
@@ -82,25 +86,25 @@ import {
   IonButton,
   IonIcon,
   toastController,
-  IonToast
+  IonToast,
 } from "@ionic/vue";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, UnwrapRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { pencil } from 'ionicons/icons';
+import { pencil } from "ionicons/icons";
 import { MovieResponse } from "../../supabase/functions/_shared/movie";
 import { supabase } from "../api/supabase";
-import { useVoiceActorManagement } from '@/composables/useVoiceActorManagement';
-import { storeToRefs } from 'pinia';
-import { useAuthStore } from '@/stores/auth';
+import { useVoiceActorManagement } from "@/composables/useVoiceActorManagement";
+import { storeToRefs } from "pinia";
+import { useAuthStore } from "@/stores/auth";
 import MediaInfoCard from "@/components/MediaInfoCard.vue";
 import ActorList from "@/components/ActorList.vue";
 import ActionButtons from "@/components/ActionButtons.vue";
 import VoiceActorSearchModal from "@/components/VoiceActorSearchModal.vue";
 import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
 import MediaItem from "@/components/MediaItem.vue";
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { actorToPersonData } from "@/utils/convert";
-
+import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
+import { actorToPersonData, voiceActorToPersonData } from "@/utils/convert";
+import { Role } from "@/components/PersonItem.vue";
 
 const authStore = useAuthStore();
 const { isAdmin } = storeToRefs(authStore);
@@ -128,20 +132,87 @@ const {
   confirmDeleteVoiceActorLink,
   goToVoiceActor,
   goToActor,
-} = useVoiceActorManagement('movie');
+} = useVoiceActorManagement("movie");
 
 const movie = ref<MovieResponse["movie"] | undefined>();
+
+const characterProfilePictures = ref<
+  {
+    id: number;
+    name: string | null;
+    image: string;
+    tvdbPeopleId: number;
+    showId: number;
+  }[]
+>([]);
+
+const findCharacter = (
+  character: UnwrapRef<typeof characterProfilePictures>[number],
+  role: Role
+) => {
+  console.log('character', character)
+  console.log('role', role)
+  const characterName = character.name?.toLowerCase();
+  const roleName = role.character.toLowerCase();
+
+  const allNames = characterName?.split("/").map((name) => name.trim());
+  console.log("allNames", allNames);
+
+  const allRoleNames = roleName.split("/").map((name) => name.trim());
+  console.log("allRoleNames", allRoleNames);
+
+  // Loop through allNames and allRoleNames to find at least one correspondence
+  for (const name of allNames ?? []) {
+    for (const roleName of allRoleNames) {
+      // Direct name matching
+      if (name === roleName || name.includes(roleName) || roleName.includes(name)) {
+        return true;
+      }
+
+      // Simplified name matching for current pair
+      const simplifiedName = name.replace(/(.*)( '?.*' ?)(.*)/, "$1 $3");
+      const simplifiedRoleName = roleName.replace(/(.*)( '?.*' ?)(.*)/, "$1 $3");
+
+      if (
+        simplifiedName.includes(roleName) ||
+        name.includes(simplifiedRoleName) ||
+        simplifiedName.includes(simplifiedRoleName)
+      ) {
+        return true;
+      }
+    }
+  }
+
+  console.log("characterName", characterName);
+  console.log("roleName", roleName);
+
+  const simplifiedName = characterName?.replace(/(.*)( '?.*' ?)(.*)/, "$1 $3");
+  console.log("simplifiedName", simplifiedName);
+
+  const simplifiedRoleName = roleName.replace(/(.*)( '?.*' ?)(.*)/, "$1 $3");
+  console.log("simplifiedRoleName", simplifiedRoleName);
+
+  return (
+    characterName?.includes(roleName) ||
+    simplifiedName?.includes(roleName) ||
+    characterName?.includes(simplifiedRoleName) ||
+    simplifiedName?.includes(simplifiedRoleName)
+  );
+};
+
 const actors = computed(() => {
-  return movie.value?.credits.cast.map(cast => {
-    console.log('cast', cast)
+  return movie.value?.credits.cast.map((cast) => {
+    console.log("cast", cast);
     const person = actorToPersonData(cast);
 
     for (const role of person.roles ?? []) {
-      const image = ''
-      role.image = image;
+      const image = characterProfilePictures.value.find((character) =>
+        findCharacter(character, role)
+      )?.image;
+      role.image = image ?? "";
     }
 
-    return person
+    return person;
   });
 });
 
@@ -159,11 +230,11 @@ const hasData = computed(() => {
 
 // Scan functionality
 const isScanning = ref(false);
-const scanResult = ref('');
+const scanResult = ref("");
 const showScanResult = ref(false);
 
 const isFetching = ref(false);
-const fetchError = ref('');
+const fetchError = ref("");
 
 const takePhoto = async () => {
   try {
@@ -178,20 +249,20 @@ const takePhoto = async () => {
     const response = await supabase.functions.invoke("process_image", {
       body: {
         image: image.base64String,
-        mediaId: parseInt(route.params.id as string)
-      }
+        mediaId: parseInt(route.params.id as string),
+      },
     });
 
     if (response.data.ok) {
-      scanResult.value = 'Image processed successfully!';
+      scanResult.value = "Image processed successfully!";
       showScanResult.value = true;
     } else {
-      scanResult.value = response.data.error || 'Error processing image.';
+      scanResult.value = response.data.error || "Error processing image.";
       showScanResult.value = true;
     }
   } catch (error) {
-    console.error('Error taking photo:', error);
-    scanResult.value = 'Error capturing image. Please try again.';
+    console.error("Error taking photo:", error);
+    scanResult.value = "Error capturing image. Please try again.";
     showScanResult.value = true;
   } finally {
     isScanning.value = false;
@@ -221,18 +292,19 @@ const fetchInfos = async () => {
   if (data.ok) {
     location.reload();
   } else {
-    toastController.create({
-      message: data.error,
-      duration: 2000,
-      position: 'top',
-      color: 'danger',
-    }).then((toast) => {
-      toast.present();
-    });
+    toastController
+      .create({
+        message: data.error,
+        duration: 2000,
+        position: "top",
+        color: "danger",
+      })
+      .then((toast) => {
+        toast.present();
+      });
     isFetching.value = false;
     fetchError.value = data.error;
     isLoading.value = false;
-
   }
 };
 
@@ -245,10 +317,15 @@ const fetchMovieData = async () => {
     const data = movieResponseRaw.data as MovieResponse;
     movie.value = data.movie;
     console.log("data.voiceActors", data.voiceActors);
-    voiceActors.value = data.voiceActors;
+    voiceActors.value = data.voiceActors.map((va) =>
+      voiceActorToPersonData(va.voiceActorDetails, va.performance,va.actor_id)
+    );
+    if (data.characterProfilePictures) {
+      characterProfilePictures.value = data.characterProfilePictures;
+    }
   } catch (e: any) {
-    console.error('Error fetching movie data:', e);
-    fetchError.value = 'Failed to load movie details.';
+    console.error("Error fetching movie data:", e);
+    fetchError.value = "Failed to load movie details.";
   }
 };
 
@@ -256,8 +333,8 @@ const fetchMovieData = async () => {
 const goToEditPage = () => {
   if (movie.value?.id) {
     router.push({
-      name: 'AddVoiceCast',
-      params: { id: movie.value.id }
+      name: "AddVoiceCast",
+      params: { id: movie.value.id },
     });
   }
 };
@@ -331,15 +408,14 @@ const goToEditPage = () => {
 // Check admin status when component mounts
 onMounted(async () => {
   isLoading.value = true;
-  fetchError.value = '';
+  fetchError.value = "";
   try {
     await fetchMovieData();
   } catch (e: any) {
-    console.error('Error fetching movie data:', e);
-    fetchError.value = 'Failed to load movie details.';
+    console.error("Error fetching movie data:", e);
+    fetchError.value = "Failed to load movie details.";
   } finally {
     isLoading.value = false;
   }
 });
 </script>
-

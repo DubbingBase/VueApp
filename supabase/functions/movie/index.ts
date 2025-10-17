@@ -54,12 +54,13 @@ Deno.serve(async (req) => {
         if (searchQuery) {
           const searchResults = await tvdbClient.searchSeries(searchQuery)
           if (searchResults.data && searchResults.data.length > 0) {
+            console.log('searchResults.data', searchResults.data)
             // Find the best match (could be improved with more sophisticated matching)
             const bestMatch = searchResults.data.find((series: any) =>
               series.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
               searchQuery.toLowerCase().includes(series.name?.toLowerCase())
             ) || searchResults.data[0]
-            tvdbSeriesId = bestMatch?.id
+            tvdbSeriesId = bestMatch?.tvdb_id
             console.log(`Found TVDB series ID from search: ${tvdbSeriesId}`)
           }
         }
@@ -67,14 +68,19 @@ Deno.serve(async (req) => {
 
       // Get character profile pictures if we found a TVDB series ID
       if (tvdbSeriesId) {
-        const charactersResponse = await tvdbClient.getCharactersBySeries(tvdbSeriesId)
-        if (charactersResponse.data && charactersResponse.data.length > 0) {
-          characterProfilePictures = charactersResponse.data
-            .filter((character: any) => character.image)
+        const charactersResponse = await tvdbClient.getMovieById(tvdbSeriesId, {
+          meta: 'translations',
+          short: false,
+        })
+        const characters = charactersResponse.data.characters
+        if (characters && characters.length > 0) {
+          console.log('characters', characters)
+          characterProfilePictures = characters
+            .filter((character: any) => character.personImgURL)
             .map((character: any) => ({
               id: character.id,
               name: character.name,
-              image: character.image,
+              image: character.personImgURL,
               movieId: movieId
             }))
           console.log(`Found ${characterProfilePictures.length} character profile pictures`)

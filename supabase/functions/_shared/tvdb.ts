@@ -92,6 +92,18 @@ export class TVDBClient implements ITVDBClient {
     return this.get(`series/${seriesId}`);
   }
 
+  async getMovieById(movieId: number, extended?: { meta?: 'translations', short?: boolean }): Promise<any> {
+    if (extended) {
+      return this.get(`movies/${movieId}/extended`, {
+        params: {
+          extended: extended.meta,
+          short: extended.short
+        }
+      });
+    }
+    return this.get(`series/${movieId}`);
+  }
+
   async getEpisodesBySeries(seriesId: number, season?: number): Promise<any> {
     const endpoint = season
       ? `series/${seriesId}/episodes/${season}`
@@ -105,6 +117,9 @@ export class TVDBClient implements ITVDBClient {
 
   async getCharactersBySeries(seriesId: number): Promise<any> {
     return this.get(`series/${seriesId}/characters`);
+  }
+  async getCharactersByMovie(movieId: number): Promise<any> {
+    return this.get(`movies/${movieId}/characters`);
   }
 
   async getPersonById(personId: number): Promise<any> {

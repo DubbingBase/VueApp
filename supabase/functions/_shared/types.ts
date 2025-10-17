@@ -34,6 +34,7 @@ export interface VoiceActorDetails {
     years_active: any
     date_of_birth: any
     social_media_links: any
+    profile_picture?: string
 }
 
 export interface WorkAndVoiceActor {

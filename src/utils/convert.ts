@@ -1,5 +1,5 @@
 import { PersonData, Role } from "@/components/PersonItem.vue";
-import { Actor } from "../../supabase/functions/_shared/types";
+import { Actor, VoiceActorDetails } from "../../supabase/functions/_shared/types";
 
 export const actorToPersonData = (actor: Actor): PersonData<Actor> => {
     const roles: Role[] = []
@@ -26,5 +26,18 @@ export const actorToPersonData = (actor: Actor): PersonData<Actor> => {
         tags: [],
         tmdb_id: actor.id,
         data: actor
+    }
+}
+
+export const voiceActorToPersonData = (va: VoiceActorDetails, performance: string, actorId: number): PersonData<VoiceActorDetails> => {
+    return {
+        id: va.id,
+        name: va.firstname + ' ' + va.lastname,
+        roles: [],
+        profile_picture: va.profile_picture,
+        performance: performance,
+        tags: [],
+        tmdb_id: actorId,
+        data: va
     }
 }

@@ -36,7 +36,6 @@
 
       <div class="tabs" v-show="!isLoading">
         <ion-segment scrollable>
-
           <ion-segment-button value="seasons" content-id="seasons">
             <!-- <ion-icon :icon="radio" /> -->
             Saisons
@@ -80,7 +79,6 @@
               :open-voice-actor-search="openVoiceActorSearch"
               :loading="isLoading"
               :mediaLanguage="show?.original_language"
-
             />
           </ion-segment-content>
         </ion-segment-view>
@@ -132,7 +130,7 @@ import {
   toastController,
   IonToast,
 } from "@ionic/vue";
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, UnwrapRef } from "vue";
 import { useRoute } from "vue-router";
 import { useIonRouter } from "@ionic/vue";
 import { format } from "date-fns";
@@ -149,8 +147,9 @@ import SolarSettingsMinimalisticOutline from "~icons/solar/settings-minimalistic
 import { storeToRefs } from "pinia";
 import { useAuthStore } from "@/stores/auth";
 import { supabase } from "@/api/supabase";
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { actorToPersonData } from "@/utils/convert";
+import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
+import { actorToPersonData, voiceActorToPersonData } from "@/utils/convert";
+import { Role } from "@/components/PersonItem.vue";
 
 const authStore = useAuthStore();
 const { isAdmin } = storeToRefs(authStore);
@@ -163,13 +162,15 @@ const isLoading = ref(true);
 const isFetching = ref(false);
 const error = ref("");
 
-const characterProfilePictures = ref<{
-  "id": number
-  "name": string
-  "image": string
-  "tvdbPeopleId": number
-  "showId": number
-}[]>([]);
+const characterProfilePictures = ref<
+  {
+    id: number;
+    name: string;
+    image: string;
+    tvdbPeopleId: number;
+    showId: number;
+  }[]
+>([]);
 
 // Initialize voice actor management
 const {
@@ -191,16 +192,70 @@ const {
   goToVoiceActor,
 } = useVoiceActorManagement("tv");
 
+const findCharacter = (
+  character: UnwrapRef<typeof characterProfilePictures>[number],
+  role: Role
+) => {
+  const characterName = character.name.toLowerCase();
+  const roleName = role.character.toLowerCase();
+
+  const allNames = characterName.split("/").map((name) => name.trim());
+  console.log("allNames", allNames);
+
+  const allRoleNames = roleName.split("/").map((name) => name.trim());
+  console.log("allRoleNames", allRoleNames);
+
+  // Loop through allNames and allRoleNames to find at least one correspondence
+  for (const name of allNames) {
+    for (const roleName of allRoleNames) {
+      // Direct name matching
+      if (name === roleName || name.includes(roleName) || roleName.includes(name)) {
+        return true;
+      }
+
+      // Simplified name matching for current pair
+      const simplifiedName = name.replace(/(.*)( '?.*' ?)(.*)/, "$1 $3");
+      const simplifiedRoleName = roleName.replace(/(.*)( '?.*' ?)(.*)/, "$1 $3");
+
+      if (
+        simplifiedName.includes(roleName) ||
+        name.includes(simplifiedRoleName) ||
+        simplifiedName.includes(simplifiedRoleName)
+      ) {
+        return true;
+      }
+    }
+  }
+
+  console.log("characterName", characterName);
+  console.log("roleName", roleName);
+
+  const simplifiedName = characterName.replace(/(.*)( '?.*' ?)(.*)/, "$1 $3");
+  console.log("simplifiedName", simplifiedName);
+
+  const simplifiedRoleName = roleName.replace(/(.*)( '?.*' ?)(.*)/, "$1 $3");
+  console.log("simplifiedRoleName", simplifiedRoleName);
+
+  return (
+    characterName.includes(roleName) ||
+    simplifiedName.includes(roleName) ||
+    characterName.includes(simplifiedRoleName) ||
+    simplifiedName.includes(simplifiedRoleName)
+  );
+};
+
 const actors = computed(() => {
-  return show.value?.credits.cast.map(cast => {
+  return show.value?.credits.cast.map((cast) => {
     const person = actorToPersonData(cast);
 
     for (const role of person.roles ?? []) {
-      const image = characterProfilePictures.value.find(character => character.name === role.character)?.image
-      role.image = image ?? '';
+      const image = characterProfilePictures.value.find((character) =>
+        findCharacter(character, role)
+      )?.image;
+      role.image = image ?? "";
     }
 
-    return person
+    return person;
   });
 });
 
@@ -224,14 +279,14 @@ const formattedSeasons = computed(() => {
   return show.value.seasons.map((season: any) => ({
     ...season,
     formatted_air_date: season.air_date
-      ? format(new Date(season.air_date), 'MMM dd, yyyy')
-      : 'TBA'
+      ? format(new Date(season.air_date), "MMM dd, yyyy")
+      : "TBA",
   }));
 });
 
 // Scan functionality
 const isScanning = ref(false);
-const scanResult = ref('');
+const scanResult = ref("");
 const showScanResult = ref(false);
 
 const takePhoto = async () => {
@@ -246,19 +301,18 @@ const takePhoto = async () => {
 
     // Here you would typically send the image to your vision API
     // For now, we'll just show a success message
-    scanResult.value = 'Image captured successfully! Processing...';
+    scanResult.value = "Image captured successfully! Processing...";
     showScanResult.value = true;
 
     // Simulate API call
     setTimeout(() => {
       // TODO: Replace with actual API call to your vision LLM
-      scanResult.value = 'Processing complete! Ready to add voice actors.';
+      scanResult.value = "Processing complete! Ready to add voice actors.";
       // Here you would process the response and potentially auto-fill the voice actor form
     }, 2000);
-
   } catch (error) {
-    console.error('Error taking photo:', error);
-    scanResult.value = 'Error capturing image. Please try again.';
+    console.error("Error taking photo:", error);
+    scanResult.value = "Error capturing image. Please try again.";
     showScanResult.value = true;
   } finally {
     isScanning.value = false;
@@ -324,7 +378,13 @@ onMounted(async () => {
     show.value.credits = response.data.aggregateCredits;
     // Load voice actors for this serie
     if (response.data.voiceActors) {
-      voiceActors.value = response.data.voiceActors;
+      voiceActors.value = response.data.voiceActors.map((va) =>
+        voiceActorToPersonData(
+          va.voiceActorDetails,
+          va.performance,
+          va.actor_id
+        )
+      );
     }
     if (response.data.characterProfilePictures) {
       characterProfilePictures.value = response.data.characterProfilePictures;

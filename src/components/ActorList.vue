@@ -29,23 +29,12 @@
 import ActorWithVoiceActors from './ActorWithVoiceActors.vue';
 import NoActors from './NoActors.vue';
 import { PersonData } from './PersonItem.vue';
+import { VoiceActorDetails } from '../../supabase/functions/_shared/types';
 
 // Props
 const props = defineProps<{
   actors?: PersonData[];
-  voiceActors?: Array<{
-    id: number;
-    voice_actor_id: number;
-    work_id: number;
-    work_type: string;
-    performance: string;
-    voiceActorDetails: {
-      id: number;
-      firstname: string;
-      lastname: string;
-      profile_picture?: string;
-    };
-  }>;
+  voiceActors?: PersonData<VoiceActorDetails>[];
   goToActor: (id: number) => void;
   goToVoiceActor: (id: number) => void;
   loading?: boolean;
@@ -62,14 +51,7 @@ console.log('voiceActors', props.voiceActors)
 const getVoiceActorsForActor = (actorId: number) => {
   if (!props.voiceActors) return [];
   console.log('props.voiceActors', props.voiceActors)
-  return props.voiceActors.filter((item: any) => item.actor_id === actorId).map((va: any) => ({
-    id: va.voiceActorDetails.id,
-    firstname: va.voiceActorDetails.firstname,
-    lastname: va.voiceActorDetails.lastname,
-    tags: va.performance ? [va.performance] : [],
-    tmdb_id: va.voiceActorDetails.tmdb_id,
-    profile_picture: va.voiceActorDetails.profile_picture,
-  } satisfies PersonData));
+  return props.voiceActors.filter((item) => item.tmdb_id === actorId);
 };
 
 // Wrapper functions to handle prop type requirements
