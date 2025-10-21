@@ -10,6 +10,7 @@ import { getEntity, getWikipediaPage, getWikipediaPageSectionAsWikitext, wikiped
 import { flatTocToTree } from './toc.ts'
 import { exploreDubbingSectionChilds } from './extract.ts'
 import { MistralVoiceActorExtractOutput } from "../_shared/types.ts";
+import { wikipediaCache } from "../_shared/index.ts";
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -28,9 +29,8 @@ Deno.serve(async (req) => {
 
   console.log('wikiId', wikiId)
 
-  const entityURL = getEntity(wikiId)
-  const responseWikidata = await fetch(entityURL)
-  const entity = await responseWikidata.json()
+  // Use cached Wikidata entity fetch
+  const entity = await wikipediaCache.getWikidataEntity(wikiId)
 
   const wikipediaPageTitle = entity.entities[wikiId].sitelinks[lang + 'wiki'].title
 
@@ -47,16 +47,14 @@ Deno.serve(async (req) => {
     )
   }
 
-  const wikiepediaPageURL = getWikipediaPage(wikipediaPageTitle, lang)
-  const responseWikipedia = await fetch(wikiepediaPageURL)
-  const wikipediaPage = await responseWikipedia.json()
+  // Use cached Wikipedia page info fetch
+  const wikipediaPage = await wikipediaCache.getWikipediaPageInfo(wikipediaPageTitle, lang)
 
   const firstPage = Object.keys(wikipediaPage.query.pages)[0]
   const wikipediaLangPageId = wikipediaPage.query.pages[firstPage].pageid
 
-  const wikipediaPageSectionsURL = wikipediaPageFindSections(wikipediaLangPageId)
-  const responseWikipediaSections = await fetch(wikipediaPageSectionsURL)
-  const wikipediaPageSections = await responseWikipediaSections.json()
+  // Use cached Wikipedia page sections fetch
+  const wikipediaPageSections = await wikipediaCache.getPageSections(wikipediaLangPageId)
 
   console.log('wikipediaPageSections', wikipediaPageSections)
 

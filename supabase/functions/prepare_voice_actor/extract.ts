@@ -1,6 +1,7 @@
 import { RecursiveSection } from './toc.ts'
 import { Categorymember, ElementType, FullElement, ResponseParseText } from './models.ts'
 import { acceptedDubbingSubSectionGames, acceptedDubbingSubSectionGenericDubbing, acceptedDubbingSubSectionMovie, acceptedDubbingSubSections, acceptedDubbingSubSectionShows, parseDubberPageAsWikitext } from '../_shared/extract/constants.ts';
+import { wikipediaCache } from '../_shared/index.ts';
 
 const makeUniqueIndex = (pageId: string, sectionIndex: string) => {
     return `${pageId}_${sectionIndex}`;
@@ -34,11 +35,8 @@ const extractMatchingSection = async (
         return;
     }
 
-    const rawResponseParseSection = await fetch(
-        parseDubberPageAsWikitext(element.pageid, sectionIndex)
-    );
-    const responseParseSection =
-        (await rawResponseParseSection.json()) as ResponseParseText;
+    // Use cached Wikipedia page content fetch
+    const responseParseSection = await wikipediaCache.getPageContentAsWikitext(element.pageid, sectionIndex) as ResponseParseText;
 
     if (!responseParseSection?.parse) {
         console.error(responseParseSection, element.pageid, sectionIndex);

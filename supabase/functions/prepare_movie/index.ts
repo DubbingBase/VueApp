@@ -8,6 +8,7 @@ import { corsHeaders } from "../_shared/http-utils.ts"
 import { supabase } from "../_shared/database.ts"
 import { getEntity, getWikipediaPage, getWikipediaPageSectionAsWikitext, wikipediaPageFindSections } from "../_shared/extract/constants.ts"
 import { MistralMovieExtractOutput } from "../_shared/types.ts";
+import { wikipediaCache } from "../_shared/index.ts";
 import { WithCast } from "../_shared/types.ts";
 import { Database } from "../_shared/database.types.ts";
 import { PostgrestError } from "jsr:@supabase/supabase-js";
@@ -59,10 +60,8 @@ Deno.serve(async (req) => {
     )
   }
 
-  const entityURL = getEntity(wikiId)
-
-  const responseWikidata = await fetch(entityURL)
-  const entity = await responseWikidata.json()
+  // Use cached Wikidata entity fetch
+  const entity = await wikipediaCache.getWikidataEntity(wikiId)
 
   const wikipediaPageTitle = entity.entities[wikiId]?.sitelinks?.[lang + 'wiki']?.title
 
@@ -88,18 +87,15 @@ Deno.serve(async (req) => {
     )
   }
 
-  const wikiepediaPageURL = getWikipediaPage(wikipediaPageTitle, lang)
-  console.log('wikiepediaPageURL', wikiepediaPageURL)
-  const responseWikipedia = await fetch(wikiepediaPageURL)
-  const wikipediaPage = await responseWikipedia.json()
+  // Use cached Wikipedia page info fetch
+  const wikipediaPage = await wikipediaCache.getWikipediaPageInfo(wikipediaPageTitle, lang)
 
   const firstPage = Object.keys(wikipediaPage.query.pages)[0]
 
   const wikipediaLangPageId = wikipediaPage.query.pages[firstPage].pageid
 
-  const wikipediaPageSectionsURL = wikipediaPageFindSections(wikipediaLangPageId)
-  const responseWikipediaSections = await fetch(wikipediaPageSectionsURL)
-  const wikipediaPageSections = await responseWikipediaSections.json()
+  // Use cached Wikipedia page sections fetch
+  const wikipediaPageSections = await wikipediaCache.getPageSections(wikipediaLangPageId)
 
   const sectionIds = wikipediaPageSections.parse.sections.filter((section: any) => {
     return section.line.match(/distribution/i)
@@ -108,9 +104,8 @@ Deno.serve(async (req) => {
   for (const section of sectionIds) {
     console.log('section', section)
 
-    const sectionAsWikitextURL = getWikipediaPageSectionAsWikitext(wikipediaLangPageId, section.index)
-    const responseSectionActionWikitext = await fetch(sectionAsWikitextURL)
-    const wikitextJSON = await responseSectionActionWikitext.json()
+    // Use cached Wikipedia page section fetch
+    const wikitextJSON = await wikipediaCache.getPageSectionAsWikitext(wikipediaLangPageId, section.index)
     const wikitext = wikitextJSON.parse.wikitext
 
     const mistralURL = 'https://api.mistral.ai/v1/agents/completions'

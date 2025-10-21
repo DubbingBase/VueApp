@@ -10,6 +10,8 @@ import { DatabaseClient } from "../_shared/database.ts"
 import { createResponse, createErrorResponse, handleOptions } from "../_shared/http-utils.ts"
 import { processMedia } from "../_shared/tmdb-urls.ts";
 import { processVoiceActor } from "../_shared/supabase-urls.ts";
+import { SimpleCache } from "../_shared/cache-utils.ts"
+import { RedisClient } from "../_shared/redis.ts"
 
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
@@ -31,12 +33,43 @@ Deno.serve(async (req) => {
 
     // Use shared TMDBClient for API calls
     const tmdbClient = new TMDBClient()
-    // Fetch show details and aggregate credits in parallel
+
+    // Initialize cache with Redis client
+    const cache = new SimpleCache(new RedisClient())
+    // Fetch show details and aggregate credits in parallel with caching
     const [serie, aggregateCredits] = await Promise.all([
-      tmdbClient.get(`tv/${showId}`, {
-        append_to_response: 'credits,external_ids'
+      // Try cache first for serie data, fallback to API
+      cache.get(`tmdb:tv:${showId}`).then(cachedSerie => {
+        if (cachedSerie) {
+          console.log(`Cache hit for TMDB TV show ${showId}`)
+          return cachedSerie
+        }
+        console.log(`Cache miss for TMDB TV show ${showId}, fetching from API`)
+        return tmdbClient.get(`tv/${showId}`, {
+          append_to_response: 'credits,external_ids'
+        }).then(serieData => {
+          // Cache the result for future requests
+          cache.set(`tmdb:tv:${showId}`, serieData, 'MEDIUM').catch(err =>
+            console.error('Failed to cache TMDB TV show data:', err)
+          )
+          return serieData
+        })
       }),
-      tmdbClient.get(`tv/${showId}/aggregate_credits`).catch(() => null) // Aggregate credits might not be available for all shows
+      // Try cache first for aggregate credits, fallback to API
+      cache.get(`tmdb:tv:${showId}:aggregate_credits`).then(cachedCredits => {
+        if (cachedCredits) {
+          console.log(`Cache hit for TMDB TV aggregate credits ${showId}`)
+          return cachedCredits
+        }
+        console.log(`Cache miss for TMDB TV aggregate credits ${showId}, fetching from API`)
+        return tmdbClient.get(`tv/${showId}/aggregate_credits`).then(creditsData => {
+          // Cache the result for future requests
+          cache.set(`tmdb:tv:${showId}:aggregate_credits`, creditsData, 'MEDIUM').catch(err =>
+            console.error('Failed to cache TMDB TV aggregate credits:', err)
+          )
+          return creditsData
+        }).catch(() => null) // Aggregate credits might not be available for all shows
+      })
     ])
     const serieWithImageUrls = processMedia(serie)
 
@@ -71,23 +104,38 @@ Deno.serve(async (req) => {
 
       // Get character profile pictures if we found a TVDB series ID
       if (tvdbSeriesId) {
-        const charactersResponse = await tvdbClient.getSeriesById(tvdbSeriesId, {
-          meta: 'episodes',
-          short: false
-        })
-        const characters = charactersResponse.data.characters
-        // console.log('characters', characters)
-        if (characters && characters.length > 0) {
-          characterProfilePictures = characters
-            .filter((character: any) => character.image)
-            .map((character: any) => ({
-              id: character.id,
-              name: character.name,
-              image: character.image,
-              tvdbPeopleId: character.peopleId,
-              showId: showId
-            }))
-          console.log(`Found ${characterProfilePictures.length} character profile pictures`)
+        // Try cache first for character data, fallback to API
+        const cacheKey = `tvdb:characters:${tvdbSeriesId}`
+        const cachedCharacters = await cache.get(cacheKey)
+
+        if (cachedCharacters) {
+          console.log(`Cache hit for TVDB characters ${tvdbSeriesId}`)
+          characterProfilePictures = cachedCharacters as any[]
+        } else {
+          console.log(`Cache miss for TVDB characters ${tvdbSeriesId}, fetching from API`)
+          const charactersResponse = await tvdbClient.getSeriesById(tvdbSeriesId, {
+            meta: 'episodes',
+            short: false
+          })
+          const characters = charactersResponse.data.characters
+          // console.log('characters', characters)
+          if (characters && characters.length > 0) {
+            characterProfilePictures = characters
+              .filter((character: any) => character.image)
+              .map((character: any) => ({
+                id: character.id,
+                name: character.name,
+                image: character.image,
+                tvdbPeopleId: character.peopleId,
+                showId: showId
+              }))
+            console.log(`Found ${characterProfilePictures.length} character profile pictures`)
+
+            // Cache the character data with shorter TTL since character data can be more dynamic
+            cache.set(cacheKey, characterProfilePictures, 'SHORT').catch(err =>
+              console.error('Failed to cache TVDB character data:', err)
+            )
+          }
         }
       } else {
         console.log('No TVDB series ID found, skipping character profile pictures')

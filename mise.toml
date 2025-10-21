@@ -1,6 +1,6 @@
 [tools]
 deno = "2.1.9"
-node = "22"
+node = "24"
 
 [env]
 _.file = '.env.development'
