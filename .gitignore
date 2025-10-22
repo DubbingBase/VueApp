@@ -29,3 +29,5 @@ backup_*/**
 android/.bundle/
 android/vendor/
 android/Gemfile.lock
+src-tauri/gen/android/app/dubbing-base-keystore.jks
+src-tauri/gen/android/keystore.properties

@@ -57,5 +57,12 @@ run = "./backup_db.sh"
 [tasks.build-android]
 description = "Builds the Android app"
 depends = ["install"]
-run = "pnpm cap build android"
+run = "pnpm ionic cap build android"
+env = { JAVA_HOME="/usr/lib/jvm/java-21-openjdk" }
+
+[tasks.build-android-debug]
+description = "Builds the Android app in debug mode"
+depends = ["install"]
+dir = "{{ config_root }}/android"
+run = "fastlane build_debug"
 env = { JAVA_HOME="/usr/lib/jvm/java-21-openjdk" }

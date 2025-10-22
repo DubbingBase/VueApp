@@ -24,13 +24,6 @@ jobs:
         node-version: '20'
         cache: 'pnpm'
 
-    - name: Setup Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '3.3'
-        bundler-cache: true
-        working-directory: android
-
     - name: Setup Java 21
       uses: actions/setup-java@v4
       with:
@@ -40,69 +33,30 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
 
-    - name: Cache Gradle packages
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
-
-    - name: Setup Fastlane
+    - name: Setup Android signing
       run: |
-        cd android
-        bundle check || bundle install
-        bundle exec fastlane validate
-      env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-
-    - name: Validate build environment
-      run: |
-        cd android
-        echo "Validating build environment..."
-        bundle exec fastlane validate
-        echo "Build environment validation completed successfully"
-      env:
-        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-
-    - name: Build Android Debug (Pull Requests)
-      if: github.event_name == 'pull_request'
-      timeout-minutes: 15
-      env:
-        SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-        SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_KEY }}
-      run: |
-        cd android
-        echo "Starting debug build for pull request..."
-        bundle exec fastlane build_debug
-        echo "Debug build completed successfully"
+        cd src-tauri/gen/android
+        echo "keyAlias=${{ secrets.KEY_ALIAS }}" > keystore.properties
+        echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> keystore.properties
+        echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" >> keystore.properties
+        base64 -d <<< "${{ secrets.KEYSTORE_FILE }}" > $RUNNER_TEMP/dubbing-base-keystore.jks
+        echo "storeFile=$RUNNER_TEMP/dubbing-base-keystore.jks" >> keystore.properties
 
     - name: Build Android Release
       if: github.event_name != 'pull_request'
       timeout-minutes: 20
       env:
-        SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-        SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_KEY }}
-        KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
-        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
       run: |
-        cd android
-        echo "Starting release build..."
-        bundle exec fastlane build_release
-        echo "Release build completed successfully"
+        pnpm tauri android build
 
     - name: Upload AAB artifact (Release builds only)
       if: github.event_name != 'pull_request'
       uses: actions/upload-artifact@v4
       with:
         name: android-app-bundle
-        path: android/app/build/outputs/bundle/release/app-release.aab
+        path: src-tauri/gen/android/app/build/outputs/bundle/universalRelease/app-universal-release.aab
         retention-days: 30
       continue-on-error: false
 
@@ -111,15 +65,6 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: android-apk-release
-        path: android/app/build/outputs/apk/release/app-release.apk
+        path: src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk
         retention-days: 30
-      continue-on-error: false
-
-    - name: Upload APK artifact (Debug builds)
-      if: github.event_name == 'pull_request'
-      uses: actions/upload-artifact@v4
-      with:
-        name: android-apk-debug
-        path: android/app/build/outputs/apk/debug/app-debug.apk
-        retention-days: 7
       continue-on-error: false
