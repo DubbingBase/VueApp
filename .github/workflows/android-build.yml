@@ -33,6 +33,10 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
 
+    - name: Install dependencies
+      run: |
+        pnpm install
+
     - name: Setup Android signing
       run: |
         cd src-tauri/gen/android
