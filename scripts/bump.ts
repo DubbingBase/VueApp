@@ -1,21 +1,30 @@
-import { execSync } from "node:child_process";
+// scripts/bump-version.mjs
 import fs from "fs";
+import { execSync } from "node:child_process";
 
 const bump = process.argv[2] || "patch";
 
-execSync(`npm version ${bump}`);
-
+// 1. Bump package.json version
+execSync(`npm version ${bump} --no-git-tag-version`);
 const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
 const version = pkg.version;
 
-// Update Tauri config
-execSync(`npx tauri config set package.version ${version}`);
+// 2. Update tauri.conf.json
+const tauriConfPath = "src-tauri/tauri.conf.json";
+const tauriConf = JSON.parse(fs.readFileSync(tauriConfPath, "utf8"));
 
-// Update Cargo.toml
-const cargo = fs.readFileSync("src-tauri/Cargo.toml", "utf8");
-fs.writeFileSync(
-  "src-tauri/Cargo.toml",
-  cargo.replace(/version\s*=\s*".*"/, `version = "${version}"`)
+if (!tauriConf.package) tauriConf.package = {};
+tauriConf.package.version = version;
+
+fs.writeFileSync(tauriConfPath, JSON.stringify(tauriConf, null, 2));
+
+// 3. Update Cargo.toml
+const cargoPath = "src-tauri/Cargo.toml";
+const cargoToml = fs.readFileSync(cargoPath, "utf8");
+const updatedToml = cargoToml.replace(
+  /version\s*=\s*".*"/,
+  `version = "${version}"`
 );
+fs.writeFileSync(cargoPath, updatedToml);
 
-console.log("✅ Version bumped to", version);
+console.log(`✅ Bumped ${bump} → version ${version}`);
