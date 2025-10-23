@@ -3,6 +3,7 @@ name: Android Build
 on:
   push:
     branches: [ main ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -90,11 +91,11 @@ jobs:
     - name: ls
       run: ls -la
 
-    - name: Upload .aab to Production Track
+    - name: Upload .aab to Google Play
       uses: KevinRohn/github-action-upload-play-store@v1.0.1
       with:
         service_account_json: ${{ secrets.SERVICE_ACCOUNT_JSON }}
         package_name: "com.dubbingbase.app"
         aab_file_path: "app-universal-release.aab"
-        track: "production"
+        track: ${{ github.ref == 'refs/heads/main' && 'internal' || 'production' }}
         release_status: "completed"
