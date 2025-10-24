@@ -102,27 +102,27 @@ router.beforeEach(async (to: RouteLocationNormalized, from: RouteLocationNormali
 
   await authStore.initialize();
 
-  // Allow access to routes that permit anonymous users
-  if (anonymousAllowedRoutes.includes(to.path) || anonymousAllowedRoutes.some(route => {
-    // Handle parameterized routes like /tabs/voice-actor-profile/:id
-    if (route.includes(':id')) {
-      const baseRoute = route.split('/:id')[0];
-      return to.path.startsWith(baseRoute);
-    }
-    return false;
-  })) {
-    return next();
-  }
+  // // Allow access to routes that permit anonymous users
+  // if (anonymousAllowedRoutes.includes(to.path) || anonymousAllowedRoutes.some(route => {
+  //   // Handle parameterized routes like /tabs/voice-actor-profile/:id
+  //   if (route.includes(':id')) {
+  //     const baseRoute = route.split('/:id')[0];
+  //     return to.path.startsWith(baseRoute);
+  //   }
+  //   return false;
+  // })) {
+  //   return next();
+  // }
 
-  console.log('will redirect  ', authStore.isAuthenticated)
+  // console.log('will redirect  ', authStore.isAuthenticated)
   // Check if user is authenticated for protected routes
-  if (!authStore.isAuthenticated) {
-    // If not authenticated, redirect to login with the attempted URL as a query parameter
-    return next({
-      path: '/login',
-      query: { redirect: to.fullPath }
-    });
-  }
+  // if (!authStore.isAuthenticated) {
+  //   // If not authenticated, redirect to login with the attempted URL as a query parameter
+  //   return next({
+  //     path: '/login',
+  //     query: { redirect: to.fullPath }
+  //   });
+  // }
 
   // Check for admin routes
   if (to.meta.requiresAdmin) {

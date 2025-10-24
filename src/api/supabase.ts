@@ -1,11 +1,21 @@
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '../../supabase/functions/_shared/database.types'
+import { fetch } from '@tauri-apps/plugin-http';
+import { isTauri } from '@/utils/tauri';
 
-console.log('meta', import.meta)
+console.log('meta', JSON.stringify(import.meta))
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_KEY
-const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)
+
+console.log('supabaseUrl', supabaseUrl)
+console.log('isTauri', isTauri)
+
+const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+    global: {
+        fetch: isTauri ? fetch : undefined,
+    }
+})
 
 export {
     supabase

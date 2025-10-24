@@ -5,7 +5,7 @@
   "identifier": "com.dubbingbase.app",
   "build": {
     "frontendDist": "../dist",
-    "devUrl": "http://localhost:5173",
+    "devUrl": "http://localhost:1420",
     "beforeDevCommand": "pnpm dev",
     "beforeBuildCommand": "pnpm build"
   },
@@ -20,7 +20,17 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": {
+        "default-src": ["*"],
+        "script-src": ["*", "'unsafe-inline'", "'unsafe-eval'", "data:", "blob:"],
+        "style-src": ["*", "'unsafe-inline'", "data:", "blob:"],
+        "img-src": ["*", "data:", "blob:"],
+        "connect-src": ["*", "ws:", "wss:"],
+        "object-src": ["'none'"],
+        "base-uri": ["'self'"],
+        "form-action": ["'self'"],
+        "frame-ancestors": ["*"]
+      }
     }
   },
   "bundle": {
