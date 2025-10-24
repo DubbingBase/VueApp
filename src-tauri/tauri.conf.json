@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "DubbingBase",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "identifier": "com.dubbingbase.app",
   "build": {
     "frontendDist": "../dist",
@@ -21,15 +21,44 @@
     ],
     "security": {
       "csp": {
-        "default-src": ["*"],
-        "script-src": ["*", "'unsafe-inline'", "'unsafe-eval'", "data:", "blob:"],
-        "style-src": ["*", "'unsafe-inline'", "data:", "blob:"],
-        "img-src": ["*", "data:", "blob:"],
-        "connect-src": ["*", "ws:", "wss:"],
-        "object-src": ["'none'"],
-        "base-uri": ["'self'"],
-        "form-action": ["'self'"],
-        "frame-ancestors": ["*"]
+        "default-src": [
+          "*"
+        ],
+        "script-src": [
+          "*",
+          "'unsafe-inline'",
+          "'unsafe-eval'",
+          "data:",
+          "blob:"
+        ],
+        "style-src": [
+          "*",
+          "'unsafe-inline'",
+          "data:",
+          "blob:"
+        ],
+        "img-src": [
+          "*",
+          "data:",
+          "blob:"
+        ],
+        "connect-src": [
+          "*",
+          "ws:",
+          "wss:"
+        ],
+        "object-src": [
+          "'none'"
+        ],
+        "base-uri": [
+          "'self'"
+        ],
+        "form-action": [
+          "'self'"
+        ],
+        "frame-ancestors": [
+          "*"
+        ]
       }
     }
   },
