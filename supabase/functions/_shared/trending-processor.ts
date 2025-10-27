@@ -165,21 +165,29 @@ export async function processMediaItems(
     const title = media.title ?? media.name
 
     const result = await (async (): Promise<ProcessingResult> => {
+      // Determine the correct function URL based on media type
+      const functionUrl = typeof config.prepareFunctionUrl === 'string'
+        ? config.prepareFunctionUrl
+        : config.prepareFunctionUrl[media.type]
+
+      console.log(`Invoking ${functionUrl} for ${media.type} ${tmdbId} (${title})`)
+
+      // Determine the correct parameter name based on the function being called
+      const isShowFunction = functionUrl.includes('/show')
+      const requestBody = isShowFunction
+        ? { id: tmdbId }  // show function expects 'id'
+        : { tmdbId, type: config.mediaType }  // prepare_movie function expects 'tmdbId' and 'type'
+
+      console.log(`DEBUG: Sending parameters to ${isShowFunction ? 'show' : 'prepare_movie'} function:`, requestBody)
+
       try {
-        // Determine the correct function URL based on media type
-        const functionUrl = typeof config.prepareFunctionUrl === 'string'
-          ? config.prepareFunctionUrl
-          : config.prepareFunctionUrl[media.type]
-
-        console.log(`Invoking ${functionUrl} for ${media.type} ${tmdbId} (${title})`)
-
         const invokeResponse = await fetch(functionUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${serviceRoleKey}`,
           },
-          body: JSON.stringify({ tmdbId, type: config.mediaType }),
+          body: JSON.stringify(requestBody),
         })
 
         if (!invokeResponse.ok) {
@@ -199,6 +207,7 @@ export async function processMediaItems(
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error'
         console.error(`Failed to process ${config.mediaType} ${tmdbId} (${title}):`, errorMessage)
+        console.error(`DEBUG: Request body that was sent:`, requestBody)
         return {
           status: 'rejected',
           reason: {
