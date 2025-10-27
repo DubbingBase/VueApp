@@ -41,3 +41,20 @@ export type { IDatabaseClient, ITMDBClient, ITVDBClient, IRedisClient } from './
 // Export cache utilities and constants
 export { CACHE_TTL, cache } from './cache-utils.ts';
 export { CACHE_KEYS, SimpleKeyBuilder } from './cache-constants.ts';
+
+// Export trending processor utilities
+export {
+  processTrendingMedia,
+  processMediaItems,
+  generateSummary,
+  sendNotification,
+  validateEnvironment,
+  fetchTrendingMedia
+} from './trending-processor.ts';
+
+export type {
+  MediaItem,
+  ProcessingResult,
+  TrendingProcessorConfig,
+  TrendingProcessorResult
+} from './trending-processor.ts';

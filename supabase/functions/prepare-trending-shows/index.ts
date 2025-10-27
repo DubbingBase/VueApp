@@ -8,22 +8,24 @@ import { corsHeaders } from "../_shared/http-utils.ts"
 import { processTrendingMedia } from "../_shared/trending-processor.ts"
 
 Deno.serve(async (req) => {
+  console.log('req.method', req.method)
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
-  // Use the shared trending processor for movies only
+  // Use the shared trending processor for TV shows only
   const result = await processTrendingMedia({
-    mediaType: 'movie', // Process only movies
-    tmdbApiPath: 'https://api.themoviedb.org/3/trending/movie/day',
-    prepareFunctionUrl: `${Deno.env.get('SUPABASE_URL')}/functions/v1/prepare_movie`,
+    mediaType: 'tv', // Process only TV shows
+    tmdbApiPath: 'https://api.themoviedb.org/3/trending/tv/day',
+    prepareFunctionUrl: `${Deno.env.get('SUPABASE_URL')}/functions/v1/show`,
     delayMs: 5000,
     maxItems: 15,
-    ntfyTopic: 'Armaldio_DubbingBaseTrendingMovies',
-    notificationTitle: 'DubbingBase Trending Movies Report'
+    ntfyTopic: 'Armaldio_DubbingBaseTrendingShows',
+    notificationTitle: 'DubbingBase Trending Shows Report'
   })
 
   if (!result.ok) {
+    console.error('Trending shows processing failed:', result.message)
     return new Response(JSON.stringify({
       ok: false,
       error: result.message,
@@ -34,6 +36,7 @@ Deno.serve(async (req) => {
     })
   }
 
+  console.log('Trending shows processing completed successfully:', result.message)
   return new Response(JSON.stringify({
     ok: true,
     message: result.message,

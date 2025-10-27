@@ -1,6 +1,7 @@
 {
   "version": "4",
   "specifiers": {
+    "jsr:@supabase/functions-js@*": "2.4.4",
     "jsr:@supabase/supabase-js@*": "2.50.0",
     "npm:@supabase/auth-js@2.70.0": "2.70.0",
     "npm:@supabase/functions-js@2.4.4": "2.4.4",
@@ -12,11 +13,17 @@
     "npm:openai@^4.52.5": "4.104.0"
   },
   "jsr": {
+    "@supabase/functions-js@2.4.4": {
+      "integrity": "38456509a6e22fb116b118464cbb36357256f9048d3580632b63af91f63769f7",
+      "dependencies": [
+        "npm:openai"
+      ]
+    },
     "@supabase/supabase-js@2.50.0": {
       "integrity": "d583ced1777f6bda163de3aca49f9b00b62c48633c5d129492531a11b3542457",
       "dependencies": [
         "npm:@supabase/auth-js",
-        "npm:@supabase/functions-js",
+        "npm:@supabase/functions-js@2.4.4",
         "npm:@supabase/node-fetch",
         "npm:@supabase/postgrest-js",
         "npm:@supabase/realtime-js",

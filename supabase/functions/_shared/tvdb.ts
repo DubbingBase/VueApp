@@ -99,14 +99,12 @@ export class TVDBClient implements ITVDBClient {
     // Cache miss - fetch from API
     let result: any;
     if (extended) {
-      result = await this.get(`series/${seriesId}/extended`, {
-        params: {
-          extended: extended.meta,
-          short: extended.short
-        }
-      });
+       result = await this.get(`series/${seriesId}/extended`, {
+         extended: extended.meta || '',
+         short: extended.short?.toString() || ''
+       });
     } else {
-      result = await this.get(`series/${seriesId}`);
+       result = await this.get(`series/${seriesId}`);
     }
 
     // Cache the result with SHORT TTL (2 hours for series data)
@@ -129,14 +127,12 @@ export class TVDBClient implements ITVDBClient {
     // Cache miss - fetch from API
     let result: any;
     if (extended) {
-      result = await this.get(`movies/${movieId}/extended`, {
-        params: {
-          extended: extended.meta,
-          short: extended.short
-        }
-      });
+       result = await this.get(`movies/${movieId}/extended`, {
+         extended: extended.meta || '',
+         short: extended.short?.toString() || ''
+       });
     } else {
-      result = await this.get(`movies/${movieId}`);
+       result = await this.get(`movies/${movieId}`);
     }
 
     // Cache the result with SHORT TTL (2 hours for movie data)

@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
   const json = await response.json()
   const trendingMovies = {
     ...json,
-    results: json.results.map(result => ({
+    results: json.results.map((result: any) => ({
       ...result,
       backdrop_path: buildTmdbImageUrl(result.backdrop_path, 'w780'),
       poster_path: buildTmdbImageUrl(result.poster_path, 'w342'),
