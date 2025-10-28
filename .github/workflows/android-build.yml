@@ -53,6 +53,8 @@ jobs:
       env:
         SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
       run: |
         pnpm tauri android build
 
@@ -87,9 +89,6 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: android-app-bundle
-
-    - name: ls
-      run: ls -la
 
     - name: Upload .aab to Google Play
       uses: KevinRohn/github-action-upload-play-store@v1.0.1
