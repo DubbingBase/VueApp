@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
     prepareFunctionUrl: `${Deno.env.get('SUPABASE_URL')}/functions/v1/prepare_movie`,
     delayMs: 5000,
     maxItems: 15,
-    ntfyTopic: 'Armaldio_DubbingBaseTrendingMovies',
+    ntfyTopic: 'Armaldio_DubbingBaseTrendingSummary',
     notificationTitle: 'DubbingBase Trending Movies Report'
   })
 
