@@ -26,9 +26,6 @@
         />
         <div class="banner-overlay"></div>
       </div>
-      <div v-else class="banner banner-placeholder">
-        <div class="banner-title">Chargement…</div>
-      </div>
 
       <MediaInfoCard :media="show" />
 
