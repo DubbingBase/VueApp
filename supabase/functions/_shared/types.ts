@@ -112,7 +112,7 @@ export interface Actor {
     name: string
     place_of_birth: string
     profile_path: string
-    combined_credits: ActorCredits
+    credits: ActorCredits
     roles?: {
         credit_id: string
         character: string

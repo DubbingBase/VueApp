@@ -66,6 +66,21 @@
     "series": "Séries",
     "episodes": "Épisodes"
   },
+  "actor": {
+    "title": "Acteur",
+    "about": "À propos",
+    "movies": "Films",
+    "series": "Séries",
+    "voiceActors": "Doubleurs",
+    "roles": "Rôles",
+    "birthdate": "Date de naissance",
+    "biography": "Biographie",
+    "role": "rôle",
+    "roles": "rôles",
+    "allRoles": "Tous les rôles",
+    "dubbedOnly": "Doublés uniquement",
+    "noDubbedRoles": "Aucun rôle doublé disponible"
+  },
   "media": {
     "title": "Titre",
     "year": "Année",

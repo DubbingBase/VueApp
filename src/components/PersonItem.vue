@@ -46,7 +46,7 @@ export interface Role {
   image?: string;
 }
 
-export interface PersonData<T = unknown> {
+export interface PersonData<T = unknown | undefined> {
   id: number;
   name?: string;
   roles?: Role[];
@@ -54,7 +54,7 @@ export interface PersonData<T = unknown> {
   performance?: string;
   tags?: string[] | string;
   tmdb_id: number;
-  data?: T;
+  data: T;
 }
 
 const props = withDefaults(

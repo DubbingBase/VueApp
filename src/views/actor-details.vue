@@ -5,132 +5,110 @@
         <ion-buttons slot="start">
           <ion-back-button :default-href="{ name: 'Home' }" />
         </ion-buttons>
-        <ion-title>Acteur</ion-title>
+        <ion-title>{{ t('actor.title') }}</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content>
       <div class="actor">
         <div class="header" v-if="actor">
-          <img :src="processImageUrl(actor.profile_path)" alt="" />
+          <img :src="processImageUrl(actor.profile_picture)" alt="" />
           <div class="actor-name">{{ actor.name }}</div>
         </div>
 
-        <div class="body" v-if="actor">
-          <ion-segment scrollable v-model="active">
-            <ion-segment-button value="about">
-              <ion-label>À propos</ion-label>
-            </ion-segment-button>
-            <ion-segment-button value="movies">
-              <ion-label>Films</ion-label>
-            </ion-segment-button>
-            <ion-segment-button value="series">
-              <ion-label>Séries</ion-label>
-            </ion-segment-button>
-          </ion-segment>
+        <div class="body" v-if="actor && !loading">
+           <ion-segment scrollable>
+              <ion-segment-button value="about" content-id="about">
+                <ion-label>{{ t('actor.about') }}</ion-label>
+              </ion-segment-button>
+              <ion-segment-button value="roles" content-id="roles">
+                <ion-label>{{ t('actor.roles') }}</ion-label>
+              </ion-segment-button>
+              <ion-segment-button value="voiceActors" content-id="voiceActors">
+                <ion-label>{{ t('actor.voiceActors') }}</ion-label>
+              </ion-segment-button>
+            </ion-segment>
 
-          <ion-segment-view :activeIndex="active">
-            <ion-segment-content value="about">
-              <p>Date de naissance : {{ actor.birthday }}</p>
-              {{ actor.biography }}
-            </ion-segment-content>
-            <ion-segment-content value="movies">
-              <div class="movies-wrapper">
-                <MediaItem
-                  v-for="movie in movies"
-                  :key="movie.id"
-                  :imagePath="movie.poster_path"
-                  :title="movie.title"
-                  routeName="MovieDetails"
-                  :routeParams="{ id: movie.id }"
-                ></MediaItem>
-              </div>
-            </ion-segment-content>
-            <ion-segment-content value="series">
-              <div class="series-wrapper">
-                <MediaItem
-                  v-for="serie in series"
-                  :key="serie.id"
-                  :imagePath="serie.poster_path"
-                  :title="serie.name"
-                  routeName="SerieDetails"
-                  :routeParams="{ id: serie.id }"
-                ></MediaItem>
-              </div>
-            </ion-segment-content>
-          </ion-segment-view>
-        </div>
-        <div v-if="actor && actor.voice_roles && actor.voice_roles.length" class="voice-roles-section">
-          <div class="section-header">
-            <h2>Rôles</h2>
-            <ion-chip outline color="primary" class="role-count">
-              {{ actor.voice_roles.length }} rôle{{ actor.voice_roles.length > 1 ? 's' : '' }}
-            </ion-chip>
-          </div>
+           <ion-segment-view>
+             <ion-segment-content id="about">
+               <div class="about-section">
+                 <div class="info-item" v-if="actor.data.birthday">
+                   <strong>{{ t('actor.birthdate') }}:</strong> {{ formatDate(actor.data.birthday) }}
+                 </div>
+                 <div class="biography" v-if="actor.data.biography">
+                   <strong>{{ t('actor.biography') }}:</strong>
+                   <p>{{ actor.data.biography }}</p>
+                 </div>
+               </div>
+             </ion-segment-content>
+             <ion-segment-content id="roles">
+               <div class="voice-roles-section">
+                 <ion-segment scrollable class="role-toggle" v-model="showDubbedOnly">
+                   <ion-segment-button value="true">
+                     <ion-label>{{ t('actor.dubbedOnly') }}</ion-label>
+                   </ion-segment-button>
+                   <ion-segment-button value="false">
+                     <ion-label>{{ t('actor.allRoles') }}</ion-label>
+                   </ion-segment-button>
+                 </ion-segment>
 
-          <!-- Group voice roles by media -->
-          <div v-for="(roles, mediaId) in groupVoiceRolesByMedia()" :key="mediaId" class="media-voice-roles">
-            <div class="media-header" @click="goToMedia(roles[0].mediaDetails.id)">
-              <div class="media-item-container">
-                <MediaItem
-                  :imagePath="getMediaImagePath(roles[0].mediaDetails)"
-                  :title="roles[0].mediaDetails.title || roles[0].mediaDetails.name"
-                  v-bind="getMediaRouteInfo(roles[0].mediaDetails)"
-                />
-              </div>
-              <div class="media-title-wrapper">
-                <h3 class="media-title">
-                  {{ roles[0].mediaDetails.title || roles[0].mediaDetails.name }}
-                  <span v-if="(roles[0].mediaDetails.release_date || roles[0].mediaDetails.first_air_date)" class="media-year">
-                    ({{ new Date(roles[0].mediaDetails.release_date || roles[0].mediaDetails.first_air_date).getFullYear() }})
-                  </span>
-                </h3>
-                <p v-if="roles[0].mediaDetails.overview" class="media-overview">
-                  {{ roles[0].mediaDetails.overview.substring(0, 120) }}{{ roles[0].mediaDetails.overview.length > 120 ? '...' : '' }}
-                </p>
-              </div>
-            </div>
+                 <div class="section-header">
+                   <h2>{{ t('actor.roles') }}</h2>
+                   <ion-chip outline color="primary" class="role-count">
+                     {{ roleCount }} {{ roleCount > 1 ? t('actor.roles') : t('actor.role') }}
+                   </ion-chip>
+                 </div>
 
-            <!-- List of voice roles and their actors for this media -->
-            <ion-list lines="none" class="voice-roles-list">
-              <div v-for="role in roles" :key="role.id" class="voice-role-group">
-                <div class="role-character" v-if="role.character">
-                  <ion-icon :icon="mic" />
-                  {{ role.character }}
-                </div>
+                 <div class="grouped-roles-list">
+                   <div
+                     v-for="group in groupedRolesToShow"
+                     :key="`${group.mediaId}-${group.mediaType}`"
+                     class="media-group"
+                   >
+                     <MovieCard
+                       :media="group"
+                       :character="group.roles.map((r: any) => r.character).filter(Boolean).join(', ')"
+                       :media-type="group.mediaType"
+                     />
+                     <div class="roles-list" v-if="group.roles.length > 1">
+                       <div
+                         v-for="role in group.roles"
+                         :key="role.id"
+                         class="role-detail"
+                       >
+                         <span class="character-name">{{ role.character }}</span>
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+             </ion-segment-content>
+             <ion-segment-content id="voiceActors">
+               <div class="voice-actors-wrapper">
+                 <PersonItem
+                   v-for="voiceActor in groupedVoiceActors"
+                   :key="voiceActor.id"
+                   :person="voiceActor"
+                   type="voice-actor"
+                 />
+               </div>
+             </ion-segment-content>
+           </ion-segment-view>
+         </div>
 
-                <ion-item
-                  v-for="voiceActor in role.voice_actors"
-                  :key="voiceActor.id"
-                  class="voice-role-item"
-                  button
-                  detail
-                  @click="goToVoiceActor(voiceActor.id)"
-                  :aria-label="`Voir les détails de la voix de ${voiceActor.firstname} ${voiceActor.lastname}`"
-                >
-                  <ion-avatar slot="start" class="voice-actor-avatar">
-                    <img
-                      v-if="voiceActor.profile_picture"
-                      :src="processImageUrl(voiceActor.profile_picture)"
-                      :alt="`${voiceActor.firstname} ${voiceActor.lastname}`"
-                    />
-                    <div v-else class="fallback-avatar">
-                      <ion-icon :icon="person" />
-                    </div>
-                  </ion-avatar>
-                  <ion-label class="voice-actor-details">
-                    <h3 class="voice-actor-name">
-                      {{ voiceActor.firstname }} {{ voiceActor.lastname }}
-                    </h3>
-                    <p class="voice-role-performance" v-if="voiceActor.performance">
-                      {{ voiceActor.performance }}
-                    </p>
-                  </ion-label>
-                </ion-item>
-              </div>
-            </ion-list>
+      </div>
 
-          </div>
-        </div>
+      <!-- Loading State -->
+      <div v-if="loading" class="loading-container">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>{{ t('common.loading') }}</p>
+      </div>
+
+      <!-- Error State -->
+      <div v-if="error && !loading" class="error-container">
+        <ion-icon :icon="alertCircle" size="large" color="danger"></ion-icon>
+        <h3>{{ t('common.error') }}</h3>
+        <p>{{ error }}</p>
+        <ion-button @click="retryLoad">{{ t('common.retry') }}</ion-button>
       </div>
     </ion-content>
   </ion-page>
@@ -138,8 +116,8 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import { useIonRouter } from "@ionic/vue";
 import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 import {
   IonPage,
   IonBackButton,
@@ -147,10 +125,6 @@ import {
   IonTitle,
   IonToolbar,
   IonHeader,
-  IonList,
-  IonItem,
-  IonAvatar,
-  IonLabel,
   IonChip,
   IonIcon,
   IonSegment,
@@ -158,15 +132,19 @@ import {
   IonSegmentView,
   IonSegmentContent,
   IonContent,
+  IonSpinner,
+  IonButton,
 } from "@ionic/vue";
-import { mic, person } from 'ionicons/icons';
-import { Actor } from "../../supabase/functions/_shared/actor";
-import MediaItem from "../components/MediaItem.vue";
-import type { Serie } from "../../supabase/functions/_shared/serie";
-import type { Movie } from "../../supabase/functions/_shared/movie";
+import { alertCircle } from 'ionicons/icons';
+import type {  Actor } from "../../supabase/functions/_shared/types";
 import { supabase } from "../api/supabase";
 import { actorToPersonData } from "@/utils/convert";
 import { PersonData } from "@/components/PersonItem.vue";
+import PersonItem from "@/components/PersonItem.vue";
+import MovieCard from "@/components/MovieCard.vue";
+
+
+const { t } = useI18n();
 
 // TMDB Configuration for image URLs
 const TMDB_CONFIG = {
@@ -192,108 +170,199 @@ function processImageUrl(imagePath: string | null | undefined, size: string = TM
 
 const route = useRoute();
 
-const actor = ref<PersonData>();
+const actor = ref<PersonData<Actor>>();
+const voiceActors = ref<any[]>([]);
+const loading = ref(true);
+const error = ref<string | null>(null);
+const showDubbedOnly = ref<'true' | 'false'>('true');
 
-const active = ref(0);
+const tmdbRoles = computed(() => {
+  if (!actor.value?.data?.credits?.cast) return [];
 
-const isMovie = (item: Movie | Serie): item is Movie => {
-  return item.media_type === "movie";
-};
+  return actor.value.data.credits.cast.map((credit: any) => {
+    const title = credit.title || credit.name;
+    const releaseDate = credit.release_date || credit.first_air_date;
+    const releaseYear = releaseDate ? new Date(releaseDate).getFullYear().toString() : '';
 
-const isSerie = (item: Movie | Serie): item is Serie => {
-  return item.media_type === "tv";
-};
+    return {
+      id: `${credit.id}-${credit.character}`,
+      mediaId: credit.id,
+      title,
+      character: credit.character,
+      releaseYear,
+      mediaType: credit.media_type,
+      poster_path: credit.poster_path,
+      release_date: credit.release_date,
+      first_air_date: credit.first_air_date
+    };
+  });
+});
 
-const credits = computed(() => {
-  return (
-    actor.value?.combined_credits ??
-    actor.value?.credits ?? {
-      cast: [],
-      crew: [],
+const groupedTmdbRoles = computed(() => {
+  const groups = new Map();
+
+  tmdbRoles.value.forEach(role => {
+    const key = `${role.mediaId}-${role.mediaType}`;
+    if (!groups.has(key)) {
+      groups.set(key, {
+        mediaId: role.mediaId,
+        mediaType: role.mediaType,
+        title: role.title,
+        releaseYear: role.releaseYear,
+        poster_path: role.poster_path,
+        release_date: role.release_date,
+        first_air_date: role.first_air_date,
+        roles: []
+      });
     }
-  );
+    groups.get(key).roles.push({
+      character: role.character,
+      id: role.id
+    });
+  });
+
+  return Array.from(groups.values()).sort((a, b) => {
+    const dateA = new Date(a.release_date || a.first_air_date || '1900-01-01');
+    const dateB = new Date(b.release_date || b.first_air_date || '1900-01-01');
+    return dateB.getTime() - dateA.getTime();
+  });
 });
 
-const movies = computed(() => {
-  return credits.value.cast.filter(isMovie);
+const groupedRolesToShow = computed(() => {
+  if (showDubbedOnly.value === 'true') {
+    return groupedTmdbRoles.value.filter(group => mediaIdsWithDubs.value.has(group.mediaId));
+  }
+  return groupedTmdbRoles.value;
 });
 
-const series = computed(() => {
-  return credits.value.cast.filter(isSerie);
+const mediaIdsWithDubs = computed(() => {
+  return new Set(voiceActors.value.map((va: any) => va.mediaDetails?.id).filter(Boolean));
 });
 
-onMounted(async () => {
+const sortedVoiceActors = computed(() => {
+  const voiceActorMap = new Map();
+
+  // Aggregate voice actors and count their roles
+  voiceActors.value.forEach((role: any) => {
+    role.voice_actors.forEach((va: any) => {
+      if (!voiceActorMap.has(va.id)) {
+        voiceActorMap.set(va.id, {
+          ...va,
+          roleCount: 0
+        });
+      }
+      voiceActorMap.get(va.id).roleCount += 1;
+    });
+  });
+
+  // Convert to array and sort by role count descending
+  return Array.from(voiceActorMap.values()).sort((a, b) => b.roleCount - a.roleCount);
+});
+
+const groupedVoiceActors = computed(() => {
+  return sortedVoiceActors.value.map((voiceActor: any) => ({
+    id: voiceActor.id,
+    name: `${voiceActor.firstname} ${voiceActor.lastname}`,
+    tmdb_id: voiceActor.id,
+    profile_picture: voiceActor.profile_picture,
+    performance: `${voiceActor.roleCount} ${voiceActor.roleCount > 1 ? t('actor.roles') : t('actor.role')}`,
+    tags: voiceActor.is_official ? ['official'] : [],
+    data: voiceActor
+  }));
+});
+
+
+const roleCount = computed(() => {
+  return groupedRolesToShow.value.length;
+});
+
+function formatDate(dateString: string): string {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleDateString();
+}
+
+
+
+
+
+async function loadActorData() {
   const id = route.params.id;
+  console.log('Route params:', route.params);
+  console.log('Actor ID from route:', id);
 
-  const actorResponseRaw = await await supabase.functions.invoke("actor", {
-    body: { id },
-  });
-  const actorResponse = (await actorResponseRaw.data) as { actor: Actor };
-  actor.value = actorToPersonData(actorResponse.actor);
+  loading.value = true;
+  error.value = null;
 
-  for (const role of actor.value.roles ?? []) {
-    const image = chara
-    role.image = image;
+  try {
+    console.log('Invoking Supabase function "actor" with id:', id);
+    const actorResponseRaw = await supabase.functions.invoke("actor", {
+      body: { id },
+    });
+    console.log('Raw Supabase response:', actorResponseRaw);
+    const actorResponse = (await actorResponseRaw.data) as { actor: Actor; voiceActors?: any[] };
+    console.log('Parsed actor response:', actorResponse);
+
+    // Fix: Properly assign actor data including all required fields
+    const convertedActor = actorToPersonData(actorResponse.actor);
+    actor.value = convertedActor
+
+    console.log('Converted actor data:', actor.value);
+    voiceActors.value = actorResponse.voiceActors || [];
+    console.log('Voice actors:', voiceActors.value);
+  } catch (err) {
+    console.error('Error fetching actor data:', err);
+    error.value = err instanceof Error ? err.message : 'Failed to load actor data';
+  } finally {
+    loading.value = false;
   }
+}
+
+function retryLoad() {
+  loadActorData();
+}
+
+
+onMounted(() => {
+  loadActorData();
 });
-function goToVoiceActor(id: number) {
-  const { push } = useIonRouter();
-  push({ name: 'VoiceActorDetails', params: { id } });
-}
-
-function goToMedia(media: any) {
-  const { push } = useIonRouter();
-  if (media.media_type === 'movie' || media.title) {
-    push({ name: 'MovieDetails', params: { id: media.id } });
-  } else if (media.media_type === 'tv' || media.name) {
-    push({ name: 'SerieDetails', params: { id: media.id } });
-  }
-}
-
-function getMediaRouteInfo(mediaDetails: any) {
-  const routeName = mediaDetails.media_type === 'movie' || mediaDetails.title
-    ? 'MovieDetails'
-    : 'SerieDetails';
-
-  return {
-    routeName,
-    routeParams: { id: mediaDetails.id }
-  };
-}
-
-function getMediaImagePath(mediaDetails: any) {
-  if (!mediaDetails.poster_path) {
-    // Use a placeholder image when no poster is available
-    return `https://via.placeholder.com/133x200/cccccc/666666?text=No+Image`;
-  }
-  return processImageUrl(mediaDetails.poster_path, 'w92');
-}
-
-
-// Group voice roles by media
-function groupVoiceRolesByMedia(): Record<string, any[]> {
-  if (!actor.value?.voice_roles) return {};
-
-  const grouped: Record<string, any[]> = {};
-
-  actor.value.voice_roles.forEach((role: any) => {
-    if (!role.id) return;
-
-    const mediaId = role.id;
-    if (!grouped[mediaId]) {
-      grouped[mediaId] = [];
-    }
-
-    grouped[mediaId].push(role);
-  });
-
-  console.log('grouped', grouped);
-
-  return grouped;
-}
 </script>
 
 <style scoped lang="scss">
+.actor {
+  padding: 0;
+  margin: 0 auto;
+}
+
+.about-section {
+  padding: 1rem;
+
+  .info-item {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+
+    strong {
+      color: var(--ion-color-primary);
+    }
+  }
+
+  .biography {
+    margin-top: 1.5rem;
+
+    strong {
+      color: var(--ion-color-primary);
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      margin: 0;
+      line-height: 1.6;
+      color: var(--ion-text-color);
+    }
+  }
+}
+
 .media-voice-roles {
   margin-bottom: 2rem;
   background: var(--ion-color-light);
@@ -308,43 +377,9 @@ function groupVoiceRolesByMedia(): Record<string, any[]> {
 
 .media-header {
   display: flex;
-  align-items: flex-start;
   padding: 1rem;
+  width: 100%;
   background: var(--ion-color-light-shade);
-  cursor: pointer;
-  transition: background 0.2s ease;
-
-  &:hover {
-    background: var(--ion-color-light-tint);
-  }
-}
-
-.media-title-wrapper {
-  flex: 1;
-  margin-left: 1rem;
-}
-
-.media-title {
-  margin: 0 0 0.5rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--ion-color-dark);
-  display: flex;
-  align-items: center;
-
-  .media-year {
-    margin-left: 0.5rem;
-    font-size: 0.9rem;
-    font-weight: normal;
-    color: var(--ion-color-medium);
-  }
-}
-
-.media-overview {
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--ion-color-medium);
-  line-height: 1.4;
 }
 
 .voice-roles-list {
@@ -409,57 +444,13 @@ function groupVoiceRolesByMedia(): Record<string, any[]> {
       vertical-align: middle;
     }
   }
-}
 
-.character-roles {
-  margin-top: 1rem;
-  padding: 0 1rem 1rem;
-
-  .character-name {
-    margin: 0 0 0.5rem;
-    font-size: 0.95rem;
-    font-weight: 600;
+  .voice-role-performance {
+    font-weight: 500;
     color: var(--ion-color-primary);
   }
-
-  .character-roles-list {
-    background: var(--ion-color-light-shade);
-    border-radius: 8px;
-    overflow: hidden;
-
-    .character-role-item {
-      --background: transparent;
-      --padding-start: 0.75rem;
-      --padding-end: 0.75rem;
-      --min-height: 64px;
-
-      &::part(native) {
-        padding-top: 0.5rem;
-        padding-bottom: 0.5rem;
-      }
-    }
-  }
 }
 
-.media-item-container {
-  width: 80px;
-  height: auto;
-  margin-right: 1rem;
-  flex-shrink: 0;
-
-  .media-item {
-    width: 100% !important;
-    height: auto !important;
-    min-width: 80px !important;
-    max-width: 80px !important;
-
-    .poster img {
-      width: 80px !important;
-      height: 120px !important;
-      border-radius: 8px;
-    }
-  }
-}
 
 .header {
   display: flex;
@@ -477,19 +468,23 @@ function groupVoiceRolesByMedia(): Record<string, any[]> {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     margin-bottom: 1rem;
   }
+
+  .actor-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--ion-text-color);
+    text-align: center;
+  }
 }
 
-.movies-wrapper, .series-wrapper {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 1rem;
-  padding: 0.5rem;
-}
 
 .voice-roles-section {
   margin: 1.5rem 0;
   padding: 0 1rem;
+
+  .role-toggle {
+    margin-bottom: 1rem;
+  }
 
   .section-header {
     display: flex;
@@ -511,17 +506,23 @@ function groupVoiceRolesByMedia(): Record<string, any[]> {
   }
 }
 
-.voice-roles-list {
-  background: transparent;
+.voice-actors-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem;
+}
 
-  .voice-role-item {
-    --padding-start: 0.5rem;
-    --padding-end: 0.5rem;
-    --inner-padding-end: 0.5rem;
-    margin-bottom: 0.75rem;
-    border-radius: 8px;
+.grouped-roles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  .media-group {
     background: var(--ion-item-background);
+    border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 
     &:active {
@@ -529,128 +530,29 @@ function groupVoiceRolesByMedia(): Record<string, any[]> {
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
-    .voice-actor-avatar {
-      width: 48px;
-      height: 48px;
-      margin-right: 0.75rem;
-      cursor: pointer;
+    .roles-list {
+      padding: 0.5rem 1rem;
+      border-top: 1px solid var(--ion-color-light-shade);
+      background: var(--ion-color-light);
 
-      img {
-        object-fit: cover;
-        border-radius: 8px;
-        transition: transform 0.2s ease;
-        &:hover {
-          transform: scale(1.05);
-        }
-      }
+      .role-detail {
+        padding: 0.25rem 0;
 
-      .fallback-avatar {
-        width: 100%;
-        height: 100%;
-        background: var(--ion-color-light);
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--ion-color-medium);
-
-        ion-icon {
-          font-size: 1.5rem;
-        }
-      }
-    }
-
-    .voice-actor-details {
-      h3 {
-        font-weight: 500;
-        margin: 0 0 0.25rem 0;
-        color: var(--ion-text-color);
-      }
-
-      p {
-        margin: 0.25rem 0;
-        font-size: 0.85rem;
-        color: var(--ion-color-medium);
-        display: flex;
-        align-items: center;
-
-        ion-icon {
-          margin-right: 0.5rem;
-          font-size: 1rem;
-          color: var(--ion-color-primary);
-        }
-      }
-
-      .voice-role-performance {
-        font-weight: 500;
-        color: var(--ion-color-primary) !important;
-      }
-
-      .media-details {
-        display: flex;
-        align-items: flex-start;
-        gap: 0.75rem;
-        margin-top: 0.5rem;
-        padding-top: 0.5rem;
-        border-top: 1px solid var(--ion-color-light);
-
-        .media-poster {
-          width: 40px;
-          height: 60px;
-          margin: 0;
-          background: var(--ion-color-light);
-          border-radius: 4px;
-          overflow: hidden;
-          flex-shrink: 0;
-
-          img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          }
-
-          .fallback-poster {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--ion-color-medium);
-
-            ion-icon {
-              font-size: 1.5rem;
-            }
-          }
+        &:not(:last-child) {
+          border-bottom: 1px solid var(--ion-color-light-shade);
         }
 
-        .media-info {
-          display: flex;
-          flex-direction: column;
-          gap: 0.25rem;
+        .character-name {
           font-size: 0.85rem;
-
-          .media-year {
-            color: var(--ion-color-medium);
-            margin-left: 0.25rem;
-          }
-
-          .media-overview {
-            color: var(--ion-color-medium);
-            font-size: 0.8rem;
-            line-height: 1.3;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            text-overflow: ellipsis;
-          }
+          color: var(--ion-color-medium);
+          font-style: italic;
         }
       }
     }
   }
 }
 
-/* Responsive adjustments */
+// Mobile-only styles - no desktop hover states
 @media (min-width: 768px) {
   .voice-roles-section {
     margin: 2rem auto;
@@ -665,4 +567,5 @@ function groupVoiceRolesByMedia(): Record<string, any[]> {
     }
   }
 }
+
 </style>
