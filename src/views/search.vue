@@ -24,8 +24,8 @@
             />
           </ion-list>
         </transition-group>
-        <p v-if="!isLoading && matches.length === 0 && query.length >= 3" class="empty-state">No results found</p>
-        <p v-if="!isLoading && matches.length === 0 && query.length < 3" class="empty-state">Start typing to search...</p>
+        <p v-if="!isLoading && matches.length === 0 && trimmedQuery.length >= 3" class="empty-state">No results found</p>
+        <p v-if="!isLoading && matches.length === 0 && trimmedQuery.length < 3" class="empty-state">Start typing to search...</p>
       </div>
       <LoadingSpinner v-if="isLoading" :overlay="true" />
       <ion-toast :is-open="!!error" :message="error" @didDismiss="error=''"></ion-toast>
@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import {
   IonHeader,
   IonSearchbar,
@@ -68,6 +68,7 @@ const matches = ref<SearchResult[]>([]);
 const isLoading = ref(false);
 const error = ref('');
 const query = ref('');
+const trimmedQuery = computed(() => query.value.trim());
 let abortController: AbortController | null = null;
 
 const priority = { voice_actor: 1, movie: 2, person: 3, tv: 4 };
@@ -75,10 +76,9 @@ const priority = { voice_actor: 1, movie: 2, person: 3, tv: 4 };
 const search = async (
   event: IonSearchbarCustomEvent<SearchbarInputEventDetail>
 ) => {
-  const inputQuery = event.target.value?.trim() || '';
-  query.value = inputQuery;
+  query.value = event.target.value || '';
 
-  if (inputQuery.length < 3) {
+  if (trimmedQuery.value.length < 3) {
     matches.value = [];
     return;
   }
@@ -94,7 +94,7 @@ const search = async (
 
   try {
     const { data, error } = await supabase.functions.invoke('search', {
-      body: { query: inputQuery },
+      body: { query: trimmedQuery.value },
     });
 
     if (error) throw error;

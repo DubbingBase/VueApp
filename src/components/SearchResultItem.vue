@@ -1,10 +1,10 @@
 <template>
-  <ion-card
-    class="search-result-card"
-    :routerLink="{
+  <router-link class="no-link" :to="{
       name: routeName,
       params: { id: match.id },
-    }"
+    }">
+  <ion-card
+    class="search-result-card"
     button
   >
     <ion-card-content class="card-content">
@@ -18,6 +18,7 @@
       </div>
     </ion-card-content>
   </ion-card>
+  </router-link>
 </template>
 
 <script lang="ts" setup>
