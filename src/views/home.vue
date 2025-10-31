@@ -109,6 +109,39 @@
           </template>
         </div>
       </div>
+      <div class="top-voice-actors">
+        <div class="list-header">{{ t('home.topVoiceActors') }}</div>
+        <div class="voice-actors">
+          <template v-if="isLoadingTopVoiceActors">
+            <MediaItem
+              v-for="i in 3"
+              :key="'top-voice-actor-skeleton-' + i"
+              :loading="true"
+              imagePath=""
+              title=""
+              routeName=""
+              :routeParams="{}"
+            />
+          </template>
+          <template v-else-if="errorTopVoiceActors">
+            <div class="error-message">{{ t('home.topVoiceActorsError') }}</div>
+          </template>
+          <template v-else-if="topVoiceActors.length === 0">
+            <div class="empty-message">{{ t('home.topVoiceActorsEmpty') }}</div>
+          </template>
+          <template v-else>
+            <MediaItem
+              :key="va.id"
+              v-for="va in topVoiceActors"
+              :imagePath="va.profile_picture ?? undefined"
+              :title="`${va.firstname} ${va.lastname}`"
+              routeName="VoiceActorDetails"
+              :routeParams="{ id: va.id }"
+              :fallbackImagePath="`https://api.dicebear.com/9.x/initials/svg?scale=50&backgroundColor=212121&seed=${va.firstname} ${va.lastname}`"
+            ></MediaItem>
+          </template>
+        </div>
+      </div>
     </ion-content>
   </ion-page>
 </template>
@@ -128,20 +161,25 @@ const { t } = useI18n();
 const trendingMovies = ref<TrendingResponse["results"]>([]);
 const trendingSeries = ref<SerieTrendingResponse["results"]>([]);
 const recentVoiceActors = ref<Tables<'voice_actors'>[]>([]);
+const topVoiceActors = ref<Tables<'voice_actors'>[]>([]);
 const isLoadingMovies = ref(true);
 const isLoadingSeries = ref(true);
 const isLoadingVoiceActors = ref(true);
+const isLoadingTopVoiceActors = ref(true);
 const errorMovies = ref("");
 const errorSeries = ref("");
 const errorVoiceActors = ref("");
+const errorTopVoiceActors = ref("");
 
 onMounted(async () => {
   isLoadingMovies.value = true;
   isLoadingSeries.value = true;
   isLoadingVoiceActors.value = true;
+  isLoadingTopVoiceActors.value = true;
   errorMovies.value = "";
   errorSeries.value = "";
   errorVoiceActors.value = "";
+  errorTopVoiceActors.value = "";
   try {
     const trendingMovieResponseRaw = await supabase.functions.invoke("trending-movies");
     if (trendingMovieResponseRaw.error) throw new Error(trendingMovieResponseRaw.error.message || "Erreur inconnue");
@@ -174,6 +212,17 @@ onMounted(async () => {
   } finally {
     isLoadingVoiceActors.value = false;
   }
+
+  try {
+    const topVoiceActorsResponseRaw = await supabase.functions.invoke("top-voice-actors", { body: { limit: 10 } });
+    if (topVoiceActorsResponseRaw.error) throw new Error(topVoiceActorsResponseRaw.error.message || "Erreur inconnue");
+    topVoiceActors.value = topVoiceActorsResponseRaw.data || [];
+  } catch (e: any) {
+    errorTopVoiceActors.value = e.message || "Erreur lors du chargement des top doubleurs.";
+    topVoiceActors.value = [];
+  } finally {
+    isLoadingTopVoiceActors.value = false;
+  }
 });
 </script>
 
@@ -191,7 +240,7 @@ onMounted(async () => {
 }
 
 
-.trending-movies, .trending-series, .recent-voice-actors {
+.trending-movies, .trending-series, .recent-voice-actors, .top-voice-actors {
   margin-bottom: 32px;
   padding-left: 12px;
   margin-top: 32px;

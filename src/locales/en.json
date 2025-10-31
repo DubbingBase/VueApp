@@ -93,12 +93,15 @@
     "trendingMovies": "Trending - Movies",
     "trendingSeries": "Trending - Series",
     "recentVoiceActors": "Recent Voice Actors",
+    "topVoiceActors": "Top Voice Actors",
     "moviesError": "Unable to load popular movies. Please try again later.",
     "moviesEmpty": "No trending movies found.",
     "seriesError": "Unable to load popular series. Please try again later.",
     "seriesEmpty": "No trending series found.",
     "voiceActorsError": "Unable to load recent voices. Please try again later.",
-    "voiceActorsEmpty": "No recent voices found."
+    "voiceActorsEmpty": "No recent voices found.",
+    "topVoiceActorsError": "Unable to load top voice actors. Please try again later.",
+    "topVoiceActorsEmpty": "No top voice actors found."
   },
   "settings": {
     "title": "Settings",
