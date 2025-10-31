@@ -152,28 +152,31 @@ Deno.serve(async (req: Request): Promise<Response> => {
       return createErrorResponse("Actor not found", 404);
     }
 
-    console.log("actor", actor);
-
     const actorCredits = [
-      ...actor.movie_credits.cast,
-      ...actor.tv_credits.cast,
-    ];
+      ...actor.movie_credits.cast.map((x) => ({
+        ...x,
+        media_type: "movie",
+      })),
+      ...actor.tv_credits.cast.map((x) => ({
+        ...x,
+        media_type: "tv",
+      })),
+    ].map((castMember: any) => ({
+      ...castMember,
+      profile_path: buildTmdbImageUrl(castMember.profile_path),
+      poster_path: buildTmdbImageUrl(castMember.poster_path),
+      backdrop_path: buildTmdbImageUrl(castMember.backdrop_path),
+    }));
+
+    console.log("actorCredits", actorCredits);
 
     const result = {
       actor: {
         ...actor,
         profile_path: buildTmdbImageUrl(actor.profile_path),
-        credits: actorCredits
-          ? {
-            ...actorCredits,
-            cast: actorCredits.map((castMember: any) => ({
-              ...castMember,
-              profile_path: buildTmdbImageUrl(castMember.profile_path),
-              poster_path: buildTmdbImageUrl(castMember.poster_path),
-              backdrop_path: buildTmdbImageUrl(castMember.backdrop_path),
-            })),
-          }
-          : {},
+        credits: {
+          cast: actorCredits,
+        },
         voice_roles: voiceRoles,
       },
       voiceActors: voiceRoles,

@@ -195,6 +195,7 @@ const groupedTmdbRoles = computed(() => {
 
   tmdbRoles.value.forEach((role) => {
     const key = `${role.mediaId}-${role.mediaType}`;
+    console.log("key", key);
     if (!groups.has(key)) {
       groups.set(key, {
         mediaId: role.mediaId,
