@@ -7,6 +7,8 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { TMDBClient } from "../_shared/tmdb.ts"
 import { DatabaseClient } from "../_shared/database.ts"
 import { createResponse, createErrorResponse, handleOptions } from "../_shared/http-utils.ts"
+import { buildSupabaseImageUrl } from "../_shared/supabase-urls.ts";
+import { buildTmdbImageUrl } from "../_shared/tmdb-urls.ts";
 
 async function getActor(actorId: number, tmdbClient: TMDBClient) {
   try {
@@ -79,7 +81,7 @@ async function getVoiceRoles(actorId: number, tmdbClient: TMDBClient, dbClient: 
             id: mediaDetails.id,
             title: mediaDetails.title || mediaDetails.name,
             original_title: mediaDetails.original_title || mediaDetails.original_name,
-            poster_path: mediaDetails.poster_path,
+            poster_path: buildTmdbImageUrl(mediaDetails.poster_path),
             release_date: mediaDetails.release_date || mediaDetails.first_air_date,
             media_type: work.content_type || '',
             overview: mediaDetails.overview
@@ -130,6 +132,16 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const result = {
       actor: {
         ...actor,
+        profile_path: buildTmdbImageUrl(actor.profile_path),
+        credits: actor.credits ? {
+          ...actor.credits,
+          cast: actor.credits.cast.map((castMember: any) => ({
+            ...castMember,
+            profile_path: buildTmdbImageUrl(castMember.profile_path),
+            poster_path: buildTmdbImageUrl(castMember.poster_path),
+            backdrop_path: buildTmdbImageUrl(castMember.backdrop_path)
+          }))
+        } : {},
         voice_roles: voiceRoles,
       },
       voiceActors: voiceRoles,

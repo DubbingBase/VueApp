@@ -11,7 +11,7 @@
     <ion-content>
       <div class="actor">
         <div class="header" v-if="actor">
-          <img :src="processImageUrl(actor.profile_picture)" alt="" />
+          <img :src="actor.profile_picture" alt="" />
           <div class="actor-name">{{ actor.name }}</div>
         </div>
 
@@ -143,30 +143,7 @@ import { PersonData } from "@/components/PersonItem.vue";
 import PersonItem from "@/components/PersonItem.vue";
 import MovieCard from "@/components/MovieCard.vue";
 
-
 const { t } = useI18n();
-
-// TMDB Configuration for image URLs
-const TMDB_CONFIG = {
-  baseUrl: 'https://image.tmdb.org/t/p',
-  defaultSize: 'w500'
-} as const;
-
-/**
- * Processes image path for TMDB URLs
- */
-function processImageUrl(imagePath: string | null | undefined, size: string = TMDB_CONFIG.defaultSize): string {
-  if (!imagePath) return '';
-
-  // If it's already a full URL, use it directly (backend processed URL)
-  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-    return imagePath;
-  }
-
-  // For TMDB image paths, construct the full TMDB URL
-  const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
-  return `${TMDB_CONFIG.baseUrl}/${size}/${cleanPath}`;
-}
 
 const route = useRoute();
 
