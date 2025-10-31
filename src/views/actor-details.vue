@@ -72,7 +72,10 @@
                   >
                     <router-link
                       :to="{
-                        name: 'MovieDetails',
+                        name:
+                          group.mediaType === 'movie'
+                            ? `MovieDetails`
+                            : `SerieDetails`,
                         params: { id: group.mediaId },
                       }"
                       class="no-link"
@@ -90,6 +93,25 @@
                         class="role-detail"
                       >
                         <span class="character-name">{{ role.character }}</span>
+                      </div>
+                    </div>
+                    <div
+                      class="voice-actors-section"
+                      v-if="group.voice_actors.length > 0"
+                    >
+                      <div class="voice-actors-list">
+                        <PersonItem
+                          v-for="va in group.voice_actors"
+                          :key="va.id"
+                          :person="
+                            voiceActorToPersonData(
+                              va,
+                              va.performance,
+                              va.actor_id
+                            )
+                          "
+                          type="voice-actor"
+                        />
                       </div>
                     </div>
                   </div>
@@ -151,7 +173,7 @@ import {
 import { alertCircle } from "ionicons/icons";
 import type { Actor } from "../../supabase/functions/_shared/types";
 import { supabase } from "../api/supabase";
-import { actorToPersonData } from "@/utils/convert";
+import { actorToPersonData, voiceActorToPersonData } from "@/utils/convert";
 import { PersonData } from "@/components/PersonItem.vue";
 import PersonItem from "@/components/PersonItem.vue";
 import MovieCard from "@/components/MovieCard.vue";
@@ -206,6 +228,7 @@ const groupedTmdbRoles = computed(() => {
         release_date: role.release_date,
         first_air_date: role.first_air_date,
         roles: [],
+        voice_actors: voiceActorsByMediaId.value.get(role.mediaId) || [],
       });
     }
     groups.get(key).roles.push({
@@ -234,6 +257,14 @@ const mediaIdsWithDubs = computed(() => {
   return new Set(
     voiceActors.value.map((va: any) => va.mediaDetails?.id).filter(Boolean)
   );
+});
+
+const voiceActorsByMediaId = computed(() => {
+  const map = new Map();
+  voiceActors.value.forEach((va: any) => {
+    map.set(va.mediaDetails.id, va.voice_actors);
+  });
+  return map;
 });
 
 const sortedVoiceActors = computed(() => {
@@ -548,6 +579,17 @@ onMounted(() => {
           color: var(--ion-color-medium);
           font-style: italic;
         }
+      }
+    }
+
+    .voice-actors-section {
+      border-top: 1px solid var(--ion-color-light-shade);
+      background: var(--ion-color-light);
+
+      .voice-actors-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
       }
     }
   }

@@ -47,6 +47,8 @@ async function getVoiceRoles(
   dbClient: DatabaseClient,
 ): Promise<VoiceRole[]> {
   try {
+    // TODO: rework
+
     // Use shared DatabaseClient for database queries
     const workData = await dbClient.getWorkByActor(actorId);
 
@@ -84,16 +86,12 @@ async function getVoiceRoles(
           highlight: top3.includes(work.voice_actor_id),
           voice_actors: voice_actors
             ? [{
-              id: voice_actors.id,
-              firstname: voice_actors.firstname,
-              lastname: voice_actors.lastname,
-              profile_path: voice_actors.profile_path,
-              gender: voice_actors.gender,
-              popularity: voice_actors.popularity,
-              known_for_department: voice_actors.known_for_department,
-              character: voice_actors.character,
-              social_media_links: voice_actors
-                .social_media_links as SocialMediaLinks,
+              ...voice_actors,
+              profile_picture: buildSupabaseImageUrl(
+                voice_actors.profile_picture,
+                "voice_actor_profile_pictures",
+                "500",
+              ),
             }]
             : [],
           mediaDetails: mediaDetails
