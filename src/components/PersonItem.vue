@@ -1,36 +1,38 @@
 <template>
-  <div class="person-item">
-    <MediaItem
-      :image-path="image"
-      :route-name="routeName"
-      :route-params="routeParams"
-      :width="THUMBNAIL_DEFAULT_WIDTH"
-      :height="THUMBNAIL_DEFAULT_HEIGHT"
-      :fallbackImagePath="`https://api.dicebear.com/9.x/initials/svg?scale=50&backgroundColor=212121&seed=${displayName}`"
-    />
+  <router-link class="no-link" :to="{ name: routeName, params: routeParams }">
+    <div class="person-item">
+      <MediaItem
+        :image-path="image"
+        :route-name="routeName"
+        :route-params="routeParams"
+        :width="THUMBNAIL_DEFAULT_WIDTH"
+        :height="THUMBNAIL_DEFAULT_HEIGHT"
+        :fallbackImagePath="`https://api.dicebear.com/9.x/initials/svg?scale=50&backgroundColor=212121&seed=${displayName}`"
+      />
 
-    <MediaItem
-      v-for="(role, index) in person.roles?.filter((role) => role.image)"
-      :key="role.character"
-      :imagePath="role.image"
-      :routeName="'ActorDetails'"
-      :routeParams="{ id: person.id }"
-      :width="THUMBNAIL_DEFAULT_WIDTH"
-      :height="THUMBNAIL_DEFAULT_HEIGHT"
-    />
+      <MediaItem
+        v-for="(role, index) in person.roles?.filter((role) => role.image)"
+        :key="role.character"
+        :imagePath="role.image"
+        :routeName="'ActorDetails'"
+        :routeParams="{ id: person.id }"
+        :width="THUMBNAIL_DEFAULT_WIDTH"
+        :height="THUMBNAIL_DEFAULT_HEIGHT"
+      />
 
-    <div class="person-info">
-      <div class="person-name">{{ displayName }}</div>
-      <div v-if="subtitle" class="person-subtitle">{{ subtitle }}</div>
-      <div v-if="tags.length > 0" class="person-tags">
-        <span v-for="tag in tags" :key="tag" class="tag">{{ tag }}</span>
+      <div class="person-info">
+        <div class="person-name">{{ displayName }}</div>
+        <div v-if="subtitle" class="person-subtitle">{{ subtitle }}</div>
+        <div v-if="tags.length > 0" class="person-tags">
+          <span v-for="tag in tags" :key="tag" class="tag">{{ tag }}</span>
+        </div>
+      </div>
+
+      <div class="person-actions">
+        <slot name="actions"></slot>
       </div>
     </div>
-
-    <div class="person-actions">
-      <slot name="actions"></slot>
-    </div>
-  </div>
+  </router-link>
 </template>
 
 <script setup lang="ts">

@@ -21,7 +21,9 @@
     "search": "Search",
     "filter": "Filter",
     "sort": "Sort",
-    "himself": "Himself"
+    "himself": "Himself",
+    "scan": "Scan",
+    "fetchInfos": "Fetch information"
   },
   "profile": {
     "userProfile": "My User Profile",

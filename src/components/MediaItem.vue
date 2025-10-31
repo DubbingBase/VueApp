@@ -53,7 +53,9 @@ import { computed } from "vue";
 interface Props {
   imagePath: string | undefined;
   title?: string;
+  /** @deprecated */
   routeName: string;
+  /** @deprecated */
   routeParams: Record<string, any>;
   loading?: boolean;
   fallbackImagePath?: string;

@@ -1,25 +1,12 @@
 <template>
   <div class="movie-card">
     <div class="media-poster">
-      <router-link :to="{
-        name: mediaType === 'movie' ? 'MovieDetails' : 'SerieDetails',
-        params: { id: media.id },
-      }">
-        <MediaThumbnail
-          :path="media.poster_path"
-          :radius="'8px'"
-        />
-      </router-link>
+      <MediaThumbnail :path="media.poster_path" :radius="'8px'" />
     </div>
 
     <div class="movie-info">
       <h5 class="media-title">
-        <router-link :to="{
-          name: mediaType === 'movie' ? 'MovieDetails' : 'SerieDetails',
-          params: { id: media.id },
-        }" class="title-link">
-          {{ title }}
-        </router-link>
+        {{ title }}
       </h5>
 
       <div class="character-info">
@@ -44,7 +31,7 @@ import type { Serie as SerieModel } from "../../supabase/functions/_shared/serie
 type Props = {
   media: MovieModel | SerieModel;
   character: string;
-  mediaType: 'movie' | 'serie';
+  mediaType: "movie" | "serie";
 };
 
 const props = defineProps<Props>();
@@ -54,8 +41,11 @@ const title = computed(() => {
 });
 
 const releaseDate = computed(() => {
-  const date = (props.media as any).release_date || (props.media as any).first_air_date;
-  return date ? new Date(date).toLocaleDateString(navigator.language, { year: 'numeric' }) : '';
+  const date =
+    (props.media as any).release_date || (props.media as any).first_air_date;
+  return date
+    ? new Date(date).toLocaleDateString(navigator.language, { year: "numeric" })
+    : "";
 });
 </script>
 

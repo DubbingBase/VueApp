@@ -6,13 +6,14 @@ import { isTauri } from '@/utils/tauri';
 import { warn, debug, trace, info, error } from '@tauri-apps/plugin-log';
 
 
-info('meta:' + JSON.stringify(import.meta))
-
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_KEY
 
-info('supabaseUrl:' + supabaseUrl)
-info('isTauri:' + isTauri)
+if (isTauri) {
+    info('meta:' + JSON.stringify(import.meta))
+    info('supabaseUrl:' + supabaseUrl)
+    info('isTauri:' + isTauri)
+}
 
 const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     global: {

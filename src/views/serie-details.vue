@@ -125,6 +125,8 @@ import {
   IonSegmentContent,
   IonSegmentView,
   toastController,
+  IonTitle,
+  IonButton,
   IonToast,
 } from "@ionic/vue";
 import { ref, computed, onMounted, UnwrapRef } from "vue";
@@ -206,13 +208,20 @@ const findCharacter = (
   for (const name of allNames) {
     for (const roleName of allRoleNames) {
       // Direct name matching
-      if (name === roleName || name.includes(roleName) || roleName.includes(name)) {
+      if (
+        name === roleName ||
+        name.includes(roleName) ||
+        roleName.includes(name)
+      ) {
         return true;
       }
 
       // Simplified name matching for current pair
       const simplifiedName = name.replace(/(.*)( '?.*' ?)(.*)/, "$1 $3");
-      const simplifiedRoleName = roleName.replace(/(.*)( '?.*' ?)(.*)/, "$1 $3");
+      const simplifiedRoleName = roleName.replace(
+        /(.*)( '?.*' ?)(.*)/,
+        "$1 $3"
+      );
 
       if (
         simplifiedName.includes(roleName) ||

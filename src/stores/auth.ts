@@ -3,6 +3,7 @@ import { ref, computed, onUnmounted } from 'vue';
 import { supabase } from '@/api/supabase';
 import { useIonRouter } from '@ionic/vue';
 import type { User } from '@supabase/supabase-js';
+import type { Permission } from '@/types/permissions';
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -13,11 +14,20 @@ export const useAuthStore = defineStore('auth', () => {
   // Getters
   const isAuthenticated = computed(() => !!user.value);
   const isAdmin = computed(() => user.value?.app_metadata?.role === 'admin' ||
-                     user.value?.user_metadata?.role === 'admin' ||
-                     user.value?.role === 'admin');
+                      user.value?.user_metadata?.role === 'admin' ||
+                      user.value?.role === 'admin');
   const isAnonymous = computed(() => user.value?.is_anonymous)
 
   const currentUser = computed(() => user.value);
+
+  const permissions = computed((): Permission[] => {
+    if (!isAuthenticated.value) return [];
+    const perms: Permission[] = ['add_voice_actors'];
+    if (isAdmin.value) {
+      perms.push('admin_fetch');
+    }
+    return perms;
+  });
 
   // Actions
   const setUser = (userData: any) => {
@@ -126,11 +136,7 @@ export const useAuthStore = defineStore('auth', () => {
       const { data: { session } } = await supabase.auth.getSession();
       console.log('Current session:', session);
 
-      if (!session) {
-        const x = await supabase.auth.signInAnonymously();
-        console.log(x);
-        user.value = x.data.session?.user || null;
-      } else {
+      if (session) {
         user.value = session?.user || null;
       }
 
@@ -175,6 +181,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAnonymous,
     isAdmin,
     currentUser,
+    permissions,
 
     // Actions
     setUser,

@@ -29,6 +29,7 @@
     "date-fns": "^4.1.0",
     "ionicons": "^7.4.0",
     "pinia": "^3.0.3",
+    "posthog-js": "^1.283.0",
     "vite-plugin-deadfile": "^1.4.0",
     "vue": "^3.5.21",
     "vue-i18n": "^11.1.12",

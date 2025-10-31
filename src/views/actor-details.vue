@@ -5,7 +5,7 @@
         <ion-buttons slot="start">
           <ion-back-button :default-href="{ name: 'Home' }" />
         </ion-buttons>
-        <ion-title>{{ t('actor.title') }}</ion-title>
+        <ion-title>{{ t("actor.title") }}</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content>
@@ -16,99 +16,112 @@
         </div>
 
         <div class="body" v-if="actor && !loading">
-           <ion-segment scrollable>
-              <ion-segment-button value="about" content-id="about">
-                <ion-label>{{ t('actor.about') }}</ion-label>
-              </ion-segment-button>
-              <ion-segment-button value="roles" content-id="roles">
-                <ion-label>{{ t('actor.roles') }}</ion-label>
-              </ion-segment-button>
-              <ion-segment-button value="voiceActors" content-id="voiceActors">
-                <ion-label>{{ t('actor.voiceActors') }}</ion-label>
-              </ion-segment-button>
-            </ion-segment>
+          <ion-segment scrollable>
+            <ion-segment-button value="about" content-id="about">
+              <ion-label>{{ t("actor.about") }}</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="roles" content-id="roles">
+              <ion-label>{{ t("actor.roles") }}</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="voiceActors" content-id="voiceActors">
+              <ion-label>{{ t("actor.voiceActors") }}</ion-label>
+            </ion-segment-button>
+          </ion-segment>
 
-           <ion-segment-view>
-             <ion-segment-content id="about">
-               <div class="about-section">
-                 <div class="info-item" v-if="actor.data.birthday">
-                   <strong>{{ t('actor.birthdate') }}:</strong> {{ formatDate(actor.data.birthday) }}
-                 </div>
-                 <div class="biography" v-if="actor.data.biography">
-                   <strong>{{ t('actor.biography') }}:</strong>
-                   <p>{{ actor.data.biography }}</p>
-                 </div>
-               </div>
-             </ion-segment-content>
-             <ion-segment-content id="roles">
-               <div class="voice-roles-section">
-                 <ion-segment scrollable class="role-toggle" v-model="showDubbedOnly">
-                   <ion-segment-button value="true">
-                     <ion-label>{{ t('actor.dubbedOnly') }}</ion-label>
-                   </ion-segment-button>
-                   <ion-segment-button value="false">
-                     <ion-label>{{ t('actor.allRoles') }}</ion-label>
-                   </ion-segment-button>
-                 </ion-segment>
+          <ion-segment-view>
+            <ion-segment-content id="about">
+              <div class="about-section">
+                <div class="info-item" v-if="actor.data.birthday">
+                  <strong>{{ t("actor.birthdate") }}:</strong>
+                  {{ formatDate(actor.data.birthday) }}
+                </div>
+                <div class="biography" v-if="actor.data.biography">
+                  <strong>{{ t("actor.biography") }}:</strong>
+                  <p>{{ actor.data.biography }}</p>
+                </div>
+              </div>
+            </ion-segment-content>
+            <ion-segment-content id="roles">
+              <div class="voice-roles-section">
+                <ion-segment
+                  scrollable
+                  class="role-toggle"
+                  v-model="showDubbedOnly"
+                >
+                  <ion-segment-button value="true">
+                    <ion-label>{{ t("actor.dubbedOnly") }}</ion-label>
+                  </ion-segment-button>
+                  <ion-segment-button value="false">
+                    <ion-label>{{ t("actor.allRoles") }}</ion-label>
+                  </ion-segment-button>
+                </ion-segment>
 
-                 <div class="section-header">
-                   <h2>{{ t('actor.roles') }}</h2>
-                   <ion-chip outline color="primary" class="role-count">
-                     {{ roleCount }} {{ roleCount > 1 ? t('actor.roles') : t('actor.role') }}
-                   </ion-chip>
-                 </div>
+                <div class="section-header">
+                  <h2>{{ t("actor.roles") }}</h2>
+                  <ion-chip outline color="primary" class="role-count">
+                    {{ roleCount }}
+                    {{ roleCount > 1 ? t("actor.roles") : t("actor.role") }}
+                  </ion-chip>
+                </div>
 
-                 <div class="grouped-roles-list">
-                   <div
-                     v-for="group in groupedRolesToShow"
-                     :key="`${group.mediaId}-${group.mediaType}`"
-                     class="media-group"
-                   >
-                     <MovieCard
-                       :media="group"
-                       :character="group.roles.map((r: any) => r.character).filter(Boolean).join(', ')"
-                       :media-type="group.mediaType"
-                     />
-                     <div class="roles-list" v-if="group.roles.length > 1">
-                       <div
-                         v-for="role in group.roles"
-                         :key="role.id"
-                         class="role-detail"
-                       >
-                         <span class="character-name">{{ role.character }}</span>
-                       </div>
-                     </div>
-                   </div>
-                 </div>
-               </div>
-             </ion-segment-content>
-             <ion-segment-content id="voiceActors">
-               <div class="voice-actors-wrapper">
-                 <PersonItem
-                   v-for="voiceActor in groupedVoiceActors"
-                   :key="voiceActor.id"
-                   :person="voiceActor"
-                   type="voice-actor"
-                 />
-               </div>
-             </ion-segment-content>
-           </ion-segment-view>
-         </div>
-
+                <div class="grouped-roles-list">
+                  <div
+                    v-for="group in groupedRolesToShow"
+                    :key="`${group.mediaId}-${group.mediaType}`"
+                    class="media-group"
+                  >
+                    <router-link
+                      :to="{
+                        name: 'MovieDetails',
+                        params: { id: group.mediaId },
+                      }"
+                      class="no-link"
+                    >
+                      <MovieCard
+                        :media="group"
+                        :character="group.roles.map((r: any) => r.character).filter(Boolean).join(', ')"
+                        :media-type="group.mediaType"
+                      />
+                    </router-link>
+                    <div class="roles-list" v-if="group.roles.length > 1">
+                      <div
+                        v-for="role in group.roles"
+                        :key="role.id"
+                        class="role-detail"
+                      >
+                        <span class="character-name">{{ role.character }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ion-segment-content>
+            <ion-segment-content id="voiceActors">
+              <div class="voice-actors-wrapper">
+                <PersonItem
+                  v-for="voiceActor in groupedVoiceActors"
+                  :key="voiceActor.id"
+                  :person="voiceActor"
+                  type="voice-actor"
+                />
+              </div>
+            </ion-segment-content>
+          </ion-segment-view>
+        </div>
       </div>
 
       <!-- Loading State -->
       <div v-if="loading" class="loading-container">
         <ion-spinner name="crescent"></ion-spinner>
-        <p>{{ t('common.loading') }}</p>
+        <p>{{ t("common.loading") }}</p>
       </div>
 
       <!-- Error State -->
       <div v-if="error && !loading" class="error-container">
         <ion-icon :icon="alertCircle" size="large" color="danger"></ion-icon>
-        <h3>{{ t('common.error') }}</h3>
+        <h3>{{ t("common.error") }}</h3>
         <p>{{ error }}</p>
-        <ion-button @click="retryLoad">{{ t('common.retry') }}</ion-button>
+        <ion-button @click="retryLoad">{{ t("common.retry") }}</ion-button>
       </div>
     </ion-content>
   </ion-page>
@@ -135,8 +148,8 @@ import {
   IonSpinner,
   IonButton,
 } from "@ionic/vue";
-import { alertCircle } from 'ionicons/icons';
-import type {  Actor } from "../../supabase/functions/_shared/types";
+import { alertCircle } from "ionicons/icons";
+import type { Actor } from "../../supabase/functions/_shared/types";
 import { supabase } from "../api/supabase";
 import { actorToPersonData } from "@/utils/convert";
 import { PersonData } from "@/components/PersonItem.vue";
@@ -151,7 +164,7 @@ const actor = ref<PersonData<Actor>>();
 const voiceActors = ref<any[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
-const showDubbedOnly = ref<'true' | 'false'>('true');
+const showDubbedOnly = ref<"true" | "false">("true");
 
 const tmdbRoles = computed(() => {
   if (!actor.value?.data?.credits?.cast) return [];
@@ -159,7 +172,9 @@ const tmdbRoles = computed(() => {
   return actor.value.data.credits.cast.map((credit: any) => {
     const title = credit.title || credit.name;
     const releaseDate = credit.release_date || credit.first_air_date;
-    const releaseYear = releaseDate ? new Date(releaseDate).getFullYear().toString() : '';
+    const releaseYear = releaseDate
+      ? new Date(releaseDate).getFullYear().toString()
+      : "";
 
     return {
       id: `${credit.id}-${credit.character}`,
@@ -170,7 +185,7 @@ const tmdbRoles = computed(() => {
       mediaType: credit.media_type,
       poster_path: credit.poster_path,
       release_date: credit.release_date,
-      first_air_date: credit.first_air_date
+      first_air_date: credit.first_air_date,
     };
   });
 });
@@ -178,7 +193,7 @@ const tmdbRoles = computed(() => {
 const groupedTmdbRoles = computed(() => {
   const groups = new Map();
 
-  tmdbRoles.value.forEach(role => {
+  tmdbRoles.value.forEach((role) => {
     const key = `${role.mediaId}-${role.mediaType}`;
     if (!groups.has(key)) {
       groups.set(key, {
@@ -189,31 +204,35 @@ const groupedTmdbRoles = computed(() => {
         poster_path: role.poster_path,
         release_date: role.release_date,
         first_air_date: role.first_air_date,
-        roles: []
+        roles: [],
       });
     }
     groups.get(key).roles.push({
       character: role.character,
-      id: role.id
+      id: role.id,
     });
   });
 
   return Array.from(groups.values()).sort((a, b) => {
-    const dateA = new Date(a.release_date || a.first_air_date || '1900-01-01');
-    const dateB = new Date(b.release_date || b.first_air_date || '1900-01-01');
+    const dateA = new Date(a.release_date || a.first_air_date || "1900-01-01");
+    const dateB = new Date(b.release_date || b.first_air_date || "1900-01-01");
     return dateB.getTime() - dateA.getTime();
   });
 });
 
 const groupedRolesToShow = computed(() => {
-  if (showDubbedOnly.value === 'true') {
-    return groupedTmdbRoles.value.filter(group => mediaIdsWithDubs.value.has(group.mediaId));
+  if (showDubbedOnly.value === "true") {
+    return groupedTmdbRoles.value.filter((group) =>
+      mediaIdsWithDubs.value.has(group.mediaId)
+    );
   }
   return groupedTmdbRoles.value;
 });
 
 const mediaIdsWithDubs = computed(() => {
-  return new Set(voiceActors.value.map((va: any) => va.mediaDetails?.id).filter(Boolean));
+  return new Set(
+    voiceActors.value.map((va: any) => va.mediaDetails?.id).filter(Boolean)
+  );
 });
 
 const sortedVoiceActors = computed(() => {
@@ -225,7 +244,7 @@ const sortedVoiceActors = computed(() => {
       if (!voiceActorMap.has(va.id)) {
         voiceActorMap.set(va.id, {
           ...va,
-          roleCount: 0
+          roleCount: 0,
         });
       }
       voiceActorMap.get(va.id).roleCount += 1;
@@ -233,7 +252,9 @@ const sortedVoiceActors = computed(() => {
   });
 
   // Convert to array and sort by role count descending
-  return Array.from(voiceActorMap.values()).sort((a, b) => b.roleCount - a.roleCount);
+  return Array.from(voiceActorMap.values()).sort(
+    (a, b) => b.roleCount - a.roleCount
+  );
 });
 
 const groupedVoiceActors = computed(() => {
@@ -242,31 +263,28 @@ const groupedVoiceActors = computed(() => {
     name: `${voiceActor.firstname} ${voiceActor.lastname}`,
     tmdb_id: voiceActor.id,
     profile_picture: voiceActor.profile_picture,
-    performance: `${voiceActor.roleCount} ${voiceActor.roleCount > 1 ? t('actor.roles') : t('actor.role')}`,
-    tags: voiceActor.is_official ? ['official'] : [],
-    data: voiceActor
+    performance: `${voiceActor.roleCount} ${
+      voiceActor.roleCount > 1 ? t("actor.roles") : t("actor.role")
+    }`,
+    tags: voiceActor.is_official ? ["official"] : [],
+    data: voiceActor,
   }));
 });
-
 
 const roleCount = computed(() => {
   return groupedRolesToShow.value.length;
 });
 
 function formatDate(dateString: string): string {
-  if (!dateString) return '';
+  if (!dateString) return "";
   const date = new Date(dateString);
   return date.toLocaleDateString();
 }
 
-
-
-
-
 async function loadActorData() {
   const id = route.params.id;
-  console.log('Route params:', route.params);
-  console.log('Actor ID from route:', id);
+  console.log("Route params:", route.params);
+  console.log("Actor ID from route:", id);
 
   loading.value = true;
   error.value = null;
@@ -276,20 +294,24 @@ async function loadActorData() {
     const actorResponseRaw = await supabase.functions.invoke("actor", {
       body: { id },
     });
-    console.log('Raw Supabase response:', actorResponseRaw);
-    const actorResponse = (await actorResponseRaw.data) as { actor: Actor; voiceActors?: any[] };
-    console.log('Parsed actor response:', actorResponse);
+    console.log("Raw Supabase response:", actorResponseRaw);
+    const actorResponse = (await actorResponseRaw.data) as {
+      actor: Actor;
+      voiceActors?: any[];
+    };
+    console.log("Parsed actor response:", actorResponse);
 
     // Fix: Properly assign actor data including all required fields
     const convertedActor = actorToPersonData(actorResponse.actor);
-    actor.value = convertedActor
+    actor.value = convertedActor;
 
-    console.log('Converted actor data:', actor.value);
+    console.log("Converted actor data:", actor.value);
     voiceActors.value = actorResponse.voiceActors || [];
-    console.log('Voice actors:', voiceActors.value);
+    console.log("Voice actors:", voiceActors.value);
   } catch (err) {
-    console.error('Error fetching actor data:', err);
-    error.value = err instanceof Error ? err.message : 'Failed to load actor data';
+    console.error("Error fetching actor data:", err);
+    error.value =
+      err instanceof Error ? err.message : "Failed to load actor data";
   } finally {
     loading.value = false;
   }
@@ -298,7 +320,6 @@ async function loadActorData() {
 function retryLoad() {
   loadActorData();
 }
-
 
 onMounted(() => {
   loadActorData();
@@ -428,13 +449,16 @@ onMounted(() => {
   }
 }
 
-
 .header {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 1rem 0;
-  background: linear-gradient(to bottom, var(--ion-color-light) 0%, transparent 100%);
+  background: linear-gradient(
+    to bottom,
+    var(--ion-color-light) 0%,
+    transparent 100%
+  );
   margin-bottom: 1rem;
 
   img {
@@ -453,7 +477,6 @@ onMounted(() => {
     text-align: center;
   }
 }
-
 
 .voice-roles-section {
   margin: 1.5rem 0;
@@ -544,5 +567,4 @@ onMounted(() => {
     }
   }
 }
-
 </style>

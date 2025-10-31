@@ -10,8 +10,14 @@
     <!-- Main Actor Display -->
     <div class="main-actor">
       <PersonItem :person="actor" type="actor">
-        <template #actions >
-          <ion-button v-if="voiceActors.length === 0 && shouldShowVoiceActors" fill="clear" size="small" @click.stop="openVoiceActorSearch && openVoiceActorSearch(actor.id)" aria-label="Add voice actor link">
+        <template #actions>
+          <ion-button
+            v-if="voiceActors.length === 0 && shouldShowVoiceActors && hasPermission('add_voice_actors')"
+            fill="clear"
+            size="small"
+            @click.stop="openVoiceActorSearch && openVoiceActorSearch(actor.id)"
+            aria-label="Add voice actor link"
+          >
             <ion-icon :icon="addCircle"></ion-icon>
           </ion-button>
         </template>
@@ -19,7 +25,10 @@
     </div>
 
     <!-- Voice Actors List -->
-    <div v-if="voiceActors && voiceActors.length && shouldShowVoiceActors" class="voice-actors-section">
+    <div
+      v-if="voiceActors && voiceActors.length && shouldShowVoiceActors"
+      class="voice-actors-section"
+    >
       <div class="voice-actors-scroll">
         <div class="voice-actors-container">
           <template v-for="voiceActor in voiceActors" :key="voiceActor.id">
@@ -32,14 +41,39 @@
                 :person="voiceActor"
                 type="voice-actor"
               >
-              <template #actions>
-                <ion-button fill="clear" size="small" @click.stop="editVoiceActorLink && editVoiceActorLink({ id: actor.id, voiceActorDetails: voiceActor })" aria-label="Edit voice actor link">
-                  <ion-icon :icon="createOutline"></ion-icon>
-                </ion-button>
-                <ion-button fill="clear" size="small" @click.stop="confirmDeleteVoiceActorLink && confirmDeleteVoiceActorLink({ id: actor.id, voiceActorDetails: voiceActor })" color="danger" aria-label="Delete voice actor link">
-                  <ion-icon :icon="trashOutline"></ion-icon>
-                </ion-button>
-              </template>
+                <template #actions>
+                  <ion-button
+                    fill="clear"
+                    size="small"
+                    v-if="hasPermission('edit_voice_actor_link')"
+                    @click.stop="
+                      editVoiceActorLink &&
+                        editVoiceActorLink({
+                          id: actor.id,
+                          voiceActorDetails: voiceActor,
+                        })
+                    "
+                    aria-label="Edit voice actor link"
+                  >
+                    <ion-icon :icon="createOutline"></ion-icon>
+                  </ion-button>
+                  <ion-button
+                    fill="clear"
+                    size="small"
+                    v-if="hasPermission('delete_voice_actor_link')"
+                    @click.stop="
+                      confirmDeleteVoiceActorLink &&
+                        confirmDeleteVoiceActorLink({
+                          id: actor.id,
+                          voiceActorDetails: voiceActor,
+                        })
+                    "
+                    color="danger"
+                    aria-label="Delete voice actor link"
+                  >
+                    <ion-icon :icon="trashOutline"></ion-icon>
+                  </ion-button>
+                </template>
               </PersonItem>
             </router-link>
           </template>
@@ -51,9 +85,12 @@
 
 <script setup lang="ts">
 import PersonItem, { PersonData } from "./PersonItem.vue";
-import { createOutline, trashOutline, addCircle } from 'ionicons/icons';
-import { useLanguagePreference } from '@/composables/useLanguagePreference';
-import { computed } from 'vue';
+import { createOutline, trashOutline, addCircle } from "ionicons/icons";
+import { useLanguagePreference } from "@/composables/useLanguagePreference";
+import { computed } from "vue";
+
+import { IonIcon, IonButton } from "@ionic/vue";
+import { usePermissions } from "@/composables/usePermissions";
 
 export interface ActorWithVoiceActorsProps {
   actor: PersonData;
@@ -71,7 +108,7 @@ const props = withDefaults(defineProps<ActorWithVoiceActorsProps>(), {
   voiceActors: () => [],
   onActorClick: () => {},
   onVoiceActorClick: () => {},
-  mediaLanguage: () => '',
+  mediaLanguage: () => "",
   editVoiceActorLink: undefined,
   confirmDeleteVoiceActorLink: undefined,
   openVoiceActorSearch: undefined,
@@ -80,8 +117,15 @@ const props = withDefaults(defineProps<ActorWithVoiceActorsProps>(), {
 // Use language preference composable
 const { preferredLanguage } = useLanguagePreference();
 
+// Use access control composable
+const { hasPermission } = usePermissions();
+
+console.log('[ActorWithVoiceActors] canAccess add_voice_actors:', hasPermission('add_voice_actors'));
+
 const shouldShowVoiceActors = computed(() => {
-  return props.mediaLanguage.toLowerCase() !== preferredLanguage.value.toLowerCase()
+  return (
+    props.mediaLanguage.toLowerCase() !== preferredLanguage.value.toLowerCase()
+  );
 });
 </script>
 
