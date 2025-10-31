@@ -71,14 +71,14 @@ const query = ref('');
 const trimmedQuery = computed(() => query.value.trim());
 let abortController: AbortController | null = null;
 
-const priority = { voice_actor: 1, movie: 2, person: 3, tv: 4 };
+const priority = { voice_actor: 1, movie: 2, tv: 3, person: 4,  };
 
 const search = async (
   event: IonSearchbarCustomEvent<SearchbarInputEventDetail>
 ) => {
   query.value = event.target.value || '';
 
-  if (trimmedQuery.value.length < 3) {
+  if (trimmedQuery.value.length < 2) {
     matches.value = [];
     return;
   }
@@ -100,7 +100,7 @@ const search = async (
     if (error) throw error;
 
     matches.value = data || [];
-    matches.value.sort((a, b) => priority[a.media_type] - priority[b.media_type]);
+    // matches.value.sort((a, b) => priority[a.media_type] - priority[b.media_type]);
   } catch (err: any) {
     if (err.name !== 'AbortError') {
       error.value = err.message || 'Search failed';

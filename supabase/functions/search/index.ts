@@ -23,17 +23,20 @@ Deno.serve(async (req) => {
   let resp = []
 
   try {
-    const response = await fetch(`https://api.themoviedb.org/3/search/multi?query=${trimmedQuery}&page=1&language=fr-FR`, {
-      headers: {
-        "Content-Type": "application/json",
-        'Authorization': `Bearer ${Deno.env.get('TMDB_API_KEY')}`,
-        'Accept': 'application/json',
-      },
-    })
-
-    const res = await response.json()
-    const withImages = res.results.map(x => processMedia(x))
-    resp.push(...withImages)
+    const results = []
+    for (let page = 1; page <= 3; page++) {
+      const response = await fetch(`https://api.themoviedb.org/3/search/multi?query=${trimmedQuery}&page=${page}&language=fr-FR`, {
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${Deno.env.get('TMDB_API_KEY')}`,
+          'Accept': 'application/json',
+        },
+      })
+      const res = await response.json()
+      const withImages = res.results.map((x: any) => processMedia(x))
+      results.push(...withImages)
+    }
+    resp.push(...results)
   } catch (e) {
     console.error('e', e)
   }
@@ -76,7 +79,34 @@ Deno.serve(async (req) => {
     console.log('e', e)
   }
 
-  resp = resp.sort((a, b) => b.popularity - a.popularity)
+  // Scoring function combining popularity, vote_average, vote_count, and recency
+  function calculateScore(item: any): number {
+    let score = 0;
+
+    // Popularity weight: 0.5 (higher popularity increases score)
+    score += (item.popularity || 0) * 0.5;
+
+    // Vote average weight: 0.1 (normalized 0-10 scale)
+    score += (item.vote_average || 0) * 0.1;
+
+    // Vote count weight: 0.25 (normalized by dividing by 3000, higher vote count means more popular)
+    score += ((item.vote_count || 0) / 3000) * 0.25;
+
+    // Recency weight: 0.15 (newer items get higher score)
+    const date = item.release_date || item.first_air_date;
+    if (date) {
+      const daysSinceRelease = (Date.now() - new Date(date).getTime()) / (1000 * 60 * 60 * 24);
+      // Use a base score of 1000 and subtract days to favor recency
+      score += (1000 - daysSinceRelease) * 0.0015;
+    }
+
+    return score;
+  }
+
+  resp = resp.sort((a, b) => calculateScore(b) - calculateScore(a))
+
+  // Add score to each item for debugging/transparency
+  resp = resp.map(item => ({ ...item, score: calculateScore(item) }))
 
   return new Response(
     JSON.stringify(resp),
