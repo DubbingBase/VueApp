@@ -28,7 +28,8 @@
     "accepted": "Accepté",
     "rejected": "Rejeté",
     "upvote": "Vote positif",
-    "downvote": "Vote négatif"
+    "downvote": "Vote négatif",
+    "setStatus": "Définir le statut"
   },
   "profile": {
     "userProfile": "Mon profil utilisateur",

@@ -11,7 +11,7 @@
       />
 
       <MediaItem
-        v-for="(role, index) in person.roles?.filter((role) => role.image)"
+        v-for="role in person.roles?.filter((role) => role.image)"
         :key="role.character"
         :imagePath="role.image"
         :routeName="'ActorDetails'"
@@ -57,8 +57,10 @@ export interface PersonData<T = unknown | undefined> {
   tags?: string[] | string;
   tmdb_id: number;
   data: T;
-  reviewed_status?: string | null;
   character?: string;
+  // TODO: remove this as it's only for voice actors
+  reviewed_status?: string | null;
+  work_id: number;
 }
 
 const props = withDefaults(

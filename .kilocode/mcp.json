@@ -1,12 +1,16 @@
 {
-    "mcpServers": {
-        "supabase": {
-            "command": "npx",
-            "args": [
-                "-y",
-                "mcp-remote",
-                "https://mcp.supabase.com/mcp?project_ref=rrjgbneefiwoqvsjwzrz&read_only=true"
-            ]
-        }
+  "mcpServers": {
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@0.5.5",
+        "--access-token",
+        "sbp_72cc786c0441ab0c5921e3de215f0a1af2a82b92"
+      ],
+      "alwaysAllow": [
+        "list_projects"
+      ]
     }
+  }
 }

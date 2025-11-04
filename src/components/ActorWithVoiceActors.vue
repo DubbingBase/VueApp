@@ -86,6 +86,7 @@ import {
   thumbsDownOutline,
   timeOutline,
   checkmarkCircleOutline,
+  closeCircleOutline,
 } from "ionicons/icons";
 import { useLanguagePreference } from "@/composables/useLanguagePreference";
 import { computed, watch } from "vue";
@@ -96,16 +97,20 @@ import { usePermissions } from "@/composables/usePermissions";
 import { useVoiceActorManagement } from "@/composables/useVoiceActorManagement";
 import { useAuthStore } from "@/stores/auth";
 import { useI18n } from "vue-i18n";
+import {
+  Actor,
+  VoiceActorDetails,
+} from "../../supabase/functions/_shared/types";
 
 export interface ActorWithVoiceActorsProps {
-  actor: PersonData;
-  voiceActors?: PersonData[];
-  onActorClick?: (actor: PersonData) => void;
-  onVoiceActorClick?: (voiceActor: PersonData) => void;
+  actor: PersonData<Actor>;
+  voiceActors?: PersonData<VoiceActorDetails>[];
+  onActorClick?: (actor: PersonData<Actor>) => void;
+  onVoiceActorClick?: (voiceActor: PersonData<VoiceActorDetails>) => void;
   mediaLanguage?: string;
   editVoiceActorLink?: (workItem: any) => void;
   confirmDeleteVoiceActorLink?: (workItem: any) => void;
-  addVoiceActorLink?: (actor: PersonData) => void;
+  addVoiceActorLink?: (actor: PersonData<Actor>) => void;
   openVoiceActorSearch?: (actorId: number) => void;
   workType?: "movie" | "tv" | "season" | "episode";
   contentId?: string;
@@ -136,9 +141,8 @@ const authStore = useAuthStore();
 const { t } = useI18n();
 
 // Use voice actor management composable
-const { castVote, votes, refreshVotes } = useVoiceActorManagement(
-  props.workType
-);
+const { castVote, votes, refreshVotes, updateReviewStatus } =
+  useVoiceActorManagement(props.workType);
 
 // Watch for voice actors changes to refresh votes
 watch(
@@ -172,8 +176,42 @@ function handleLongPress(voiceActor: PersonData) {
 }
 
 // Open comprehensive action sheet
-const openActionSheet = async (voiceActor: PersonData) => {
+const openActionSheet = async (voiceActor: PersonData<VoiceActorDetails>) => {
   const buttons: any[] = [];
+
+  // Review status actions if user has permission
+  const canUpdateReviewStatus = hasPermission("admin_fetch");
+  if (canUpdateReviewStatus) {
+    buttons.push(
+      {
+        text: `${t("common.setStatus")} - ${t("common.waiting")}`,
+        icon: timeOutline,
+        handler: async () => {
+          await updateReviewStatus(voiceActor.work_id, "waiting");
+          // Force a refresh of the component to show updated status
+          location.reload();
+        },
+      },
+      {
+        text: `${t("common.setStatus")} - ${t("common.accepted")}`,
+        icon: checkmarkCircleOutline,
+        handler: async () => {
+          await updateReviewStatus(voiceActor.work_id, "accepted");
+          // Force a refresh of the component to show updated status
+          location.reload();
+        },
+      },
+      {
+        text: `${t("common.setStatus")} - ${t("common.rejected")}`,
+        icon: closeCircleOutline,
+        handler: async () => {
+          await updateReviewStatus(voiceActor.work_id, "rejected");
+          // Force a refresh of the component to show updated status
+          location.reload();
+        },
+      }
+    );
+  }
 
   // Vote actions if authenticated
   if (authStore.isAuthenticated) {

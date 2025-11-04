@@ -39,11 +39,18 @@ export { supabase, supabaseAdmin, supabaseUser };
 
 export class DatabaseClient implements IDatabaseClient {
   async getWorkWithVoiceActors(contentId: number) {
-    const { data, error } = await supabase.from("work")
+    debugLog("Fetching work with voice actors", { contentId });
+
+    const { data, error } = await supabaseAdmin.from("work")
       .select(`*, voiceActorDetails:voice_actors (*)`)
       .eq("content_id", contentId);
 
-    if (error) throw error;
+    if (error) {
+      debugLog("Error fetching work with voice actors", { error: error.message });
+      throw error;
+    }
+
+    debugLog("Work data retrieved", { count: data?.length || 0, sample: data?.[0] });
 
     return data;
   }

@@ -232,6 +232,36 @@ export function useVoiceActorManagement(
     });
   };
 
+  const updateReviewStatus = async (workId: number, status: 'waiting' | 'accepted' | 'rejected') => {
+    if (!authStore.user) {
+      console.error("User not authenticated");
+      return;
+    }
+
+    try {
+      const response = await supabase.functions.invoke("update-review-status", {
+        body: {
+          work_id: workId,
+          reviewed_status: status,
+        },
+      });
+
+      if (!response.data?.success) {
+        throw new Error("Failed to update review status");
+      }
+
+      // Update local state - find the voice actor and update its reviewed_status
+      // Note: voiceActors.value contains PersonData objects, not the raw work data
+      // The UI will need to be refreshed to show the updated status
+      console.log("Review status updated, UI should refresh to show changes");
+
+      console.log("Review status updated successfully");
+    } catch (error) {
+      console.error("Error updating review status:", error);
+      throw error;
+    }
+  };
+
   const castVote = async (workId: number, voteType: 'up' | 'down') => {
     if (!authStore.user) {
       votingError.value = "You must be logged in to vote.";
@@ -349,6 +379,7 @@ export function useVoiceActorManagement(
     deleteVoiceActorLink,
     goToVoiceActor,
     goToActor,
+    updateReviewStatus,
     castVote,
     refreshVotes,
   };

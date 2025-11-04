@@ -379,7 +379,9 @@ onMounted(async () => {
         voiceActorToPersonData(
           va.voiceActorDetails,
           va.performance,
-          va.actor_id
+          va.actor_id,
+          va.reviewed_status,
+          va.id
         )
       );
     }

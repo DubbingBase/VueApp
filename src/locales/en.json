@@ -28,7 +28,8 @@
     "accepted": "Accepted",
     "rejected": "Rejected",
     "upvote": "Upvote",
-    "downvote": "Downvote"
+    "downvote": "Downvote",
+    "setStatus": "Set Status"
   },
   "profile": {
     "userProfile": "My User Profile",

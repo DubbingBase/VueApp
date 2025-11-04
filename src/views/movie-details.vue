@@ -320,7 +320,13 @@ const fetchMovieData = async () => {
     movie.value = data.movie;
     console.log("data.voiceActors", data.voiceActors);
     voiceActors.value = data.voiceActors.map((va) =>
-      voiceActorToPersonData(va.voiceActorDetails, va.performance, va.actor_id)
+      voiceActorToPersonData(
+        va.voiceActorDetails,
+        va.performance,
+        va.actor_id,
+        va.reviewed_status,
+        va.id
+      )
     );
     if (data.characterProfilePictures) {
       characterProfilePictures.value = data.characterProfilePictures;
@@ -328,7 +334,7 @@ const fetchMovieData = async () => {
 
     // Refresh votes after loading voice actors
     if (voiceActors.value.length > 0) {
-      const workIds = voiceActors.value.map(va => va.id);
+      const workIds = voiceActors.value.map((va) => va.id);
       await refreshVotes(workIds);
     }
   } catch (e: any) {
