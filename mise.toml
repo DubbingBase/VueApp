@@ -3,8 +3,8 @@ deno = "2.1.9"
 node = "24"
 
 [env]
-# _.file = '.env.production'
-_.file = '.env.development'
+_.file = '.env.production'
+# _.file = '.env.development'
 
 [tasks.install]
 description = "Installs dependencies"
@@ -81,7 +81,7 @@ env = { "VITE_SUPABASE_URL" = "http://10.0.2.2:55321" }
 description = "Builds the Android app"
 depends = ["install", "sync", "build-web"]
 run = "pnpm cap build android"
-env = { VITE_SUPABASE_URL = "https://rrjgbneefiwoqvsjwzrz.supabase.co", VITE_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyamdibmVlZml3b3F2c2p3enJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzIwODUxMDAsImV4cCI6MjA0NzY2MTEwMH0.ywaUYwXnXF555i4dUCCl4gvcTZR1Ct6n0ptheJCdIVw" }
+env = { VITE_SUPABASE_URL = "https://rrjgbneefiwoqvsjwzrz.supabase.co", VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyamdibmVlZml3b3F2c2p3enJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzIwODUxMDAsImV4cCI6MjA0NzY2MTEwMH0.ywaUYwXnXF555i4dUCCl4gvcTZR1Ct6n0ptheJCdIVw" }
 
 [tasks.android-app-install]
 description = "Builds the Android app"
