@@ -13,6 +13,7 @@ import {
 } from "../_shared/http-utils.ts";
 import { buildSupabaseImageUrl } from "../_shared/supabase-urls.ts";
 import { buildTmdbImageUrl } from "../_shared/tmdb-urls.ts";
+import { cacheUtils } from "../_shared/index.ts";
 
 async function getActor(actorId: number, tmdbClient: TMDBClient) {
   try {
@@ -138,7 +139,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     // Initialize shared clients
-    const tmdbClient = new TMDBClient();
+    const tmdbClient = new TMDBClient(cacheUtils);
     const dbClient = new DatabaseClient();
 
     const [actor, voiceRoles] = await Promise.all([

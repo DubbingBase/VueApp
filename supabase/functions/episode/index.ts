@@ -2,6 +2,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { createResponse, createErrorResponse, handleOptions } from "../_shared/http-utils.ts"
 import { TMDBClient } from "../_shared/tmdb.ts"
+import { cacheUtils } from "../_shared/index.ts"
 
 
 Deno.serve(async (req) => {
@@ -18,7 +19,7 @@ Deno.serve(async (req) => {
 
     console.log('Fetching episode:', { id, season_number, episode_number })
 
-    const tmdbClient = new TMDBClient()
+    const tmdbClient = new TMDBClient(cacheUtils)
     const result = await tmdbClient.getMediaWithVoiceActors('episode', id, season_number, episode_number)
 
     return createResponse({

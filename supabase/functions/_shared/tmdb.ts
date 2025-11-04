@@ -13,15 +13,14 @@ export class TMDBClient implements ITMDBClient {
   private baseUrl: string;
   private cache: SimpleCache;
 
-  constructor(cache?: SimpleCache) {
+  constructor(cache: SimpleCache) {
     this.apiKey = Deno.env.get('TMDB_API_KEY')!;
     this.baseUrl = 'https://api.themoviedb.org/3';
-    // Use provided cache or create a new instance with null redis client (will fallback gracefully)
-    this.cache = cache || new SimpleCache(null as any);
+    this.cache = cache;
     debugLog('TMDB Client initialized', {
       hasApiKey: !!this.apiKey,
       baseUrl: this.baseUrl,
-      hasCache: !!cache
+      hasCache: true
     });
   }
 

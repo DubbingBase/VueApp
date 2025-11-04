@@ -99,12 +99,8 @@
 
       <VoiceActorSearchModal
         :is-open="showVoiceActorSearch"
-        :search-term="searchTerm"
-        :search-results="searchResults"
-        :is-searching="isSearching"
-        :search-error="searchError"
         :media-id="route.params.id as string"
-        :search-voice-actors="searchVoiceActors"
+        :work-type="'tv'"
         :link-voice-actor="linkVoiceActor"
         @close="showVoiceActorSearch = false"
       />
@@ -175,16 +171,11 @@ const characterProfilePictures = ref<
 const {
   // State
   showVoiceActorSearch,
-  searchTerm,
-  searchResults,
-  isSearching,
-  searchError,
   voiceActors,
 
   // Methods
   getVoiceActorByTmdbId,
   openVoiceActorSearch,
-  searchVoiceActors,
   linkVoiceActor,
   editVoiceActorLink,
   confirmDeleteVoiceActorLink,

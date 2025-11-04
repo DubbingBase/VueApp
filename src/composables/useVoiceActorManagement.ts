@@ -1,9 +1,9 @@
-import { ref, watch, onUnmounted } from 'vue';
-import { useIonRouter } from '@ionic/vue';
-import { alertController } from '@ionic/vue';
-import { storeToRefs } from 'pinia';
-import { useAuthStore } from '@/stores/auth';
-import { supabase } from '@/api/supabase';
+import { onUnmounted, ref, watch } from "vue";
+import { useIonRouter } from "@ionic/vue";
+import { alertController } from "@ionic/vue";
+import { storeToRefs } from "pinia";
+import { useAuthStore } from "@/stores/auth";
+import { supabase } from "@/api/supabase";
 
 export interface VoiceActor {
   id: number;
@@ -21,92 +21,95 @@ export interface WorkAndVoiceActor {
   voiceActorDetails: VoiceActor;
 }
 
-export function useVoiceActorManagement(workType: 'movie' | 'tv' | 'season' | 'episode') {
+export function useVoiceActorManagement(
+  workType: "movie" | "tv" | "season" | "episode",
+) {
   const ionRouter = useIonRouter();
   const authStore = useAuthStore();
   const { isAdmin } = storeToRefs(authStore);
 
   // Search modal state
   const showVoiceActorSearch = ref(false);
-  const searchTerm = ref('');
+  const searchTerm = ref("");
   const searchResults = ref<VoiceActor[]>([]);
   const isSearching = ref(false);
-  const searchError = ref('');
-  const selectedActor = ref<any>(null);
+  const searchError = ref("");
+  const selectedActor = ref<number>();
 
   // Voice actors data
   const voiceActors = ref<WorkAndVoiceActor[]>([]);
   const isLoading = ref(false);
-  const error = ref('');
+  const error = ref("");
 
   // Search timer for debouncing
   let searchTimer: NodeJS.Timeout | null = null;
 
   const getVoiceActorByTmdbId = (tmdbId: number): WorkAndVoiceActor[] => {
-    console.log('tmdbId', tmdbId);
-    console.log('voiceActors.value', voiceActors.value);
-    return voiceActors.value.filter(va => va.voice_actor_id === tmdbId);
+    console.log("tmdbId", tmdbId);
+    console.log("voiceActors.value", voiceActors.value);
+    return voiceActors.value.filter((va) => va.voice_actor_id === tmdbId);
   };
 
   const openVoiceActorSearch = (actor: any) => {
     selectedActor.value = actor;
-    searchTerm.value = '';
+    searchTerm.value = "";
     searchResults.value = [];
     showVoiceActorSearch.value = true;
   };
 
   const searchVoiceActors = async () => {
+    console.log("searchTerm.value", searchTerm.value);
     if (!searchTerm.value.trim()) {
       searchResults.value = [];
       return;
     }
 
     isSearching.value = true;
-    searchError.value = '';
+    searchError.value = "";
 
     try {
-      const response = await supabase.functions.invoke('search-voice-actors', {
+      const response = await supabase.functions.invoke("search-voice-actors", {
         body: {
-          query: searchTerm.value
-        }
+          query: searchTerm.value,
+        },
       });
       console.log(response.data);
       searchResults.value = response.data;
     } catch (err) {
-      console.error('Error searching voice actors:', err);
-      searchError.value = 'Failed to search voice actors. Please try again.';
+      console.error("Error searching voice actors:", err);
+      searchError.value = "Failed to search voice actors. Please try again.";
     } finally {
       isSearching.value = false;
     }
   };
 
   const linkVoiceActor = async (voiceActor: VoiceActor, contentId: string) => {
-    console.log('selectedActor.value', selectedActor.value);
+    console.log("selectedActor.value", selectedActor.value);
     try {
-      const response = await supabase.functions.invoke('link-voice-actor', {
+      const response = await supabase.functions.invoke("link-voice-actor", {
         body: {
-          actor_id: selectedActor.value.id,
-          work_type: workType,
+          actor_id: selectedActor.value,
+          media_type: workType,
           voice_actor_id: voiceActor.id,
-          performance: 'dialogues',
-          content_id: contentId,
-        }
+          performance: "dialogues",
+          media_id: contentId,
+        },
       });
 
       // Add the new voice actor to the list
       voiceActors.value.push({
         ...response.data,
-        voiceActorDetails: voiceActor
+        voiceActorDetails: voiceActor,
       });
 
       // Close the modal
       showVoiceActorSearch.value = false;
     } catch (error) {
-      console.error('Error linking voice actor:', error);
+      console.error("Error linking voice actor:", error);
       const alert = await alertController.create({
-        header: 'Error',
-        message: 'Failed to link voice actor. Please try again.',
-        buttons: ['OK']
+        header: "Error",
+        message: "Failed to link voice actor. Please try again.",
+        buttons: ["OK"],
       });
       await alert.present();
     }
@@ -114,27 +117,27 @@ export function useVoiceActorManagement(workType: 'movie' | 'tv' | 'season' | 'e
 
   const editVoiceActorLink = async (workItem: WorkAndVoiceActor) => {
     const alert = await alertController.create({
-      header: 'Edit Performance',
+      header: "Edit Performance",
       inputs: [
         {
-          name: 'performance',
-          type: 'text',
-          placeholder: 'Performance type (e.g., Voice, ADR, etc.)',
-          value: workItem.performance || 'Voice'
-        }
+          name: "performance",
+          type: "text",
+          placeholder: "Performance type (e.g., Voice, ADR, etc.)",
+          value: workItem.performance || "Voice",
+        },
       ],
       buttons: [
         {
-          text: 'Cancel',
-          role: 'cancel'
+          text: "Cancel",
+          role: "cancel",
         },
         {
-          text: 'Save',
+          text: "Save",
           handler: async (data) => {
             await updateVoiceActorLink(workItem.id, data.performance);
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
 
     await alert.present();
@@ -142,65 +145,69 @@ export function useVoiceActorManagement(workType: 'movie' | 'tv' | 'season' | 'e
 
   const updateVoiceActorLink = async (workId: number, performance: string) => {
     try {
-      const response = await supabase.functions.invoke('update_voice_actor_link', {
-        body: {
-          work_id: workId,
-          performance
-        }
-      });
+      const response = await supabase.functions.invoke(
+        "update_voice_actor_link",
+        {
+          body: {
+            work_id: workId,
+            performance,
+          },
+        },
+      );
 
       // Update the local state
-      const index = voiceActors.value.findIndex(va => va.id === workId);
+      const index = voiceActors.value.findIndex((va) => va.id === workId);
       if (index !== -1) {
         voiceActors.value[index].performance = response.data.performance;
       }
     } catch (error) {
-      console.error('Error updating voice actor link:', error);
+      console.error("Error updating voice actor link:", error);
       const alert = await alertController.create({
-        header: 'Error',
-        message: 'Failed to update voice actor link. Please try again.',
-        buttons: ['OK']
+        header: "Error",
+        message: "Failed to update voice actor link. Please try again.",
+        buttons: ["OK"],
       });
       await alert.present();
     }
   };
 
   const confirmDeleteVoiceActorLink = async (workItem: WorkAndVoiceActor) => {
-    console.log('workItem', workItem);
+    console.log("workItem", workItem);
     const alert = await alertController.create({
-      header: 'Confirm Delete',
-      message: `Are you sure you want to remove ${workItem.voiceActorDetails.firstname} ${workItem.voiceActorDetails.lastname}?`,
+      header: "Confirm Delete",
+      message:
+        `Are you sure you want to remove ${workItem.voiceActorDetails.firstname} ${workItem.voiceActorDetails.lastname}?`,
       buttons: [
         {
-          text: 'Cancel',
-          role: 'cancel'
+          text: "Cancel",
+          role: "cancel",
         },
         {
-          text: 'Delete',
-          role: 'destructive',
-          handler: () => deleteVoiceActorLink(workItem.id)
-        }
-      ]
+          text: "Delete",
+          role: "destructive",
+          handler: () => deleteVoiceActorLink(workItem.id),
+        },
+      ],
     });
     await alert.present();
   };
 
   const deleteVoiceActorLink = async (workId: number) => {
     try {
-      await supabase.functions.invoke('delete-voice-actor-link', {
+      await supabase.functions.invoke("delete-voice-actor-link", {
         body: {
-          work_id: workId
-        }
+          work_id: workId,
+        },
       });
 
       // Remove from local state
-      voiceActors.value = voiceActors.value.filter(va => va.id !== workId);
+      voiceActors.value = voiceActors.value.filter((va) => va.id !== workId);
     } catch (error) {
-      console.error('Error deleting voice actor link:', error);
+      console.error("Error deleting voice actor link:", error);
       const alert = await alertController.create({
-        header: 'Error',
-        message: 'Failed to delete voice actor link. Please try again.',
-        buttons: ['OK']
+        header: "Error",
+        message: "Failed to delete voice actor link. Please try again.",
+        buttons: ["OK"],
       });
       await alert.present();
     }
@@ -208,15 +215,15 @@ export function useVoiceActorManagement(workType: 'movie' | 'tv' | 'season' | 'e
 
   const goToVoiceActor = (id: number) => {
     ionRouter.push({
-      name: 'VoiceActorDetails',
-      params: { id }
+      name: "VoiceActorDetails",
+      params: { id },
     });
   };
 
   const goToActor = (id: number) => {
     ionRouter.push({
-      name: 'ActorDetails',
-      params: { id }
+      name: "ActorDetails",
+      params: { id },
     });
   };
 
@@ -238,7 +245,7 @@ export function useVoiceActorManagement(workType: 'movie' | 'tv' | 'season' | 'e
   });
 
   watch(voiceActors, (newVal) => {
-    console.log('voiceActors changed:', newVal);
+    console.log("voiceActors changed:", newVal);
   });
 
   return {

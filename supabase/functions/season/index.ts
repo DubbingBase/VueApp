@@ -4,6 +4,7 @@ import { createResponse, createErrorResponse, handleOptions } from "../_shared/h
 import { TMDBClient } from "../_shared/tmdb.ts";
 import { DatabaseClient } from "../_shared/database.ts";
 import { MediaService } from "../_shared/media-service.ts";
+import { cacheUtils } from "../_shared/index.ts";
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -19,7 +20,7 @@ Deno.serve(async (req) => {
 
     console.log('Fetching season:', { id, season_number })
 
-    const tmdbClient = new TMDBClient()
+    const tmdbClient = new TMDBClient(cacheUtils)
     const databaseClient = new DatabaseClient()
     const mediaService = new MediaService(databaseClient, tmdbClient)
 

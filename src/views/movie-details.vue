@@ -5,7 +5,7 @@
         <ion-buttons slot="start">
           <ion-back-button :default-href="{ name: 'Home' }" />
         </ion-buttons>
-        <ion-title>Voix</ion-title>
+        <ion-title>{{ movie?.title ?? "" }}</ion-title>
         <ion-buttons slot="end" v-if="isAdmin">
           <ion-button @click="goToEditPage">
             <ion-icon :icon="pencil"></ion-icon>
@@ -14,7 +14,7 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
-    <!--
+      <!--
       <div class="background" v-if="movie">
         <img
           width="100%"
@@ -62,12 +62,8 @@
 
     <VoiceActorSearchModal
       :is-open="showVoiceActorSearch"
-      :search-term="searchTerm"
-      :search-results="searchResults"
-      :is-searching="isSearching"
-      :search-error="searchError"
       :media-id="route.params.id as string"
-      :search-voice-actors="searchVoiceActors"
+      :work-type="'movie'"
       :link-voice-actor="linkVoiceActor"
       @close="showVoiceActorSearch = false"
     />
@@ -116,17 +112,12 @@ const router = useRouter();
 const {
   // State
   showVoiceActorSearch,
-  searchTerm,
-  searchResults,
-  isSearching,
-  searchError,
   voiceActors,
   isLoading,
 
   // Methods
   getVoiceActorByTmdbId,
   openVoiceActorSearch,
-  searchVoiceActors,
   linkVoiceActor,
   editVoiceActorLink,
   confirmDeleteVoiceActorLink,
@@ -150,8 +141,8 @@ const findCharacter = (
   character: UnwrapRef<typeof characterProfilePictures>[number],
   role: Role
 ) => {
-  console.log('character', character)
-  console.log('role', role)
+  console.log("character", character);
+  console.log("role", role);
   const characterName = character.name?.toLowerCase();
   const roleName = role.character.toLowerCase();
 
@@ -165,13 +156,20 @@ const findCharacter = (
   for (const name of allNames ?? []) {
     for (const roleName of allRoleNames) {
       // Direct name matching
-      if (name === roleName || name.includes(roleName) || roleName.includes(name)) {
+      if (
+        name === roleName ||
+        name.includes(roleName) ||
+        roleName.includes(name)
+      ) {
         return true;
       }
 
       // Simplified name matching for current pair
       const simplifiedName = name.replace(/(.*)( '?.*' ?)(.*)/, "$1 $3");
-      const simplifiedRoleName = roleName.replace(/(.*)( '?.*' ?)(.*)/, "$1 $3");
+      const simplifiedRoleName = roleName.replace(
+        /(.*)( '?.*' ?)(.*)/,
+        "$1 $3"
+      );
 
       if (
         simplifiedName.includes(roleName) ||
@@ -318,7 +316,7 @@ const fetchMovieData = async () => {
     movie.value = data.movie;
     console.log("data.voiceActors", data.voiceActors);
     voiceActors.value = data.voiceActors.map((va) =>
-      voiceActorToPersonData(va.voiceActorDetails, va.performance,va.actor_id)
+      voiceActorToPersonData(va.voiceActorDetails, va.performance, va.actor_id)
     );
     if (data.characterProfilePictures) {
       characterProfilePictures.value = data.characterProfilePictures;

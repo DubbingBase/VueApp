@@ -8,12 +8,21 @@ export class RedisClient implements IRedisClient {
   private restToken: string;
 
   constructor() {
-    this.restUrl = Deno.env.get('UPSTASH_REDIS_REST_URL')!;
-    this.restToken = Deno.env.get('UPSTASH_REDIS_REST_TOKEN')!;
+    const restUrl = Deno.env.get('UPSTASH_REDIS_REST_URL');
+    if (!restUrl) {
+      throw new Error('UPSTASH_REDIS_REST_URL environment variable is required');
+    }
+    this.restUrl = restUrl;
+
+    const restToken = Deno.env.get('UPSTASH_REDIS_REST_TOKEN');
+    if (!restToken) {
+      throw new Error('UPSTASH_REDIS_REST_TOKEN environment variable is required');
+    }
+    this.restToken = restToken;
   }
 
   private async makeRequest(command: string, args: string[] = []): Promise<any> {
-    const url = `${this.restUrl}/${command}/${args.join('/')}`;
+    const url = `${this.restUrl}`;
 
     const response = await fetch(url, {
       method: 'POST',
@@ -21,14 +30,33 @@ export class RedisClient implements IRedisClient {
         'Authorization': `Bearer ${this.restToken}`,
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify([command, ...args]),
     });
 
     if (!response.ok) {
-      throw new Error(`Redis API error: ${response.status} ${response.statusText}`);
+      const errorText = await response.text().catch(() => 'Unknown error');
+      throw new Error(`Upstash Redis API error: ${response.status} ${response.statusText}. Response: ${errorText}`);
     }
 
-    const data = await response.json();
-    return data.result || data;
+    let data: any;
+    try {
+      data = await response.json();
+    } catch (parseError) {
+      throw new Error(`Failed to parse Upstash Redis API response as JSON: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+    }
+
+    // Validate Upstash response structure
+    if (typeof data !== 'object' || data === null) {
+      throw new Error(`Invalid Upstash Redis API response format: expected object, got ${typeof data}`);
+    }
+
+    // Check for Upstash-specific error fields
+    if ('error' in data) {
+      throw new Error(`Upstash Redis API returned error: ${data.error}`);
+    }
+
+    // Return result field if present, otherwise the entire data
+    return data.result !== undefined ? data.result : data;
   }
 
   async get(key: string): Promise<string | null> {

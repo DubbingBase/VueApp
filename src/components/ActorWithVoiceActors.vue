@@ -2,7 +2,11 @@
   <div class="actor-with-voice-actors">
     <!-- Character Name -->
     <div class="character-name">
-      <div v-for="(role, index) in actor.roles" :key="role.character">
+      <div
+        class="name"
+        v-for="(role, index) in actor.roles"
+        :key="role.character"
+      >
         {{ index > 0 ? "/ " : "" }} {{ role.character }}
       </div>
     </div>
@@ -12,10 +16,16 @@
       <PersonItem :person="actor" type="actor">
         <template #actions>
           <ion-button
-            v-if="voiceActors.length === 0 && shouldShowVoiceActors && hasPermission('add_voice_actors')"
+            v-if="
+              voiceActors.length === 0 &&
+              shouldShowVoiceActors &&
+              hasPermission('add_voice_actors')
+            "
             fill="clear"
             size="small"
-            @click.stop="openVoiceActorSearch && openVoiceActorSearch(actor.id)"
+            @click.prevent.stop="
+              openVoiceActorSearch && openVoiceActorSearch(actor.id)
+            "
             aria-label="Add voice actor link"
           >
             <ion-icon :icon="addCircle"></ion-icon>
@@ -120,7 +130,10 @@ const { preferredLanguage } = useLanguagePreference();
 // Use access control composable
 const { hasPermission } = usePermissions();
 
-console.log('[ActorWithVoiceActors] canAccess add_voice_actors:', hasPermission('add_voice_actors'));
+console.log(
+  "[ActorWithVoiceActors] canAccess add_voice_actors:",
+  hasPermission("add_voice_actors")
+);
 
 const shouldShowVoiceActors = computed(() => {
   return (
@@ -147,6 +160,12 @@ const shouldShowVoiceActors = computed(() => {
     display: flex;
     flex-direction: row;
     gap: 8px;
+    overflow: auto;
+
+    .name {
+      display: inline-flex;
+      flex: 0 0 auto;
+    }
   }
 
   .main-actor {

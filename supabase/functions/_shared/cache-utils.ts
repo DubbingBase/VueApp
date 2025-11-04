@@ -1,5 +1,5 @@
 import { IRedisClient } from './interfaces.ts';
-import { SimpleKeyBuilder, CACHE_KEYS } from './cache-constants.ts';
+import { SimpleKeyBuilder, CACHE_KEYS, SimpleKeyValidator } from './cache-constants.ts';
 
 // Debug logging function
 function debugLog(message: string, data?: any) {
@@ -27,7 +27,8 @@ export class SimpleCache {
    */
   async get<T>(key: string): Promise<T | null> {
     try {
-      const cached = await this.redisClient.get(key);
+      const sanitizedKey = SimpleKeyValidator.sanitizeKey(key);
+      const cached = await this.redisClient.get(sanitizedKey);
       if (!cached) {
         debugLog(`Cache miss for key: ${key}`);
         return null;
@@ -48,9 +49,10 @@ export class SimpleCache {
    */
   async set<T>(key: string, data: T, ttl: CacheTTLPreset = 'MEDIUM'): Promise<boolean> {
     try {
+      const sanitizedKey = SimpleKeyValidator.sanitizeKey(key);
       const serialized = JSON.stringify(data);
       const ttlSeconds = CACHE_TTL[ttl];
-      const success = await this.redisClient.setex(key, ttlSeconds, serialized);
+      const success = await this.redisClient.setex(sanitizedKey, ttlSeconds, serialized);
 
       if (success) {
         debugLog(`Cache set for key: ${key}`, { ttl: ttlSeconds });
@@ -71,7 +73,8 @@ export class SimpleCache {
    */
   async del(key: string): Promise<boolean> {
     try {
-      const deleted = await this.redisClient.del(key);
+      const sanitizedKey = SimpleKeyValidator.sanitizeKey(key);
+      const deleted = await this.redisClient.del(sanitizedKey);
       const success = deleted > 0;
       debugLog(`Cache delete for key: ${key}`, { success, deleted });
       return success;
@@ -87,7 +90,8 @@ export class SimpleCache {
    */
   async exists(key: string): Promise<boolean> {
     try {
-      return await this.redisClient.exists(key);
+      const sanitizedKey = SimpleKeyValidator.sanitizeKey(key);
+      return await this.redisClient.exists(sanitizedKey);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       debugLog(`Cache exists check failed for key ${key}`, { error: errorMessage });
@@ -132,9 +136,6 @@ export class SimpleCache {
     return SimpleKeyBuilder.app(type, id, suffix);
   }
 }
-
-// Export a default cache instance for convenience
-export const cache = new SimpleCache(null as any); // Will be properly initialized in index.ts
 
 // Re-export key builder and constants for convenience
 export { SimpleKeyBuilder, CACHE_KEYS } from './cache-constants.ts';

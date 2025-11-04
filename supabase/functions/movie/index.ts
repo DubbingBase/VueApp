@@ -12,6 +12,7 @@ import { processMedia } from "../_shared/tmdb-urls.ts";
 import { processVoiceActor } from "../_shared/supabase-urls.ts";
 import { SimpleCache } from "../_shared/cache-utils.ts"
 import { RedisClient } from "../_shared/redis.ts"
+import { cacheUtils } from "../_shared/index.ts"
 
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
@@ -32,7 +33,7 @@ Deno.serve(async (req) => {
     }
 
     // Use shared TMDBClient for API calls
-    const tmdbClient = new TMDBClient()
+    const tmdbClient = new TMDBClient(cacheUtils)
 
     // Initialize cache with Redis client
     const cache = new SimpleCache(new RedisClient())
@@ -54,7 +55,7 @@ Deno.serve(async (req) => {
     const movieWithImageUrls = processMedia(movie)
 
     // Use TVDBClient to get character profile pictures
-    const tvdbClient = new TVDBClient()
+    const tvdbClient = new TVDBClient(cacheUtils)
     let characterProfilePictures: any[] = []
 
     try {

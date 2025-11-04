@@ -1,1 +1,14 @@
-migrate schema on remote db
+add pull to refresh
+fix multiple characters showing duplicated images
+fix profiles
+add gamification
+add "untrusted" work
+add votes to trust work
+remove all text with loading indicators
+add skeleton loaders
+center loading indicators
+ensure cache is working
+remove ion router
+implement view transitions
+remove ionic entirely
+make things fast

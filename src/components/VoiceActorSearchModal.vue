@@ -11,7 +11,7 @@
       </ion-toolbar>
       <ion-toolbar>
         <ion-searchbar
-          v-model="localSearchTerm"
+          v-model="searchTerm"
           @ionInput="handleSearchInput"
           placeholder="Search voice actors..."
           animated
@@ -27,20 +27,33 @@
         <ion-item v-else-if="searchError" class="ion-text-center">
           <ion-text color="danger">{{ searchError }}</ion-text>
         </ion-item>
-        <ion-item v-else-if="!searchResults.length && localSearchTerm" class="ion-text-center">
+        <ion-item
+          v-else-if="!searchResults.length && searchTerm"
+          class="ion-text-center"
+        >
           <ion-text>No voice actors found</ion-text>
         </ion-item>
         <ion-item
           v-for="va in searchResults"
           :key="va.id"
           button
-          @click="() => { if (linkVoiceActor) linkVoiceActor(va, mediaId) }"
+          @click="
+            () => {
+              if (linkVoiceActor) linkVoiceActor(va, mediaId);
+            }
+          "
         >
           <ion-avatar slot="start" v-if="va.profile_picture">
-            <img :src="va.profile_picture" :alt="va.firstname + ' ' + va.lastname" />
+            <img
+              :src="va.profile_picture"
+              :alt="va.firstname + ' ' + va.lastname"
+            />
           </ion-avatar>
           <ion-avatar slot="start" v-else>
-            <img src="https://placehold.co/40?text=VA" :alt="va.firstname + ' ' + va.lastname" />
+            <img
+              src="https://placehold.co/40?text=VA"
+              :alt="va.firstname + ' ' + va.lastname"
+            />
           </ion-avatar>
           <ion-label>
             <h3>{{ va.firstname }} {{ va.lastname }}</h3>
@@ -67,11 +80,11 @@ import {
   IonItem,
   IonText,
   IonAvatar,
-  IonLabel
+  IonLabel,
 } from "@ionic/vue";
-import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
-import { ref, watch } from "vue";
-import { closeCircle } from 'ionicons/icons';
+import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
+import { useVoiceActorManagement } from "@/composables/useVoiceActorManagement";
+import { closeCircle } from "ionicons/icons";
 
 interface VoiceActor {
   id: number;
@@ -83,29 +96,16 @@ interface VoiceActor {
 
 const props = defineProps<{
   isOpen: boolean;
-  searchTerm: string;
-  searchResults: VoiceActor[];
-  isSearching: boolean;
-  searchError: string;
   mediaId: string;
-  searchVoiceActors: (term?: string) => void;
+  workType: "movie" | "tv" | "season" | "episode";
   linkVoiceActor: (va: VoiceActor, mediaId: string) => void;
 }>();
 
-
-const localSearchTerm = ref(props.searchTerm);
-
-// Watch for changes in props.searchTerm and sync with localSearchTerm
-watch(() => props.searchTerm, (newSearchTerm) => {
-  localSearchTerm.value = newSearchTerm;
-});
+const { searchTerm, searchResults, isSearching, searchError } = useVoiceActorManagement(props.workType);
 
 const handleSearchInput = (event: any) => {
   const value = event.target.value;
-  localSearchTerm.value = value;
-  if (props.searchVoiceActors) {
-    props.searchVoiceActors(value);
-  }
+  searchTerm.value = value;
 };
 </script>
 
