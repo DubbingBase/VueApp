@@ -109,6 +109,6 @@ jobs:
         with:
           service_account_json: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           package_name: "com.dubbingbase.app"
-          aab_file_path: "app-universal-release.aab"
+          aab_file_path: "app-release-signed.aab"
           track: ${{ github.ref == 'refs/heads/main' && 'internal' || 'production' }}
           release_status: "completed"
