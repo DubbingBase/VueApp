@@ -25,6 +25,7 @@
     "@tauri-apps/plugin-http": "^2.5.2",
     "@tauri-apps/plugin-log": "~2",
     "@types/node": "^24.9.1",
+    "@vueuse/components": "^14.0.0",
     "@vueuse/core": "^13.9.0",
     "date-fns": "^4.1.0",
     "ionicons": "^7.4.0",

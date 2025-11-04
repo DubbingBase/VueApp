@@ -14,10 +14,20 @@ if (isTauri) {
     info("isTauri:" + isTauri);
 }
 
-const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-    global: {
-        fetch: isTauri ? fetch : undefined,
-    },
-});
+const createBaseClient = (user?: string | null) => {
+    return createClient<Database>(supabaseUrl, supabaseAnonKey, {
+        global: {
+            fetch: isTauri ? fetch : undefined,
+            headers: user
+                ? {
+                    Authorization: user,
+                }
+                : {},
+        },
+    });
+};
+
+const supabase = createBaseClient();
+// const supaUser = (user?: string | null) => createBaseClient(user);
 
 export { supabase };

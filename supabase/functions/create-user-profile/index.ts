@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { corsHeaders } from "../_shared/http-utils.ts"
-import { supabase } from "../_shared/database.ts"
+import { supabase, supabaseUser } from "../_shared/database.ts"
 import { Database } from "../_shared/database.types.ts"
 
 type UserProfile = Database['public']['Tables']['user_profiles']['Row']
@@ -33,9 +33,8 @@ Deno.serve(async (req) => {
       )
     }
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    )
+    const supabaseClient = supabaseUser(authHeader)
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
 
     if (authError || !user) {
       return new Response(

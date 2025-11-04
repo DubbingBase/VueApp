@@ -4,9 +4,10 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
+import { Database } from '../_shared/database.types.ts';
 import { TMDBClient } from "../_shared/tmdb.ts"
 import { TVDBClient } from "../_shared/tvdb.ts"
-import { DatabaseClient } from "../_shared/database.ts"
+import { DatabaseClient, supabaseUser } from "../_shared/database.ts"
 import { createResponse, createErrorResponse, handleOptions } from "../_shared/http-utils.ts"
 import { processMedia } from "../_shared/tmdb-urls.ts";
 import { processVoiceActor } from "../_shared/supabase-urls.ts";
@@ -129,9 +130,36 @@ Deno.serve(async (req) => {
     // Use shared DatabaseClient for database queries
     const dbClient = new DatabaseClient()
     const voiceActors = await dbClient.getWorkWithVoiceActors(movieId)
+
+    // Get work IDs for vote fetching
+    const workIds = voiceActors.map(va => va.id)
+
+    // Get vote data if there are work entries and user is authenticated
+    let voteData: Record<number, { up_count: number; down_count: number; user_vote: string | null }> = {}
+    if (workIds.length > 0) {
+      try {
+        const authHeader = req.headers.get('Authorization')
+        if (authHeader) {
+          const supabase = supabaseUser(authHeader)
+          const { data: { user } } = await supabase.auth.getUser()
+          if (user) {
+            voteData = await dbClient.getWorkVotes(workIds, user.id)
+          }
+        } else {
+          voteData = await dbClient.getWorkVotes(workIds)
+        }
+      } catch (voteError) {
+        console.error('Error fetching vote data:', voteError)
+        // Continue without vote data - don't fail the entire request
+      }
+    }
+
     const voiceActorsWithImages = voiceActors.map(va => ({
       ...va,
-      voiceActorDetails: processVoiceActor(va.voiceActorDetails)
+      voiceActorDetails: processVoiceActor(va.voiceActorDetails),
+      up_votes: voteData[va.id]?.up_count || 0,
+      down_votes: voteData[va.id]?.down_count || 0,
+      user_vote: voteData[va.id]?.user_vote || null
     }))
 
     const result = {

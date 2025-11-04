@@ -163,6 +163,38 @@ export type Database = {
         }
         Relationships: []
       }
+      votes: {
+        Row: {
+          created_at: string | null
+          id: number
+          user_id: string
+          vote_type: string
+          work_id: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: never
+          user_id: string
+          vote_type: string
+          work_id: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: never
+          user_id?: string
+          vote_type?: string
+          work_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "votes_work_id_fkey"
+            columns: ["work_id"]
+            isOneToOne: false
+            referencedRelation: "work"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       work: {
         Row: {
           actor_id: number
@@ -171,6 +203,7 @@ export type Database = {
           highlight: boolean | null
           id: number
           performance: string | null
+          reviewed_status: string | null
           source_id: number | null
           status: string | null
           suggestions: string | null
@@ -183,6 +216,7 @@ export type Database = {
           highlight?: boolean | null
           id?: number
           performance?: string | null
+          reviewed_status?: string | null
           source_id?: number | null
           status?: string | null
           suggestions?: string | null
@@ -195,6 +229,7 @@ export type Database = {
           highlight?: boolean | null
           id?: number
           performance?: string | null
+          reviewed_status?: string | null
           source_id?: number | null
           status?: string | null
           suggestions?: string | null
@@ -222,6 +257,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_top_voice_actors: {
+        Args: { limit_param?: number }
+        Returns: {
+          role_count: number
+          voice_actor: Json
+        }[]
+      }
       unaccent: {
         Args: { "": string }
         Returns: string

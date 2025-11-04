@@ -47,42 +47,25 @@
               :to="{ name: 'VoiceActorDetails', params: { id: voiceActor.id } }"
             >
               <PersonItem
+                v-on-long-press.prevent="() => handleLongPress(voiceActor)"
                 class="voice-actor-item"
                 :person="voiceActor"
                 type="voice-actor"
               >
                 <template #actions>
-                  <ion-button
-                    fill="clear"
+                  <!-- Status Indicators -->
+                  <ion-icon
+                    v-if="voiceActor.reviewed_status === 'accepted'"
+                    :icon="checkmarkCircleOutline"
+                    class="status-icon accepted"
                     size="small"
-                    v-if="hasPermission('edit_voice_actor_link')"
-                    @click.stop="
-                      editVoiceActorLink &&
-                        editVoiceActorLink({
-                          id: actor.id,
-                          voiceActorDetails: voiceActor,
-                        })
-                    "
-                    aria-label="Edit voice actor link"
-                  >
-                    <ion-icon :icon="createOutline"></ion-icon>
-                  </ion-button>
-                  <ion-button
-                    fill="clear"
+                  ></ion-icon>
+                  <ion-icon
+                    v-if="voiceActor.reviewed_status === 'waiting'"
+                    :icon="timeOutline"
+                    class="status-icon waiting"
                     size="small"
-                    v-if="hasPermission('delete_voice_actor_link')"
-                    @click.stop="
-                      confirmDeleteVoiceActorLink &&
-                        confirmDeleteVoiceActorLink({
-                          id: actor.id,
-                          voiceActorDetails: voiceActor,
-                        })
-                    "
-                    color="danger"
-                    aria-label="Delete voice actor link"
-                  >
-                    <ion-icon :icon="trashOutline"></ion-icon>
-                  </ion-button>
+                  ></ion-icon>
                 </template>
               </PersonItem>
             </router-link>
@@ -95,12 +78,24 @@
 
 <script setup lang="ts">
 import PersonItem, { PersonData } from "./PersonItem.vue";
-import { createOutline, trashOutline, addCircle } from "ionicons/icons";
+import {
+  createOutline,
+  trashOutline,
+  addCircle,
+  thumbsUpOutline,
+  thumbsDownOutline,
+  timeOutline,
+  checkmarkCircleOutline,
+} from "ionicons/icons";
 import { useLanguagePreference } from "@/composables/useLanguagePreference";
-import { computed } from "vue";
+import { computed, watch } from "vue";
+import { vOnLongPress } from "@vueuse/components";
 
-import { IonIcon, IonButton } from "@ionic/vue";
+import { IonIcon, IonButton, actionSheetController } from "@ionic/vue";
 import { usePermissions } from "@/composables/usePermissions";
+import { useVoiceActorManagement } from "@/composables/useVoiceActorManagement";
+import { useAuthStore } from "@/stores/auth";
+import { useI18n } from "vue-i18n";
 
 export interface ActorWithVoiceActorsProps {
   actor: PersonData;
@@ -112,6 +107,8 @@ export interface ActorWithVoiceActorsProps {
   confirmDeleteVoiceActorLink?: (workItem: any) => void;
   addVoiceActorLink?: (actor: PersonData) => void;
   openVoiceActorSearch?: (actorId: number) => void;
+  workType?: "movie" | "tv" | "season" | "episode";
+  contentId?: string;
 }
 
 const props = withDefaults(defineProps<ActorWithVoiceActorsProps>(), {
@@ -122,6 +119,8 @@ const props = withDefaults(defineProps<ActorWithVoiceActorsProps>(), {
   editVoiceActorLink: undefined,
   confirmDeleteVoiceActorLink: undefined,
   openVoiceActorSearch: undefined,
+  workType: () => "movie",
+  contentId: () => "",
 });
 
 // Use language preference composable
@@ -129,6 +128,33 @@ const { preferredLanguage } = useLanguagePreference();
 
 // Use access control composable
 const { hasPermission } = usePermissions();
+
+// Use auth store
+const authStore = useAuthStore();
+
+// Use i18n
+const { t } = useI18n();
+
+// Use voice actor management composable
+const { castVote, votes, refreshVotes } = useVoiceActorManagement(
+  props.workType
+);
+
+// Watch for voice actors changes to refresh votes
+watch(
+  () => props.voiceActors,
+  (newVoiceActors) => {
+    if (
+      newVoiceActors &&
+      newVoiceActors.length > 0 &&
+      authStore.isAuthenticated
+    ) {
+      const workIds = newVoiceActors.map((va) => va.id);
+      refreshVotes(workIds);
+    }
+  },
+  { immediate: true }
+);
 
 console.log(
   "[ActorWithVoiceActors] canAccess add_voice_actors:",
@@ -140,6 +166,77 @@ const shouldShowVoiceActors = computed(() => {
     props.mediaLanguage.toLowerCase() !== preferredLanguage.value.toLowerCase()
   );
 });
+
+function handleLongPress(voiceActor: PersonData) {
+  openActionSheet(voiceActor);
+}
+
+// Open comprehensive action sheet
+const openActionSheet = async (voiceActor: PersonData) => {
+  const buttons: any[] = [];
+
+  // Vote actions if authenticated
+  if (authStore.isAuthenticated) {
+    buttons.push(
+      {
+        text: `${t("common.upvote")} (${
+          votes.value[voiceActor.id]?.up_count || 0
+        })`,
+        icon: thumbsUpOutline,
+        handler: () => castVote(voiceActor.id, "up"),
+      },
+      {
+        text: `${t("common.downvote")} (${
+          votes.value[voiceActor.id]?.down_count || 0
+        })`,
+        icon: thumbsDownOutline,
+        handler: () => castVote(voiceActor.id, "down"),
+      }
+    );
+  }
+
+  // Admin actions
+  if (hasPermission("edit_voice_actor_link")) {
+    buttons.push({
+      text: t("common.edit"),
+      icon: createOutline,
+      handler: () => {
+        props.editVoiceActorLink &&
+          props.editVoiceActorLink({
+            id: props.actor.id,
+            voiceActorDetails: voiceActor,
+          });
+      },
+    });
+  }
+
+  if (hasPermission("delete_voice_actor_link")) {
+    buttons.push({
+      text: t("common.delete"),
+      icon: trashOutline,
+      role: "destructive",
+      handler: () => {
+        props.confirmDeleteVoiceActorLink &&
+          props.confirmDeleteVoiceActorLink({
+            id: props.actor.id,
+            voiceActorDetails: voiceActor,
+          });
+      },
+    });
+  }
+
+  // Cancel button
+  buttons.push({
+    text: t("common.cancel"),
+    role: "cancel",
+  });
+
+  const actionSheet = await actionSheetController.create({
+    header: t("common.actions"),
+    buttons,
+  });
+  await actionSheet.present();
+};
 </script>
 
 <style scoped lang="scss">
@@ -246,5 +343,18 @@ const shouldShowVoiceActors = computed(() => {
 
 .voice-actor-item {
   width: 100%;
+}
+
+.status-icon {
+  margin-right: 8px;
+  opacity: 0.7;
+
+  &.accepted {
+    color: var(--ion-color-success);
+  }
+
+  &.waiting {
+    color: var(--ion-color-warning);
+  }
 }
 </style>

@@ -41,6 +41,11 @@ export function useVoiceActorManagement(
   const isLoading = ref(false);
   const error = ref("");
 
+  // Voting state
+  const votes = ref<Record<number, { up_count: number; down_count: number; user_vote: string | null }>>({});
+  const isVoting = ref(false);
+  const votingError = ref("");
+
   // Search timer for debouncing
   let searchTimer: NodeJS.Timeout | null = null;
 
@@ -227,6 +232,77 @@ export function useVoiceActorManagement(
     });
   };
 
+  const castVote = async (workId: number, voteType: 'up' | 'down') => {
+    if (!authStore.user) {
+      votingError.value = "You must be logged in to vote.";
+      return;
+    }
+
+    const previousVote = votes.value[workId]?.user_vote;
+    const previousUpCount = votes.value[workId]?.up_count || 0;
+    const previousDownCount = votes.value[workId]?.down_count || 0;
+
+    // Optimistic update
+    const newUserVote = previousVote === voteType ? null : voteType;
+    const newUpCount = previousVote === 'up' && voteType === 'up' ? previousUpCount - 1 :
+                      previousVote !== 'up' && voteType === 'up' ? previousUpCount + 1 : previousUpCount;
+    const newDownCount = previousVote === 'down' && voteType === 'down' ? previousDownCount - 1 :
+                        previousVote !== 'down' && voteType === 'down' ? previousDownCount + 1 : previousDownCount;
+
+    votes.value[workId] = {
+      up_count: newUpCount,
+      down_count: newDownCount,
+      user_vote: newUserVote,
+    };
+
+    isVoting.value = true;
+    votingError.value = "";
+
+    try {
+      const response = await supabase.functions.invoke("cast-vote", {
+        body: {
+          work_id: workId,
+          vote_type: voteType,
+        },
+      });
+
+      if (!response.data?.success) {
+        throw new Error("Failed to cast vote");
+      }
+    } catch (error) {
+      console.error("Error casting vote:", error);
+      votingError.value = "Failed to cast vote. Please try again.";
+
+      // Revert optimistic update
+      votes.value[workId] = {
+        up_count: previousUpCount,
+        down_count: previousDownCount,
+        user_vote: previousVote,
+      };
+    } finally {
+      isVoting.value = false;
+    }
+  };
+
+  const refreshVotes = async (workIds: number[]) => {
+    if (!authStore.user) {
+      return;
+    }
+
+    try {
+      const response = await supabase.functions.invoke("get-work-votes", {
+        body: {
+          work_ids: workIds,
+        },
+      });
+
+      votes.value = { ...votes.value, ...response.data };
+    } catch (error) {
+      console.error("Error refreshing votes:", error);
+      votingError.value = "Failed to refresh votes.";
+    }
+  };
+
   // Watch for search term changes and trigger search with debouncing
   watch(searchTerm, (newTerm) => {
     if (searchTimer) {
@@ -259,6 +335,9 @@ export function useVoiceActorManagement(
     isLoading,
     error,
     isAdmin,
+    votes,
+    isVoting,
+    votingError,
 
     // Methods
     getVoiceActorByTmdbId,
@@ -270,5 +349,7 @@ export function useVoiceActorManagement(
     deleteVoiceActorLink,
     goToVoiceActor,
     goToActor,
+    castVote,
+    refreshVotes,
   };
 }

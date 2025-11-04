@@ -23,7 +23,12 @@
     "sort": "Trier",
     "himself": "Lui-même",
     "scan": "Scanner",
-    "fetchInfos": "Récupérer les informations"
+    "fetchInfos": "Récupérer les informations",
+    "waiting": "En attente",
+    "accepted": "Accepté",
+    "rejected": "Rejeté",
+    "upvote": "Vote positif",
+    "downvote": "Vote négatif"
   },
   "profile": {
     "userProfile": "Mon profil utilisateur",

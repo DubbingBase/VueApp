@@ -23,7 +23,12 @@
     "sort": "Sort",
     "himself": "Himself",
     "scan": "Scan",
-    "fetchInfos": "Fetch information"
+    "fetchInfos": "Fetch information",
+    "waiting": "Waiting",
+    "accepted": "Accepted",
+    "rejected": "Rejected",
+    "upvote": "Upvote",
+    "downvote": "Downvote"
   },
   "profile": {
     "userProfile": "My User Profile",

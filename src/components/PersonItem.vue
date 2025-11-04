@@ -57,6 +57,8 @@ export interface PersonData<T = unknown | undefined> {
   tags?: string[] | string;
   tmdb_id: number;
   data: T;
+  reviewed_status?: string | null;
+  character?: string;
 }
 
 const props = withDefaults(

@@ -16,6 +16,8 @@
           :editVoiceActorLink="editVoiceActorLink"
           :confirmDeleteVoiceActorLink="confirmDeleteVoiceActorLink"
           :openVoiceActorSearch="openVoiceActorSearch"
+          :workType="workType"
+          :contentId="contentId"
         />
       </template>
       <template v-else>
@@ -42,6 +44,8 @@ const props = defineProps<{
   editVoiceActorLink?: (workItem: any) => void;
   confirmDeleteVoiceActorLink?: (workItem: any) => void;
   openVoiceActorSearch?: (actorId: number) => void;
+  workType?: "movie" | "tv" | "season" | "episode";
+  contentId?: string;
 }>();
 
 console.log('actors', props.actors)

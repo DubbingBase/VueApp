@@ -39,6 +39,8 @@
         :open-voice-actor-search="openVoiceActorSearch"
         :loading="isLoading"
         :mediaLanguage="movie?.original_language"
+        :workType="'movie'"
+        :contentId="route.params.id as string"
       />
 
       <ActionButtons
@@ -123,6 +125,8 @@ const {
   confirmDeleteVoiceActorLink,
   goToVoiceActor,
   goToActor,
+  castVote,
+  refreshVotes,
 } = useVoiceActorManagement("movie");
 
 const movie = ref<MovieResponse["movie"] | undefined>();
@@ -320,6 +324,12 @@ const fetchMovieData = async () => {
     );
     if (data.characterProfilePictures) {
       characterProfilePictures.value = data.characterProfilePictures;
+    }
+
+    // Refresh votes after loading voice actors
+    if (voiceActors.value.length > 0) {
+      const workIds = voiceActors.value.map(va => va.id);
+      await refreshVotes(workIds);
     }
   } catch (e: any) {
     console.error("Error fetching movie data:", e);
