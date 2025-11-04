@@ -1,25 +1,45 @@
-import type { CapacitorConfig } from '@capacitor/cli';
+import type { CapacitorConfig } from "@capacitor/cli";
+
+const keyAlias = process.env.KEY_ALIAS;
+const keyPassword = process.env.KEY_PASSWORD;
+const storePassword = process.env.KEYSTORE_PASSWORD;
+const storeFile = process.env.KEYSTORE_FILE;
+
+const buildOptions: NonNullable<CapacitorConfig["android"]>["buildOptions"] =
+  {};
+
+// if (process.env.CI) {
+buildOptions.keystoreAlias = keyAlias;
+buildOptions.keystoreAliasPassword = keyPassword;
+buildOptions.keystorePath = storeFile;
+buildOptions.keystorePassword = storePassword;
+// }
+
+console.log("buildOptions", buildOptions);
 
 const config: CapacitorConfig = {
-  appId: 'com.dubbingbase.app',
-  appName: 'DubbingBase',
-  webDir: 'dist',
+  appId: "com.dubbingbase.app",
+  appName: "DubbingBase",
+  webDir: "dist",
   plugins: {
     // Configure the App plugin for deep linking
     App: {
       // This is the custom URL scheme your app will respond to
-      customUrlScheme: 'dubbingbase',
+      customUrlScheme: "dubbingbase",
       // This is the universal link domain (for iOS)
-      iosScheme: 'dubbingbase',
+      iosScheme: "dubbingbase",
       // This is the app's website domain (for Android App Links)
-      androidScheme: 'https',
+      androidScheme: "https",
       // This is the host for universal links (for iOS)
-      hostname: 'dubbingbase.app',
+      hostname: "dubbingbase.app",
       // This is the path prefix for universal links
-      path: '/',
-      launchUrl: 'dubbingbase://'
-    }
-  }
+      path: "/",
+      launchUrl: "dubbingbase://",
+    },
+  },
+  android: {
+    buildOptions,
+  },
 };
 
 export default config;

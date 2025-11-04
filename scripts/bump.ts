@@ -14,6 +14,21 @@ execSync(`npm version ${bump} --no-git-tag-version`, { stdio: "inherit" });
 const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
 const version = pkg.version;
 
+// 1.5 Update Capacitor build.gradle
+const gradlePath = "android/app/build.gradle";
+let gradleContent = fs.readFileSync(gradlePath, "utf8");
+const [major, minor, patch] = version.split('.').map(Number);
+const newVersionCode = major * 1000000 + minor * 1000 + patch;
+gradleContent = gradleContent.replace(
+  /versionCode\s+\d+/,
+  `versionCode ${newVersionCode}`
+).replace(
+  /versionName\s+".*"/,
+  `versionName "${version}"`
+);
+fs.writeFileSync(gradlePath, gradleContent);
+console.log(`📱 Updated Capacitor versionCode to ${newVersionCode} and versionName to "${version}"`);
+
 // 2. Update Tauri config
 const tauriConfPath = "src-tauri/tauri.conf.json";
 const tauriConf = JSON.parse(fs.readFileSync(tauriConfPath, "utf8"));
