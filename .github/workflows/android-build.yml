@@ -66,6 +66,8 @@ jobs:
           KEYSTORE_FILE: ${{secrets.KEYSTORE_FILE}}
         run: |
           # pnpm tauri android build
+          pnpm build
+          pnpm cap sync
           pnpm cap build android --androidreleasetype AAB
           pnpm cap build android --androidreleasetype APK
 

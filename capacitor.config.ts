@@ -3,7 +3,6 @@ import type { CapacitorConfig } from "@capacitor/cli";
 const keyAlias = process.env.KEY_ALIAS;
 const keyPassword = process.env.KEY_PASSWORD;
 const storePassword = process.env.KEYSTORE_PASSWORD;
-const storeFile = process.env.KEYSTORE_FILE;
 
 const buildOptions: NonNullable<CapacitorConfig["android"]>["buildOptions"] =
   {};
@@ -11,7 +10,7 @@ const buildOptions: NonNullable<CapacitorConfig["android"]>["buildOptions"] =
 // if (process.env.CI) {
 buildOptions.keystoreAlias = keyAlias;
 buildOptions.keystoreAliasPassword = keyPassword;
-buildOptions.keystorePath = storeFile;
+buildOptions.keystorePath = "./dubbing-base-keystore.jks"; // generated at runtie by CI using KEYSTORE_FILE;
 buildOptions.keystorePassword = storePassword;
 // }
 

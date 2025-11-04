@@ -30,6 +30,16 @@ description = "Runs the development server"
 depends = ["install", "backend"]
 run = "pnpm run dev"
 
+[tasks.sync]
+description = "Sync capacitor assets"
+depends = ["build-web"]
+run = "pnpm cap sync"
+
+[tasks.build-web]
+description = "Builds the web app"
+depends = ["install"]
+run = "pnpm build"
+
 [tasks.migrate-up]
 description = "Runs the database migration"
 depends = ["install"]
@@ -69,7 +79,7 @@ env = { "VITE_SUPABASE_URL" = "http://10.0.2.2:55321" }
 
 [tasks.android-build-prod]
 description = "Builds the Android app"
-depends = ["install"]
+depends = ["install", "sync", "build-web"]
 run = "pnpm cap build android"
 env = { VITE_SUPABASE_URL = "https://rrjgbneefiwoqvsjwzrz.supabase.co", VITE_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyamdibmVlZml3b3F2c2p3enJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzIwODUxMDAsImV4cCI6MjA0NzY2MTEwMH0.ywaUYwXnXF555i4dUCCl4gvcTZR1Ct6n0ptheJCdIVw" }
 
