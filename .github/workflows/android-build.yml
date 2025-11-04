@@ -49,8 +49,7 @@ jobs:
 
       - name: Setup Android signing - Capacitor
         run: |
-          cd android
-          base64 -d <<< "${{ secrets.KEYSTORE_FILE }}" > $RUNNER_TEMP/dubbing-base-keystore.jks
+          base64 -d <<< "${{ secrets.KEYSTORE_FILE }}" > ./android/dubbing-base-keystore.jks
 
       - name: Build Android Release
         if: github.event_name != 'pull_request'
