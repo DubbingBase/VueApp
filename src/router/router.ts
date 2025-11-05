@@ -77,6 +77,12 @@ const routes: readonly RouteRecordRaw[] = [
         component: EditVoiceActor,
         meta: { requiresAdmin: true },
       },
+      {
+        name: 'AdminSuggestions',
+        path: '/tabs/admin/suggestions',
+        component: () => import('@/views/admin/Suggestions.vue'),
+        meta: { requiresAdmin: true }
+      },
     ],
   },
   {
