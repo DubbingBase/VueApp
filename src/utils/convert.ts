@@ -7,6 +7,8 @@ import {
 export const actorToPersonData = (actor: Actor): PersonData<Actor> => {
     const roles: Role[] = [];
 
+    console.log("actor.roles", actor.roles);
+
     if (actor.roles) {
         roles.push(...actor.roles.map((role) => ({
             character: role.character,

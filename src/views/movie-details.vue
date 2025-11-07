@@ -214,6 +214,12 @@ const actors = computed(() => {
       role.image = image ?? "";
     }
 
+    person.roles =
+      person.roles?.filter(
+        (role, index, self) =>
+          index === self.findIndex((r) => r.image === role.image)
+      ) ?? [];
+
     return person;
   });
 });

@@ -33,13 +33,13 @@
 
       <div class="tabs" v-show="!isLoading">
         <ion-segment scrollable>
-          <ion-segment-button value="seasons" content-id="seasons">
-            <!-- <ion-icon :icon="radio" /> -->
-            Saisons
-          </ion-segment-button>
           <ion-segment-button value="peoples" content-id="peoples">
             <!-- <ion-icon :icon="search" /> -->
             Personnes
+          </ion-segment-button>
+          <ion-segment-button value="seasons" content-id="seasons">
+            <!-- <ion-icon :icon="radio" /> -->
+            Saisons
           </ion-segment-button>
         </ion-segment>
         <ion-segment-view>
@@ -245,12 +245,19 @@ const actors = computed(() => {
   return show.value?.credits.cast.map((cast) => {
     const person = actorToPersonData(cast);
 
+    console.log("person.roles", person.roles);
+
     for (const role of person.roles ?? []) {
       const image = characterProfilePictures.value.find((character) =>
         findCharacter(character, role)
       )?.image;
       role.image = image ?? "";
     }
+    console.log("person.roles", person.roles);
+
+    person.roles = person.roles?.filter((role, index, self) =>
+      index === self.findIndex(r => r.image === role.image)
+    ) ?? [];
 
     return person;
   });

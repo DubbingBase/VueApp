@@ -28,10 +28,10 @@
 </template>
 
 <script setup lang="ts">
-import ActorWithVoiceActors from './ActorWithVoiceActors.vue';
-import NoActors from './NoActors.vue';
-import { PersonData } from './PersonItem.vue';
-import { VoiceActorDetails } from '../../supabase/functions/_shared/types';
+import ActorWithVoiceActors from "./ActorWithVoiceActors.vue";
+import NoActors from "./NoActors.vue";
+import { PersonData } from "./PersonItem.vue";
+import { VoiceActorDetails } from "../../supabase/functions/_shared/types";
 
 // Props
 const props = defineProps<{
@@ -48,13 +48,13 @@ const props = defineProps<{
   contentId?: string;
 }>();
 
-console.log('actors', props.actors)
-console.log('voiceActors', props.voiceActors)
+console.log("actors", props.actors);
+console.log("voiceActors", props.voiceActors);
 
 // Filter voice actors for a specific actor
 const getVoiceActorsForActor = (actorId: number) => {
   if (!props.voiceActors) return [];
-  console.log('props.voiceActors', props.voiceActors)
+  // console.log('props.voiceActors', props.voiceActors)
   return props.voiceActors.filter((item) => item.tmdb_id === actorId);
 };
 
