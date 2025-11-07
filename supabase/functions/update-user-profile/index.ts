@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
-  if (req.method !== 'PUT' && req.method !== 'PATCH') {
+  if (req.method !== 'POST' && req.method !== 'PUT' && req.method !== 'PATCH') {
     return new Response(
       JSON.stringify({ error: 'Method not allowed' }),
       {
@@ -57,11 +57,11 @@ Deno.serve(async (req) => {
     if (date_of_birth !== undefined) updateData.date_of_birth = date_of_birth
     if (nationality !== undefined) updateData.nationality = nationality
     updateData.updated_at = new Date().toISOString()
+    updateData.user_id = user.id
 
     const { data: profileData, error: profileError } = await supabase
       .from('user_profiles')
-      .update(updateData)
-      .eq('user_id', user.id)
+      .upsert(updateData, { onConflict: 'user_id' })
       .select()
       .single()
 
