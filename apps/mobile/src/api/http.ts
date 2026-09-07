@@ -1,4 +1,5 @@
 import { ofetch } from "ofetch";
+import { supabase } from "./supabase";
 
 // Product API: the Nuxt/Nitro website. Defaults to production so release
 // builds work with no extra config; override locally with VITE_API_BASE_URL.
@@ -11,8 +12,6 @@ async function authHeaders(): Promise<Record<string, string>> {
     "x-dubbingbase-client": "web",
   };
   try {
-    // Dynamic import avoids a static cycle (supabase.ts imports this module).
-    const { supabase } = await import("./supabase");
     const {
       data: { session },
     } = await supabase.auth.getSession();
@@ -36,6 +35,3 @@ export const apiFetch = ofetch.create({
     options.headers = extra;
   },
 });
-
-// Keep the old global working for any direct $fetch("/api/...") usage.
-globalThis.$fetch = apiFetch as typeof globalThis.$fetch;

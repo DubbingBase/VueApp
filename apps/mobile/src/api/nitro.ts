@@ -2,9 +2,7 @@ import { apiFetch } from "./http";
 
 interface InvokeOptions {
   body?: any;
-  query?: Record<string, any>;
   signal?: AbortSignal;
-  headers?: Record<string, string>;
 }
 
 interface BuiltRequest {
@@ -137,10 +135,9 @@ export async function nitroInvoke<T = any>(
   try {
     const data = await apiFetch<T>(req.path, {
       method: req.method,
-      query: { ...req.query, ...options?.query },
+      query: req.query,
       body: req.body,
       signal: options?.signal,
-      headers: options?.headers,
     });
     return { data, error: null };
   } catch (err: any) {
