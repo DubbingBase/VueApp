@@ -39,5 +39,3 @@ export const apiFetch = ofetch.create({
 
 // Keep the old global working for any direct $fetch("/api/...") usage.
 globalThis.$fetch = apiFetch as typeof globalThis.$fetch;
-
-export { apiFetch as $nitro };

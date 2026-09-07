@@ -118,16 +118,11 @@ const ROUTES: Record<string, RouteBuilder> = {
   }),
 };
 
-export function hasNitroRoute(functionName: string): boolean {
-  return functionName in ROUTES;
-}
-
 /**
- * Drop-in replacement for supabase.functions.invoke that targets the Nitro
- * product API. Returns the same { data, error } shape so call sites keep
- * working unchanged.
+ * Typed client for the Nitro product API (https://dubbingbase.com/api).
+ * Returns the same { data, error } shape at every call site.
  */
-export async function nitroInvoke<T = unknown>(
+export async function nitroInvoke<T = any>(
   functionName: string,
   options?: InvokeOptions,
 ): Promise<{ data: T | null; error: any }> {

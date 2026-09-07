@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
-import { supabase } from "@/api/supabase";
+import { nitroInvoke } from "@/api/nitro";
 import { useLanguagePreference } from "@/composables/useLanguagePreference";
 import type { Tables } from "@/utils/database";
 import type { Movie } from "@app/shared-logic";
@@ -139,8 +139,7 @@ export const useProfileStore = defineStore("profile", () => {
       isLoading.value = true;
       error.value = null;
 
-      const { data, error: fetchError } =
-        await supabase.functions.invoke("get-user-profile");
+      const { data, error: fetchError } = await nitroInvoke("get-user-profile");
 
       console.log("Profile store: fetchProfile response:", {
         data,
@@ -231,7 +230,7 @@ export const useProfileStore = defineStore("profile", () => {
       isLoading.value = true;
       error.value = null;
 
-      const { data, error: fetchError } = await supabase.functions.invoke(
+      const { data, error: fetchError } = await nitroInvoke(
         "get-user-voice-actors",
         {
           body: params,
@@ -275,7 +274,7 @@ export const useProfileStore = defineStore("profile", () => {
 
       if (profileType.value === "voice_actor" && currentVoiceActor.value) {
         const voiceActorUpdates = updates as Partial<VoiceActor>;
-        const { data, error: updateError } = await supabase.functions.invoke(
+        const { data, error: updateError } = await nitroInvoke(
           "update-voice-actor",
           {
             body: {
@@ -311,7 +310,7 @@ export const useProfileStore = defineStore("profile", () => {
         }
       } else if (profileType.value === "user_profile" && userProfile.value) {
         const userProfileUpdates = updates as Partial<UserProfile>;
-        const { data, error: updateError } = await supabase.functions.invoke(
+        const { data, error: updateError } = await nitroInvoke(
           "update-user-profile",
           {
             body: userProfileUpdates,
@@ -356,19 +355,16 @@ export const useProfileStore = defineStore("profile", () => {
       error.value = null;
 
       const { preferredLanguage } = useLanguagePreference();
-      const { data, error: addError } = await supabase.functions.invoke(
-        "link-voice-actor",
-        {
-          body: {
-            ...workEntry,
-            media_type:
-              workEntry.media_type === "serie" ? "tv" : workEntry.media_type,
-            voice_actor_id: currentVoiceActor.value.id,
-            targetUserId: identifiers.targetUserId,
-            language: preferredLanguage.value || "fr",
-          },
+      const { data, error: addError } = await nitroInvoke("link-voice-actor", {
+        body: {
+          ...workEntry,
+          media_type:
+            workEntry.media_type === "serie" ? "tv" : workEntry.media_type,
+          voice_actor_id: currentVoiceActor.value.id,
+          targetUserId: identifiers.targetUserId,
+          language: preferredLanguage.value || "fr",
         },
-      );
+      });
 
       if (addError) throw addError;
 
@@ -400,7 +396,7 @@ export const useProfileStore = defineStore("profile", () => {
       isUpdating.value = true;
       error.value = null;
 
-      const { error: removeError } = await supabase.functions.invoke(
+      const { error: removeError } = await nitroInvoke(
         "delete-voice-actor-link",
         {
           body: { id: workEntryId, targetUserId: identifiers.targetUserId },
@@ -433,7 +429,7 @@ export const useProfileStore = defineStore("profile", () => {
       isUpdating.value = true;
       error.value = null;
 
-      const { data, error: addError } = await supabase.functions.invoke(
+      const { data, error: addError } = await nitroInvoke(
         "link-user-voice-actor",
         {
           body: {
@@ -467,7 +463,7 @@ export const useProfileStore = defineStore("profile", () => {
       isUpdating.value = true;
       error.value = null;
 
-      const { error: removeError } = await supabase.functions.invoke(
+      const { error: removeError } = await nitroInvoke(
         "delete-user-voice-actor-link",
         {
           body: {
@@ -510,7 +506,7 @@ export const useProfileStore = defineStore("profile", () => {
       isUpdating.value = true;
       error.value = null;
 
-      const { data, error: createError } = await supabase.functions.invoke(
+      const { data, error: createError } = await nitroInvoke(
         "create-user-profile",
         {
           body: profileData,

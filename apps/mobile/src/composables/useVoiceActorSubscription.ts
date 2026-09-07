@@ -1,5 +1,6 @@
 import { ref, computed, toValue, type MaybeRefOrGetter } from "vue";
 import { supabase } from "@/api/supabase";
+import { nitroInvoke } from "@/api/nitro";
 import { useAuthStore } from "@/stores/auth";
 import { useOneSignal } from "./useOneSignal";
 import { alertController } from "@/composables/useAlert";
@@ -68,28 +69,22 @@ export function useVoiceActorSubscription(
           );
         }
 
-        const { error } = await supabase.functions.invoke(
-          "manage-subscription",
-          {
-            body: {
-              action: "subscribe",
-              voice_actor_id: Number(toValue(voiceActorId)),
-            },
+        const { error } = await nitroInvoke("manage-subscription", {
+          body: {
+            action: "subscribe",
+            voice_actor_id: Number(toValue(voiceActorId)),
           },
-        );
+        });
 
         if (error) throw error;
       } else {
         // Unsubscribe
-        const { error } = await supabase.functions.invoke(
-          "manage-subscription",
-          {
-            body: {
-              action: "unsubscribe",
-              voice_actor_id: Number(toValue(voiceActorId)),
-            },
+        const { error } = await nitroInvoke("manage-subscription", {
+          body: {
+            action: "unsubscribe",
+            voice_actor_id: Number(toValue(voiceActorId)),
           },
-        );
+        });
 
         if (error) throw error;
       }
@@ -117,12 +112,9 @@ export function useVoiceActorSubscription(
 }
 
 export async function fetchAllSubscriptions() {
-  const { data, error } = await supabase.functions.invoke(
-    "manage-subscription",
-    {
-      body: { action: "list" },
-    },
-  );
+  const { data, error } = await nitroInvoke("manage-subscription", {
+    body: { action: "list" },
+  });
 
   if (error) {
     console.error("Failed to fetch all subscriptions:", error);

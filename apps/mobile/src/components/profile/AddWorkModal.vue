@@ -103,7 +103,7 @@ import AppSkeleton from '@/components/common/AppSkeleton.vue';
 import { ref, computed } from 'vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import { useProfileStore } from '@/stores/profile'
-import { supabase } from '@/api/supabase'
+import { nitroInvoke } from '@/api/nitro'
 import type { Movie } from '@app/shared-logic'
 import type { Serie } from '@app/shared-logic'
 import type { Cast } from '@app/shared-logic'
@@ -149,7 +149,7 @@ const searchMedia = (event: { target: { value: string } }) => {
       searchResults.value = []
       return
     }
-    const { data, error } = await supabase.functions.invoke('search', { body: { query } })
+    const { data, error } = await nitroInvoke('search', { body: { query } })
     if (error) {
       console.error(error)
       return
@@ -164,7 +164,7 @@ const selectMedia = async (media: Movie | Serie) => {
   searchResults.value = []
   selectedCastId.value = null
   characterSearchQuery.value = ''
-  const { data, error } = await supabase.functions.invoke('get-media-credits', { body: { media_type: media.media_type, media_id: media.id } })
+  const { data, error } = await nitroInvoke('get-media-credits', { body: { media_type: media.media_type, media_id: media.id } })
   if (error) {
     console.error(error)
     return

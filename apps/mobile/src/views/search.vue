@@ -65,7 +65,7 @@ defineOptions({ name: "Search" });
 import SearchResultItem from "@/components/SearchResultItem.vue";
 import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
 import SearchIcon from "~icons/lucide/search";
-import { supabase } from "@/api/supabase";
+import { nitroInvoke } from "@/api/nitro";
 import type { SearchResult } from "@/types/search";
 
 const { showToast } = useToast();
@@ -110,7 +110,7 @@ const search = async (event: CustomEvent) => {
   errorMessage.value = "";
 
   try {
-    const { data, error: supaError } = await supabase.functions.invoke(
+    const { data, error: supaError } = await nitroInvoke(
       "search",
       {
         body: { query: trimmedQuery.value },

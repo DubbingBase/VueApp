@@ -167,12 +167,13 @@ import CreditsReviewModal from "@/components/CreditsReviewModal.vue";
 import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
 import { useVoiceActorManagement } from "@/composables/useVoiceActorManagement";
 import { useDeferredCharacters } from "@/composables/useDeferredCharacters";
-import { findCharacter } from "@/utils/character";
+import { findCharacter } from "@app/shared-logic";
 import Share2 from "~icons/lucide/share-2";
 // Removed unused imports
 import { storeToRefs } from "pinia";
 import { useAuthStore } from "@/stores/auth";
 import { supabase } from "@/api/supabase";
+import { nitroInvoke } from "@/api/nitro";
 import { enqueueMedia } from "@/api/mediaQueue";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { actorToPersonData, voiceActorToPersonData } from "@/utils/convert";
@@ -419,7 +420,7 @@ const takePhoto = async () => {
       ) || [];
     formData.append("actors", JSON.stringify(simplifiedActors));
 
-    const response = await supabase.functions.invoke(
+    const response = await nitroInvoke(
       "extract-credits-from-image",
       {
         body: formData,
@@ -446,7 +447,7 @@ const takePhoto = async () => {
 
 const getSerie = async (id: string) => {
   try {
-    const response = await supabase.functions.invoke<ShowResponse>("show", {
+    const response = await nitroInvoke<ShowResponse>("show", {
       body: { id },
     });
     return response;

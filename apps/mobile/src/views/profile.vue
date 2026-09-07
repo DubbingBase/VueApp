@@ -321,7 +321,7 @@ import RequestVoiceActorCard from "@/components/RequestVoiceActorCard.vue";
 import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
 import { toastController } from "@/composables/useToast";
 
-import { supabase } from "@/api/supabase";
+import { nitroInvoke } from "@/api/nitro";
 
 const profileStore = useProfileStore();
 const authStore = useAuthStore();
@@ -394,10 +394,8 @@ const handleAdminSearch = async () => {
   }
 
   try {
-    // Import supabase directly
-    const { supabase } = await import("@/api/supabase");
-    // Use the search-voice-actors function to find voice actors
-    const { data, error } = await supabase.functions.invoke(
+    // Use the search-voice-actors endpoint to find voice actors
+    const { data, error } = await nitroInvoke(
       "search-voice-actors",
       {
         body: { query: adminSearchQuery.value }}

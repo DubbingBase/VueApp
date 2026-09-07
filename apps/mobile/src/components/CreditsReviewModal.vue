@@ -80,7 +80,7 @@ import { ref, watch } from "vue";
 import XCircle from "~icons/lucide/x-circle";
 import Trash2 from "~icons/lucide/trash-2";
 import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
-import { supabase } from "@/api/supabase";
+import { nitroInvoke } from "@/api/nitro";
 import { Actor } from "@app/shared-logic";
 
 const props = defineProps<{
@@ -160,7 +160,7 @@ const processExtractedCredits = async () => {
 
   // 2. Try to find the voice actor in DB via Edge Function
   try {
-    const { data, error } = await supabase.functions.invoke("process-credits", {
+    const { data, error } = await nitroInvoke("process-credits", {
       body: {
         action: "match",
         credits: tempCredits
@@ -189,7 +189,7 @@ const saveAll = async () => {
   isSaving.value = true;
   
   try {
-    const { data, error } = await supabase.functions.invoke("process-credits", {
+    const { data, error } = await nitroInvoke("process-credits", {
       body: {
         action: "save",
         credits: processedCredits.value,

@@ -65,7 +65,7 @@
 import { ref } from "vue";
 import MediaThumbnail from "@/components/MediaThumbnail.vue";
 import { useFileDialog } from "@vueuse/core";
-import { supabase } from "../api/supabase";
+import { nitroInvoke } from "../api/nitro";
 import ImageEditorModal from "@/components/common/ImageEditorModal.vue";
 import { THUMBNAIL_DEFAULT_WIDTH, THUMBNAIL_DEFAULT_HEIGHT } from "@/constants/thumbnails";
 import { getAvatarFallbackUrl } from "@/utils/image";
@@ -145,7 +145,7 @@ const uploadCroppedImage = async (blob: Blob, originalFile: File) => {
   }
 
   try {
-    const { data } = await supabase.functions.invoke("upload_profile_picture", {
+    const { data } = await nitroInvoke("upload_profile_picture", {
       body: formData,
     });
 

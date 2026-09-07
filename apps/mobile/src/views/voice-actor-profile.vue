@@ -128,7 +128,7 @@ import AddWorkModal from '@/components/profile/AddWorkModal.vue';
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue';
 
 import type { Tables } from '@/utils/database';
-import { supabase } from '@/api/supabase';
+import { nitroInvoke } from '@/api/nitro';
 
 type VoiceActor = Tables<'voice_actors'>;
 
@@ -185,7 +185,7 @@ const loadProfileData = async () => {
   if (profileStore.currentVoiceActor?.id !== voiceActorId.value) {
     console.log("[loadProfileData] Voice actor mismatch, fetching directly via 'voice-actor' function");
     try {
-      const { data, error } = await supabase.functions.invoke("voice-actor", {
+      const { data, error } = await nitroInvoke("voice-actor", {
         body: { id: voiceActorId.value }});
       console.log("[loadProfileData] voice-actor response:", { data, error });
       if (data && data.voiceActor) {

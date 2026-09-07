@@ -199,7 +199,7 @@ import ExternalLink from '~icons/lucide/external-link';
 import { ref, watch } from "vue";
 
 import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
-import { supabase } from "@/api/supabase";
+import { nitroInvoke } from "@/api/nitro";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
@@ -260,7 +260,7 @@ const fetchData = async () => {
   error.value = "";
 
   try {
-    const { data, error: funcError } = await supabase.functions.invoke(
+    const { data, error: funcError } = await nitroInvoke(
       "extract-voice-actor-info",
       {
         body: { wikipediaUrl: wikipediaUrl.value }},
@@ -307,7 +307,7 @@ const saveData = async () => {
       wikidata_id: fetchedData.value.wikidata_id,
       tmdb_id: fetchedData.value.tmdb_id};
 
-    const { data, error: updateError } = await supabase.functions.invoke(
+    const { data, error: updateError } = await nitroInvoke(
       "update-voice-actor",
       {
         body: {

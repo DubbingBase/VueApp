@@ -75,6 +75,7 @@ import AppBackButton from "@/components/common/AppBackButton.vue";
 import { useRoute, useRouter } from "vue-router";
 import LoadingSpinner from "../components/common/LoadingSpinner.vue";
 import { supabase } from "../api/supabase";
+import { nitroInvoke } from "../api/nitro";
 import { enqueueMedia } from "../api/mediaQueue";
 import EllipsisVertical from "~icons/lucide/ellipsis-vertical";
 import Info from "~icons/lucide/info";
@@ -268,7 +269,7 @@ async function fetchEpisodeData() {
   const seasonNumber = route.params.season;
   const episodeNumber = route.params.episode;
 
-  const episodeResponse = await supabase.functions.invoke("episode", {
+  const episodeResponse = await nitroInvoke("episode", {
     body: {
       id: serieId,
       season_number: seasonNumber,

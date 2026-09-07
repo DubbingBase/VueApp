@@ -5,7 +5,7 @@ import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useAuthStore } from "@/stores/auth";
 import { useLanguagePreference } from "@/composables/useLanguagePreference";
-import { supabase } from "@/api/supabase";
+import { nitroInvoke } from "@/api/nitro";
 import { useI18n } from "vue-i18n";
 import type { PersonData } from "@/components/PersonItem.vue";
 import { voiceActorToPersonData } from "@/utils/convert";
@@ -100,7 +100,7 @@ export function useVoiceActorManagement(
     searchError.value = "";
 
     try {
-      const response = await supabase.functions.invoke("search-voice-actors", {
+      const response = await nitroInvoke("search-voice-actors", {
         body: {
           query: searchTerm.value,
         },
@@ -119,7 +119,7 @@ export function useVoiceActorManagement(
     console.log("selectedActor.value", selectedActor.value);
     try {
       const { preferredLanguage } = useLanguagePreference();
-      const response = await supabase.functions.invoke("link-voice-actor", {
+      const response = await nitroInvoke("link-voice-actor", {
         body: {
           actor_id: selectedActor.value,
           media_type: workType,
@@ -189,15 +189,12 @@ export function useVoiceActorManagement(
 
   const updateVoiceActorLink = async (workId: number, performance: string) => {
     try {
-      const response = await supabase.functions.invoke(
-        "update_voice_actor_link",
-        {
-          body: {
-            work_id: workId,
-            performance,
-          },
+      const response = await nitroInvoke("update_voice_actor_link", {
+        body: {
+          work_id: workId,
+          performance,
         },
-      );
+      });
 
       // Update the local state
       const index = voiceActors.value.findIndex((va) => va.work_id === workId);
@@ -247,7 +244,7 @@ export function useVoiceActorManagement(
 
   const deleteVoiceActorLink = async (workId: number) => {
     try {
-      await supabase.functions.invoke("delete-voice-actor-link", {
+      await nitroInvoke("delete-voice-actor-link", {
         body: {
           id: workId,
         },
@@ -292,7 +289,7 @@ export function useVoiceActorManagement(
     }
 
     try {
-      const response = await supabase.functions.invoke("update-review-status", {
+      const response = await nitroInvoke("update-review-status", {
         body: {
           work_id: workId,
           reviewed_status: status,
@@ -350,7 +347,7 @@ export function useVoiceActorManagement(
     votingError.value = "";
 
     try {
-      const response = await supabase.functions.invoke("cast-vote", {
+      const response = await nitroInvoke("cast-vote", {
         body: {
           work_id: workId,
           vote_type: voteType,
@@ -381,7 +378,7 @@ export function useVoiceActorManagement(
     }
 
     try {
-      const response = await supabase.functions.invoke("get-work-votes", {
+      const response = await nitroInvoke("get-work-votes", {
         body: {
           work_ids: workIds,
         },

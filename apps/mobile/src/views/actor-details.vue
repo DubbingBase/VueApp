@@ -230,7 +230,7 @@ import { useI18n } from "vue-i18n";
 import AppChip from '@/components/common/AppChip.vue';
 
 import type { Actor } from "@app/shared-logic";
-import { supabase } from "../api/supabase";
+import { nitroInvoke } from "../api/nitro";
 import { actorToPersonData, voiceActorToPersonData } from "@/utils/convert";
 import { PersonData } from "@/components/PersonItem.vue";
 import PersonItem from "@/components/PersonItem.vue";
@@ -454,7 +454,7 @@ async function loadActorData() {
 
   try {
     console.log('Invoking Supabase function "actor" with id:', id);
-    const actorResponseRaw = await supabase.functions.invoke("actor", {
+    const actorResponseRaw = await nitroInvoke("actor", {
       body: { id }});
     console.log("Raw Supabase response:", actorResponseRaw);
     const actorResponse: { data?: { credits?: { cast?: Array<{ id: number; character: string; title?: string; name?: string; release_date?: string; first_air_date?: string; media_type?: string; poster_path?: string }> } } } = await actorResponseRaw.data;
