@@ -1,0 +1,189 @@
+# UI
+
+> **Navigation aid.** Component inventory and prop signatures extracted via AST. Read the source files before adding props or modifying component logic.
+
+**178 components** (vue)
+
+## Client Components
+
+- **App** — `apps/mobile/src/App.vue`
+- **ActionButtons** — props: hasWikidataId, hasData, isFetching, isScanning, fetchError, queueStatus, queueErrorMessage — `apps/mobile/src/components/ActionButtons.vue`
+- **ActorItem** — props: actor, voiceActors, isAdmin, goToActor, goToVoiceActor, editVoiceActorLink, confirmDeleteVoiceActorLink, openVoiceActorSearch — `apps/mobile/src/components/ActorItem.vue`
+- **ActorList** — props: actors, voiceActors — `apps/mobile/src/components/ActorList.vue`
+- **ActorVoiceActorItem** — props: type, actor, item — `apps/mobile/src/components/ActorVoiceActorItem.vue`
+- **ActorWithVoiceActors** — `apps/mobile/src/components/ActorWithVoiceActors.vue`
+- **CollectionCard** — props: collection — `apps/mobile/src/components/CollectionCard.vue`
+- **CreditsReviewModal** — props: isOpen, extractedCredits — `apps/mobile/src/components/CreditsReviewModal.vue`
+- **CrewList** — props: groupedCrew — `apps/mobile/src/components/CrewList.vue`
+- **DubbingProjectsView** — props: contentId, contentType, projects, actors, isAdmin, getVoiceActorByTmdbId, goToActor, goToVoiceActor, editVoiceActorLink, confirmDeleteVoiceActorLink — `apps/mobile/src/components/DubbingProjectsView.vue`
+- **EpisodeBanner** — `apps/mobile/src/components/EpisodeBanner.vue`
+- **EpisodesList** — `apps/mobile/src/components/EpisodesList.vue`
+- **JobSearchModal** — props: isOpen, jobs — `apps/mobile/src/components/JobSearchModal.vue`
+- **MediaInfoCard** — `apps/mobile/src/components/MediaInfoCard.vue`
+- **MediaItem** — `apps/mobile/src/components/MediaItem.vue`
+- **MediaThumbnail** — props: path, type, required, default — `apps/mobile/src/components/MediaThumbnail.vue`
+- **MovieCard** — `apps/mobile/src/components/MovieCard.vue`
+- **NoActors** — `apps/mobile/src/components/NoActors.vue`
+- **NoVoiceActor** — props: actor — `apps/mobile/src/components/NoVoiceActor.vue`
+- **PersonItem** — props: person, type, subtitleOverride — `apps/mobile/src/components/PersonItem.vue`
+- **PersonSearchModal** — props: isOpen, mediaId, workType, linkVoiceActor — `apps/mobile/src/components/PersonSearchModal.vue`
+- **RequestVoiceActorCard** — props: voiceActor — `apps/mobile/src/components/RequestVoiceActorCard.vue`
+- **SearchResultItem** — `apps/mobile/src/components/SearchResultItem.vue`
+- **SeasonBanner** — `apps/mobile/src/components/SeasonBanner.vue`
+- **Serie** — props: value, type, required — `apps/mobile/src/components/Serie.vue`
+- **StudioCard** — props: studio — `apps/mobile/src/components/StudioCard.vue`
+- **StudioSearchModal** — props: isOpen — `apps/mobile/src/components/StudioSearchModal.vue`
+- **TmdbPersonSearchModal** — props: isOpen, persons — `apps/mobile/src/components/TmdbPersonSearchModal.vue`
+- **VoiceActor** — props: modelValue — `apps/mobile/src/components/VoiceActor.vue`
+- **VoiceActorBio** — `apps/mobile/src/components/VoiceActorBio.vue`
+- **VoiceActorFetchModal** — props: isOpen, voiceActor — `apps/mobile/src/components/VoiceActorFetchModal.vue`
+- **VoiceActorHeader** — `apps/mobile/src/components/VoiceActorHeader.vue`
+- **VoiceActorList** — props: voiceActors, actor, isAdmin, goToVoiceActor, editVoiceActorLink, confirmDeleteVoiceActorLink, openVoiceActorSearch — `apps/mobile/src/components/VoiceActorList.vue`
+- **VoiceActorWorksGrouped** — `apps/mobile/src/components/VoiceActorWorksGrouped.vue`
+- **AppActionSheet** — props: isOpen, header, buttons — `apps/mobile/src/components/common/AppActionSheet.vue`
+- **AppAlertContainer** — `apps/mobile/src/components/common/AppAlertContainer.vue`
+- **AppAvatar** — props: size — `apps/mobile/src/components/common/AppAvatar.vue`
+- **AppBackButton** — `apps/mobile/src/components/common/AppBackButton.vue`
+- **AppBadge** — props: color — `apps/mobile/src/components/common/AppBadge.vue`
+- **AppButton** — props: fill, expand, color, shape, disabled, type — `apps/mobile/src/components/common/AppButton.vue`
+- **AppCard** — props: button, clickable, href, replace — `apps/mobile/src/components/common/AppCard.vue`
+- **AppCardContent** — `apps/mobile/src/components/common/AppCardContent.vue`
+- **AppChip** — props: outline, color — `apps/mobile/src/components/common/AppChip.vue`
+- **AppImage** — props: src, alt — `apps/mobile/src/components/common/AppImage.vue`
+- **AppInput** — props: modelValue, label, labelPlacement, type, placeholder, disabled — `apps/mobile/src/components/common/AppInput.vue`
+- **AppLabel** — props: wrap — `apps/mobile/src/components/common/AppLabel.vue`
+- **AppList** — props: inset — `apps/mobile/src/components/common/AppList.vue`
+- **AppListItem** — props: button, clickable, href, disabled, lines, detail, replace — `apps/mobile/src/components/common/AppListItem.vue`
+- **AppModal** — props: isOpen, isFullScreen, maxHeight, canSwipe, overlay, breakpoints, initialBreakpoint — `apps/mobile/src/components/common/AppModal.vue`
+- **AppSearchbar** — props: modelValue, placeholder, disabled, animated, debounce — `apps/mobile/src/components/common/AppSearchbar.vue`
+- **AppSkeleton** — props: animated — `apps/mobile/src/components/common/AppSkeleton.vue`
+- **AppSpinner** — props: name, color — `apps/mobile/src/components/common/AppSpinner.vue`
+- **AppText** — props: color, tag — `apps/mobile/src/components/common/AppText.vue`
+- **AppTextarea** — props: modelValue, label, labelPlacement, placeholder, disabled, rows — `apps/mobile/src/components/common/AppTextarea.vue`
+- **AppToggle** — props: checked, disabled, color — `apps/mobile/src/components/common/AppToggle.vue`
+- **ConfirmDialog** — `apps/mobile/src/components/common/ConfirmDialog.vue`
+- **EditableField** — `apps/mobile/src/components/common/EditableField.vue`
+- **EmptyState** — props: text — `apps/mobile/src/components/common/EmptyState.vue`
+- **ErrorMessage** — `apps/mobile/src/components/common/ErrorMessage.vue`
+- **ImageEditorModal** — props: isOpen, imageFile, aspectRatio — `apps/mobile/src/components/common/ImageEditorModal.vue`
+- **LoadingSpinner** — `apps/mobile/src/components/common/LoadingSpinner.vue`
+- **AppContent** — props: fullscreen — `apps/mobile/src/components/common/layout/AppContent.vue`
+- **AppHeader** — `apps/mobile/src/components/common/layout/AppHeader.vue`
+- **AppPage** — `apps/mobile/src/components/common/layout/AppPage.vue`
+- **AppSegment** — props: modelValue, scrollable, bgColor — `apps/mobile/src/components/common/layout/AppSegment.vue`
+- **AppSegmentButton** — props: value, contentId — `apps/mobile/src/components/common/layout/AppSegmentButton.vue`
+- **AppSegmentContent** — props: id — `apps/mobile/src/components/common/layout/AppSegmentContent.vue`
+- **AppSegmentView** — props: activeSegment — `apps/mobile/src/components/common/layout/AppSegmentView.vue`
+- **AppTitle** — `apps/mobile/src/components/common/layout/AppTitle.vue`
+- **AppToolbar** — `apps/mobile/src/components/common/layout/AppToolbar.vue`
+- **AddWorkModal** — `apps/mobile/src/components/profile/AddWorkModal.vue`
+- **ProfileBasicInfo** — `apps/mobile/src/components/profile/ProfileBasicInfo.vue`
+- **ProfilePictureEditor** — `apps/mobile/src/components/profile/ProfilePictureEditor.vue`
+- **ProfileVoiceActorSelector** — `apps/mobile/src/components/profile/ProfileVoiceActorSelector.vue`
+- **WorkItem** — `apps/mobile/src/components/profile/WorkItem.vue`
+- **WorkList** — props: canEdit — `apps/mobile/src/components/profile/WorkList.vue`
+- **about** — `apps/mobile/src/views/about.vue`
+- **actor-details** — `apps/mobile/src/views/actor-details.vue`
+- **advertisement-details** — `apps/mobile/src/views/advertisement-details.vue`
+- **audiobook-details** — `apps/mobile/src/views/audiobook-details.vue`
+- **edit-dubbing-project** — `apps/mobile/src/views/edit-dubbing-project.vue`
+- **edit-studio** — `apps/mobile/src/views/edit-studio.vue`
+- **game-details** — `apps/mobile/src/views/game-details.vue`
+- **home** — `apps/mobile/src/views/home.vue`
+- **login** — `apps/mobile/src/views/login.vue`
+- **movie-details** — `apps/mobile/src/views/movie-details.vue`
+- **podcast-details** — `apps/mobile/src/views/podcast-details.vue`
+- **profile** — `apps/mobile/src/views/profile.vue`
+- **search** — `apps/mobile/src/views/search.vue`
+- **season-by-episodes** — `apps/mobile/src/views/season-by-episodes.vue`
+- **season-details** — `apps/mobile/src/views/season-details.vue`
+- **serie-details** — `apps/mobile/src/views/serie-details.vue`
+- **settings** — `apps/mobile/src/views/settings.vue`
+- **studio-details** — `apps/mobile/src/views/studio-details.vue`
+- **toy-details** — `apps/mobile/src/views/toy-details.vue`
+- **voice-actor-details** — `apps/mobile/src/views/voice-actor-details.vue`
+- **voice-actor-profile** — `apps/mobile/src/views/voice-actor-profile.vue`
+- **app** — `apps/website/src/app.vue`
+- **Footer** — `apps/website/src/components/Footer.vue`
+- **ForceEnqueueButton** — props: mediaType, mediaId, seasonNumber, episodeNumber, language — `apps/website/src/components/ForceEnqueueButton.vue`
+- **Header** — `apps/website/src/components/Header.vue`
+- **LanguageBanner** — `apps/website/src/components/LanguageBanner.vue`
+- **MediaSkeleton** — `apps/website/src/components/MediaSkeleton.vue`
+- **PersonSkeleton** — `apps/website/src/components/PersonSkeleton.vue`
+- **ReportModal** — props: open, targetUrl — `apps/website/src/components/ReportModal.vue`
+- **SearchModal** — `apps/website/src/components/SearchModal.vue`
+- **SmartBanner** — `apps/website/src/components/SmartBanner.vue`
+- **UnderConstruction** — `apps/website/src/components/UnderConstruction.vue`
+- **AsyncAutocomplete** — props: modelValue, options, loading, placeholder, disabled, allowCreate, displayFn — `apps/website/src/components/admin/AsyncAutocomplete.vue`
+- **LanguageSelect** — props: modelValue, required — `apps/website/src/components/admin/LanguageSelect.vue`
+- **BarChart** — `apps/website/src/components/admin/charts/BarChart.vue`
+- **LineChart** — `apps/website/src/components/admin/charts/LineChart.vue`
+- **PieChart** — `apps/website/src/components/admin/charts/PieChart.vue`
+- **MediaDetailsLayout** — props: title, backdropUrl, posterUrl, loading — `apps/website/src/components/layout/MediaDetailsLayout.vue`
+- **PersonDetailsLayout** — props: name, profileUrl, backdropUrl, loading — `apps/website/src/components/layout/PersonDetailsLayout.vue`
+- **DetailsActionBar** — `apps/website/src/components/layout/details/DetailsActionBar.vue`
+- **DetailsHero** — props: title, backdropUrl, blurBackdrop, imageUrl, imageAspectRatio — `apps/website/src/components/layout/details/DetailsHero.vue`
+- **DetailsPage** — `apps/website/src/components/layout/details/DetailsPage.vue`
+- **admin** — `apps/website/src/layouts/admin.vue`
+- **about** — `apps/website/src/pages/about.vue`
+- **[id]** — `apps/website/src/pages/actor/[id].vue`
+- **[id]** — `apps/website/src/pages/admin/add-voice-cast/[id].vue`
+- **audit-logs** — `apps/website/src/pages/admin/audit-logs.vue`
+- **career-grid** — `apps/website/src/pages/admin/career-grid.vue`
+- **duplicates-va** — `apps/website/src/pages/admin/duplicates-va.vue`
+- **duplicates-work** — `apps/website/src/pages/admin/duplicates-work.vue`
+- **index** — `apps/website/src/pages/admin/index.vue`
+- **manual-merge-va** — `apps/website/src/pages/admin/manual-merge-va.vue`
+- **[id]** — `apps/website/src/pages/admin/movies/edit/[id].vue`
+- **new** — `apps/website/src/pages/admin/movies/new.vue`
+- **queue** — `apps/website/src/pages/admin/queue.vue`
+- **reports** — `apps/website/src/pages/admin/reports.vue`
+- **[id]** — `apps/website/src/pages/admin/studios/edit/[id].vue`
+- **new** — `apps/website/src/pages/admin/studios/new.vue`
+- **user-va-profiles** — `apps/website/src/pages/admin/user-va-profiles.vue`
+- **users** — `apps/website/src/pages/admin/users.vue`
+- **voice-actor-spreadsheet** — `apps/website/src/pages/admin/voice-actor-spreadsheet.vue`
+- **[projectId]** — `apps/website/src/pages/advertisement/[adId]/edit/[projectId].vue`
+- **[id]** — `apps/website/src/pages/advertisement/[id].vue`
+- **[projectId]** — `apps/website/src/pages/audiobook/[audiobookId]/edit/[projectId].vue`
+- **[id]** — `apps/website/src/pages/audiobook/[id].vue`
+- **index** — `apps/website/src/pages/contribute/index.vue`
+- **play** — `apps/website/src/pages/contribute/task/play.vue`
+- **discussions** — `apps/website/src/pages/discussions.vue`
+- **[projectId]** — `apps/website/src/pages/game/[gameId]/edit/[projectId].vue`
+- **[id]** — `apps/website/src/pages/game/[id].vue`
+- **guidelines** — `apps/website/src/pages/guidelines.vue`
+- **index** — `apps/website/src/pages/index.vue`
+- **leaderboard** — `apps/website/src/pages/leaderboard.vue`
+- **legal** — `apps/website/src/pages/legal.vue`
+- **login** — `apps/website/src/pages/login.vue`
+- **[id]** — `apps/website/src/pages/movie/[id].vue`
+- **[projectId]** — `apps/website/src/pages/movie/[movieId]/edit/[projectId].vue`
+- **movies** — `apps/website/src/pages/movies.vue`
+- **[id]** — `apps/website/src/pages/podcast/[id].vue`
+- **[projectId]** — `apps/website/src/pages/podcast/[podcastId]/edit/[projectId].vue`
+- **privacy** — `apps/website/src/pages/privacy.vue`
+- **api-key** — `apps/website/src/pages/profile/api-key.vue`
+- **index** — `apps/website/src/pages/profile/index.vue`
+- **settings** — `apps/website/src/pages/profile/settings.vue`
+- **profile** — `apps/website/src/pages/profile.vue`
+- **register** — `apps/website/src/pages/register.vue`
+- **series** — `apps/website/src/pages/series.vue`
+- **[episodeNumber]** — `apps/website/src/pages/show/[id]/season/[seasonNumber]/episode/[episodeNumber].vue`
+- **[seasonNumber]** — `apps/website/src/pages/show/[id]/season/[seasonNumber].vue`
+- **[id]** — `apps/website/src/pages/show/[id].vue`
+- **[projectId]** — `apps/website/src/pages/show/[showId]/edit/[projectId].vue`
+- **[id]** — `apps/website/src/pages/studio/[id].vue`
+- **edit** — `apps/website/src/pages/studio/[studioId]/edit.vue`
+- **studios** — `apps/website/src/pages/studios.vue`
+- **terms-api** — `apps/website/src/pages/terms-api.vue`
+- **terms** — `apps/website/src/pages/terms.vue`
+- **[id]** — `apps/website/src/pages/toy/[id].vue`
+- **[projectId]** — `apps/website/src/pages/toy/[toyId]/edit/[projectId].vue`
+- **[id]** — `apps/website/src/pages/voice-actor/[id].vue`
+- **edit** — `apps/website/src/pages/voice-actor/[voiceActorId]/edit.vue`
+- **new** — `apps/website/src/pages/voice-actor/new.vue`
+- **voice-actors** — `apps/website/src/pages/voice-actors.vue`
+
+---
+_Back to [overview.md](./overview.md)_
