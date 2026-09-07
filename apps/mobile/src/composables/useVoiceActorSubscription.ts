@@ -1,6 +1,6 @@
 import { ref, computed, toValue, type MaybeRefOrGetter } from "vue";
 import { supabase } from "@/api/supabase";
-import { nitroInvoke } from "@/api/nitro";
+import { nitroRequest } from "@/api/nitro";
 import { useAuthStore } from "@/stores/auth";
 import { useOneSignal } from "./useOneSignal";
 import { alertController } from "@/composables/useAlert";
@@ -69,7 +69,8 @@ export function useVoiceActorSubscription(
           );
         }
 
-        const { error } = await nitroInvoke("manage-subscription", {
+        const { error } = await nitroRequest("/api/manage-subscription", {
+          method: "POST",
           body: {
             action: "subscribe",
             voice_actor_id: Number(toValue(voiceActorId)),
@@ -79,7 +80,8 @@ export function useVoiceActorSubscription(
         if (error) throw error;
       } else {
         // Unsubscribe
-        const { error } = await nitroInvoke("manage-subscription", {
+        const { error } = await nitroRequest("/api/manage-subscription", {
+          method: "POST",
           body: {
             action: "unsubscribe",
             voice_actor_id: Number(toValue(voiceActorId)),
@@ -112,7 +114,8 @@ export function useVoiceActorSubscription(
 }
 
 export async function fetchAllSubscriptions() {
-  const { data, error } = await nitroInvoke("manage-subscription", {
+  const { data, error } = await nitroRequest("/api/manage-subscription", {
+    method: "POST",
     body: { action: "list" },
   });
 

@@ -113,7 +113,7 @@ import AppActionSheet, {
 
 import { MovieResponse } from "@app/shared-logic";
 import { supabase } from "../api/supabase";
-import { nitroInvoke } from "../api/nitro";
+import { nitroRequest } from "../api/nitro";
 import { enqueueMedia } from "../api/mediaQueue";
 import { useVoiceActorManagement } from "@/composables/useVoiceActorManagement";
 import { useDeferredCharacters } from "@/composables/useDeferredCharacters";
@@ -384,9 +384,10 @@ const takePhoto = async () => {
       ) || [];
     formData.append("actors", JSON.stringify(simplifiedActors));
 
-    const response = await nitroInvoke(
-      "extract-credits-from-image",
+    const response = await nitroRequest(
+      "/api/extract-credits-from-image",
       {
+        method: "POST",
         body: formData,
       },
     );
@@ -499,12 +500,7 @@ const fetchInfos = async () => {
 const fetchMovieData = async () => {
   const id = route.params.id;
   try {
-    const movieResponseRaw = await nitroInvoke<MovieResponse>(
-      "movie",
-      {
-        body: { id },
-      },
-    );
+    const movieResponseRaw = await nitroRequest<MovieResponse>(`/api/movie/${id}`);
     const data = movieResponseRaw.data;
     if (data) {
       movie.value = data.movie;

@@ -321,7 +321,7 @@ import RequestVoiceActorCard from "@/components/RequestVoiceActorCard.vue";
 import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
 import { toastController } from "@/composables/useToast";
 
-import { nitroInvoke } from "@/api/nitro";
+import { nitroRequest } from "@/api/nitro";
 
 const profileStore = useProfileStore();
 const authStore = useAuthStore();
@@ -395,10 +395,11 @@ const handleAdminSearch = async () => {
 
   try {
     // Use the search-voice-actors endpoint to find voice actors
-    const { data, error } = await nitroInvoke(
-      "search-voice-actors",
+    const { data, error } = await nitroRequest(
+      "/api/search-voice-actors",
       {
-        body: { query: adminSearchQuery.value }}
+        query: { query: adminSearchQuery.value },
+      },
     );
 
     if (error) throw error;

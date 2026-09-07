@@ -97,7 +97,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { nitroInvoke } from "@/api/nitro";
+import { nitroRequest } from "@/api/nitro";
 
 const props = defineProps<{
   voiceActor?: { id: number; firstname: string; lastname: string };
@@ -148,7 +148,8 @@ const submitRequest = async () => {
 
   try {
     if (props.voiceActor) {
-      const { error } = await nitroInvoke("request-voice-actor-linkage", {
+      const { error } = await nitroRequest("/api/request-voice-actor-page", {
+        method: "POST",
         body: {
           voice_actor_id: props.voiceActor.id,
           firstname: props.voiceActor.firstname,
@@ -158,7 +159,8 @@ const submitRequest = async () => {
       });
       if (error) throw error;
     } else {
-      const { error } = await nitroInvoke("request-voice-actor-page", {
+      const { error } = await nitroRequest("/api/request-voice-actor-page", {
+        method: "POST",
         body: {
           firstname: requestForm.value.firstname.trim(),
           lastname: requestForm.value.lastname.trim(),

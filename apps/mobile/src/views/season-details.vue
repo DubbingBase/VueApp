@@ -96,7 +96,7 @@ import { ref, computed, onMounted } from "vue";
 import AppBackButton from "@/components/common/AppBackButton.vue";
 import { useRoute, useRouter } from "vue-router";
 import { supabase } from "../api/supabase";
-import { nitroInvoke } from "../api/nitro";
+import { nitroRequest } from "../api/nitro";
 import { enqueueMedia } from "../api/mediaQueue";
 import LoadingSpinner from "../components/common/LoadingSpinner.vue";
 import EllipsisVertical from "~icons/lucide/ellipsis-vertical";
@@ -293,8 +293,8 @@ async function fetchData() {
     const serieId = route.params.id;
     const seasonNumber = route.params.season;
 
-    const seasonResponse = await nitroInvoke("season", {
-      body: { id: serieId, season_number: seasonNumber },
+    const seasonResponse = await nitroRequest("/api/season", {
+      query: { id: serieId, season_number: seasonNumber },
     });
 
     const data = seasonResponse.data;

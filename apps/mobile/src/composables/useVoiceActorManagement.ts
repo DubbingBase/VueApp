@@ -5,7 +5,7 @@ import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useAuthStore } from "@/stores/auth";
 import { useLanguagePreference } from "@/composables/useLanguagePreference";
-import { nitroInvoke } from "@/api/nitro";
+import { nitroRequest } from "@/api/nitro";
 import { useI18n } from "vue-i18n";
 import type { PersonData } from "@/components/PersonItem.vue";
 import { voiceActorToPersonData } from "@/utils/convert";
@@ -100,8 +100,8 @@ export function useVoiceActorManagement(
     searchError.value = "";
 
     try {
-      const response = await nitroInvoke("search-voice-actors", {
-        body: {
+      const response = await nitroRequest("/api/search-voice-actors", {
+        query: {
           query: searchTerm.value,
         },
       });
@@ -119,7 +119,8 @@ export function useVoiceActorManagement(
     console.log("selectedActor.value", selectedActor.value);
     try {
       const { preferredLanguage } = useLanguagePreference();
-      const response = await nitroInvoke("link-voice-actor", {
+      const response = await nitroRequest("/api/link-voice-actor", {
+        method: "POST",
         body: {
           actor_id: selectedActor.value,
           media_type: workType,
@@ -189,7 +190,8 @@ export function useVoiceActorManagement(
 
   const updateVoiceActorLink = async (workId: number, performance: string) => {
     try {
-      const response = await nitroInvoke("update_voice_actor_link", {
+      const response = await nitroRequest("/api/update_voice_actor_link", {
+        method: "POST",
         body: {
           work_id: workId,
           performance,
@@ -244,7 +246,8 @@ export function useVoiceActorManagement(
 
   const deleteVoiceActorLink = async (workId: number) => {
     try {
-      await nitroInvoke("delete-voice-actor-link", {
+      await nitroRequest("/api/delete-voice-actor-link", {
+        method: "POST",
         body: {
           id: workId,
         },
@@ -289,7 +292,8 @@ export function useVoiceActorManagement(
     }
 
     try {
-      const response = await nitroInvoke("update-review-status", {
+      const response = await nitroRequest("/api/update-review-status", {
+        method: "POST",
         body: {
           work_id: workId,
           reviewed_status: status,
@@ -347,7 +351,8 @@ export function useVoiceActorManagement(
     votingError.value = "";
 
     try {
-      const response = await nitroInvoke("cast-vote", {
+      const response = await nitroRequest("/api/cast-vote", {
+        method: "POST",
         body: {
           work_id: workId,
           vote_type: voteType,
@@ -378,9 +383,9 @@ export function useVoiceActorManagement(
     }
 
     try {
-      const response = await nitroInvoke("get-work-votes", {
-        body: {
-          work_ids: workIds,
+      const response = await nitroRequest("/api/get-work-votes", {
+        query: {
+          work_ids: workIds.join(","),
         },
       });
 

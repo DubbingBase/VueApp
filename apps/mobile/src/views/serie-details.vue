@@ -173,7 +173,7 @@ import Share2 from "~icons/lucide/share-2";
 import { storeToRefs } from "pinia";
 import { useAuthStore } from "@/stores/auth";
 import { supabase } from "@/api/supabase";
-import { nitroInvoke } from "@/api/nitro";
+import { nitroRequest } from "@/api/nitro";
 import { enqueueMedia } from "@/api/mediaQueue";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { actorToPersonData, voiceActorToPersonData } from "@/utils/convert";
@@ -420,9 +420,10 @@ const takePhoto = async () => {
       ) || [];
     formData.append("actors", JSON.stringify(simplifiedActors));
 
-    const response = await nitroInvoke(
-      "extract-credits-from-image",
+    const response = await nitroRequest(
+      "/api/extract-credits-from-image",
       {
+        method: "POST",
         body: formData,
       },
     );
@@ -447,9 +448,7 @@ const takePhoto = async () => {
 
 const getSerie = async (id: string) => {
   try {
-    const response = await nitroInvoke<ShowResponse>("show", {
-      body: { id },
-    });
+    const response = await nitroRequest<ShowResponse>(`/api/show/${id}`);
     return response;
   } catch (e: unknown) {
     console.error("Error fetching series data:", e);

@@ -80,7 +80,7 @@ import { ref, watch } from "vue";
 import XCircle from "~icons/lucide/x-circle";
 import Trash2 from "~icons/lucide/trash-2";
 import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
-import { nitroInvoke } from "@/api/nitro";
+import { nitroRequest } from "@/api/nitro";
 import { Actor } from "@app/shared-logic";
 
 const props = defineProps<{
@@ -158,9 +158,10 @@ const processExtractedCredits = async () => {
     });
   }
 
-  // 2. Try to find the voice actor in DB via Edge Function
+  // 2. Try to find the voice actor in the database through the API
   try {
-    const { data, error } = await nitroInvoke("process-credits", {
+    const { data, error } = await nitroRequest("/api/process-credits", {
+      method: "POST",
       body: {
         action: "match",
         credits: tempCredits
@@ -174,7 +175,7 @@ const processExtractedCredits = async () => {
       processedCredits.value = tempCredits.map(c => ({ ...c, matchedVoiceActor: null }));
     }
   } catch (err) {
-    console.error("Error matching voice actors via edge function:", err);
+    console.error("Error matching voice actors through the API:", err);
     processedCredits.value = tempCredits.map(c => ({ ...c, matchedVoiceActor: null }));
   }
 
@@ -189,7 +190,8 @@ const saveAll = async () => {
   isSaving.value = true;
   
   try {
-    const { data, error } = await nitroInvoke("process-credits", {
+    const { data, error } = await nitroRequest("/api/process-credits", {
+      method: "POST",
       body: {
         action: "save",
         credits: processedCredits.value,

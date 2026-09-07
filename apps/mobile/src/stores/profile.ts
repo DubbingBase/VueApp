@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
-import { nitroInvoke } from "@/api/nitro";
+import { nitroRequest } from "@/api/nitro";
 import { useLanguagePreference } from "@/composables/useLanguagePreference";
 import type { Tables } from "@/utils/database";
 import type { Movie } from "@app/shared-logic";
@@ -139,7 +139,9 @@ export const useProfileStore = defineStore("profile", () => {
       isLoading.value = true;
       error.value = null;
 
-      const { data, error: fetchError } = await nitroInvoke("get-user-profile");
+      const { data, error: fetchError } = await nitroRequest(
+        "/api/get-user-profile",
+      );
 
       console.log("Profile store: fetchProfile response:", {
         data,
@@ -230,10 +232,13 @@ export const useProfileStore = defineStore("profile", () => {
       isLoading.value = true;
       error.value = null;
 
-      const { data, error: fetchError } = await nitroInvoke(
-        "get-user-voice-actors",
+      const { data, error: fetchError } = await nitroRequest(
+        "/api/get-user-voice-actors",
         {
-          body: params,
+          query: {
+            page: params.page,
+            limit: params.limit,
+          },
         },
       );
 
@@ -274,9 +279,10 @@ export const useProfileStore = defineStore("profile", () => {
 
       if (profileType.value === "voice_actor" && currentVoiceActor.value) {
         const voiceActorUpdates = updates as Partial<VoiceActor>;
-        const { data, error: updateError } = await nitroInvoke(
-          "update-voice-actor",
+        const { data, error: updateError } = await nitroRequest(
+          "/api/update-voice-actor",
           {
+            method: "POST",
             body: {
               voice_actor_id:
                 identifiers.voiceActorId || currentVoiceActor.value.id,
@@ -310,9 +316,10 @@ export const useProfileStore = defineStore("profile", () => {
         }
       } else if (profileType.value === "user_profile" && userProfile.value) {
         const userProfileUpdates = updates as Partial<UserProfile>;
-        const { data, error: updateError } = await nitroInvoke(
-          "update-user-profile",
+        const { data, error: updateError } = await nitroRequest(
+          "/api/update-user-profile",
           {
+            method: "POST",
             body: userProfileUpdates,
           },
         );
@@ -355,16 +362,20 @@ export const useProfileStore = defineStore("profile", () => {
       error.value = null;
 
       const { preferredLanguage } = useLanguagePreference();
-      const { data, error: addError } = await nitroInvoke("link-voice-actor", {
-        body: {
-          ...workEntry,
-          media_type:
-            workEntry.media_type === "serie" ? "tv" : workEntry.media_type,
-          voice_actor_id: currentVoiceActor.value.id,
-          targetUserId: identifiers.targetUserId,
-          language: preferredLanguage.value || "fr",
+      const { data, error: addError } = await nitroRequest(
+        "/api/link-voice-actor",
+        {
+          method: "POST",
+          body: {
+            ...workEntry,
+            media_type:
+              workEntry.media_type === "serie" ? "tv" : workEntry.media_type,
+            voice_actor_id: currentVoiceActor.value.id,
+            targetUserId: identifiers.targetUserId,
+            language: preferredLanguage.value || "fr",
+          },
         },
-      });
+      );
 
       if (addError) throw addError;
 
@@ -396,9 +407,10 @@ export const useProfileStore = defineStore("profile", () => {
       isUpdating.value = true;
       error.value = null;
 
-      const { error: removeError } = await nitroInvoke(
-        "delete-voice-actor-link",
+      const { error: removeError } = await nitroRequest(
+        "/api/delete-voice-actor-link",
         {
+          method: "POST",
           body: { id: workEntryId, targetUserId: identifiers.targetUserId },
         },
       );
@@ -429,9 +441,10 @@ export const useProfileStore = defineStore("profile", () => {
       isUpdating.value = true;
       error.value = null;
 
-      const { data, error: addError } = await nitroInvoke(
-        "link-user-voice-actor",
+      const { data, error: addError } = await nitroRequest(
+        "/api/link-user-voice-actor",
         {
+          method: "POST",
           body: {
             voice_actor_id: voiceActorId,
             targetUserId: identifiers.targetUserId,
@@ -463,9 +476,10 @@ export const useProfileStore = defineStore("profile", () => {
       isUpdating.value = true;
       error.value = null;
 
-      const { error: removeError } = await nitroInvoke(
-        "delete-user-voice-actor-link",
+      const { error: removeError } = await nitroRequest(
+        "/api/delete-user-voice-actor-link",
         {
+          method: "POST",
           body: {
             voice_actor_id: voiceActorId,
             targetUserId: identifiers.targetUserId,
@@ -506,9 +520,10 @@ export const useProfileStore = defineStore("profile", () => {
       isUpdating.value = true;
       error.value = null;
 
-      const { data, error: createError } = await nitroInvoke(
-        "create-user-profile",
+      const { data, error: createError } = await nitroRequest(
+        "/api/create-user-profile",
         {
+          method: "POST",
           body: profileData,
         },
       );
