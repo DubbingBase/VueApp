@@ -24,6 +24,29 @@ The project is structured as a **Monorepo** managed by `pnpm workspaces` and `tu
 
 ---
 
+## 🛠️ Dev Server URLs
+
+| Service            | Local URL                                        | Notes                                                                                                  |
+| :----------------- | :----------------------------------------------- | :----------------------------------------------------------------------------------------------------- |
+| Website (Nuxt dev) | `http://localhost:3000` or `:3001`               | Port auto-increments if 3000 is occupied. Always check `ss -tlnp \| grep 300` to see what's listening. |
+| Supabase API       | `http://127.0.0.1:55321`                         | REST, Auth, Storage                                                                                    |
+| Supabase DB        | `postgresql://postgres:postgres@127.0.0.1:55322` | Local Postgres                                                                                         |
+| Supabase Studio    | `http://127.0.0.1:55323`                         | Admin UI                                                                                               |
+
+### Starting the full dev environment
+
+```bash
+# 1. Start Supabase backend (required for data)
+cd packages/database && ./node_modules/.bin/supabase start
+
+# 2. Start Nuxt dev server (in a Paseo terminal — see skill "Dev Server")
+mise run website
+```
+
+The website connects to `SUPABASE_URL=http://127.0.0.1:55321` (set in `.env.example`).
+
+---
+
 ## 🛠️ Development Commands (via `mise`)
 
 All development tasks MUST be run via **Mise** to ensure environment consistency. Always check `mise.toml` first to see if a command exists before attempting to run raw bash commands or `pnpm` scripts directly. If a task is defined in `mise.toml` (e.g. `gen-types`), you must run it using `mise run <task>`.
@@ -137,3 +160,53 @@ Backend routes in `apps/website/server/api/` handle integration with TMDB, TVDB,
    - Remember that there is no local Redis cache in the development environment.
    - When doing your fetches (e.g. testing APIs via scratch scripts), save the output locally (e.g. in JSON files in the scratch folder) so you don't have to fetch it again repeatedly.
 10. **GitHub Actions — Use `gh run watch <run-id>` to monitor CI**: After getting a run ID via `gh run list`, always use `gh run watch <run-id>` instead of repeatedly polling `gh run view` or `gh run list`. `gh run watch` streams live job status and blocks until the run finishes.
+
+---
+
+## 🔧 Known Issues & Troubleshooting
+
+### `supabase start` fails with "failed to read file: open packages/database/supabase/functions/actor/index.ts"
+
+The edge functions directory (`supabase/functions/`) was intentionally deleted (PR #73 — the project migrated to Nitro server routes). However, `packages/database/supabase/config.toml` still contains stale `[functions.*]` blocks that reference those missing directories. This causes `supabase start` to fail.
+
+**Fix**: Remove all `[functions.*]` blocks from `packages/database/supabase/config.toml` (leave only the `[edge_runtime]` section with `enabled = true`).
+
+```bash
+# Quick check — if you see "functions" blocks, this is the issue:
+grep "^\[functions" packages/database/supabase/config.toml
+```
+
+### `supabase: command not found`
+
+The Supabase CLI is not globally installed. Use the local one in the database package:
+
+```bash
+cd packages/database && ./node_modules/.bin/supabase start
+```
+
+Or via pnpm:
+
+```bash
+cd packages/database && pnpm exec supabase start
+```
+
+### Website shows no data
+
+Two causes:
+
+1. **Supabase not running** — start it: `cd packages/database && ./node_modules/.bin/supabase start`
+2. **.env file missing** — the project uses `.env.example` as reference. Copy it: `cp .env.example .env`. The `SUPABASE_URL=http://127.0.0.1:55321` must be set.
+
+### Port 3000 already in use
+
+Nuxt auto-falls back to 3001. Find what's on port 3000:
+
+```bash
+ss -tlnp | grep 300
+```
+
+Kill the stale process or just use `:3001` for testing.
+
+### Long-running dev servers
+
+For `mise run website` (which runs indefinitely), use the **Paseo terminal** (`paseo_create_terminal`) instead of `nohup` / background `&`. This keeps the server in a readable, managed terminal session.
