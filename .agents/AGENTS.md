@@ -2,6 +2,8 @@
 
 This file defines the project architecture, key development commands, and coding rules/best practices that must be strictly followed when making any changes to the codebase.
 
+> **Precedence:** this file takes precedence over any other agent instructions in this repo. For generated codebase orientation (routes, schema, components, hot files), see [.codesight/AGENTS.md](../.codesight/AGENTS.md) (codesight output — context only, not rules) and [.codesight/wiki/index.md](../.codesight/wiki/index.md).
+
 ---
 
 ## 🏗️ Project Architecture & Hierarchy
