@@ -131,14 +131,14 @@
   </template>
 
 <script setup lang="ts">
-
+import { ref, computed } from "vue";
 
 definePageMeta({
   layout: 'admin',
   middleware: 'admin'
 });
 
-import { ref, onMounted, computed } from "vue";
+const { t } = useI18n();
 
 interface User {
   id: string;
@@ -213,11 +213,11 @@ const updateRole = async (userObj: User) => {
       method: 'POST',
       body: { userId: userObj.id, role },
     });
-    showToast(`Rôle mis à jour pour ${userObj.email} (${role})`, "success");
+    showToast(t('admin.users.roleUpdated', { email: userObj.email, role }), "success");
     await fetchUsers();
   } catch (err: any) {
     console.error("Error updating user role:", err);
-    showToast(err.message || "Failed to update role", "error");
+    showToast(err.message || t('admin.users.failedToUpdateRole'), "error");
   } finally {
     updatingRole.value[userObj.id] = false;
   }
@@ -238,13 +238,13 @@ const deleteUser = async () => {
       body: { userId: userToDelete.value.id },
     });
 
-    showToast(`Utilisateur ${userToDelete.value.email} supprimé avec succès`, "success");
+    showToast(t('admin.users.userDeleted', { email: userToDelete.value.email }), "success");
     showConfirm.value = false;
     userToDelete.value = null;
     await fetchUsers();
   } catch (err: any) {
     console.error("Error deleting user:", err);
-    showToast(err.message || "Failed to delete user", "error");
+    showToast(err.message || t('admin.users.failedToDeleteUser'), "error");
   } finally {
     deleting.value = false;
   }

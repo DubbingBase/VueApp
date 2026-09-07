@@ -271,15 +271,15 @@
 </template>
 
 <script setup lang="ts">
-const supabase = useSupabaseClient();
-const localePath = useLocalePath();
+import { ref, computed, onMounted } from "vue";
 
 definePageMeta({
   layout: 'admin',
   middleware: 'admin'
 });
 
-import { ref, computed, onMounted } from "vue";
+const supabase = useSupabaseClient();
+const localePath = useLocalePath();
 
 interface Actor {
   id: number;

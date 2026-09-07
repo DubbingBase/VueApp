@@ -27,7 +27,7 @@
         </NuxtLink>
         <NuxtLink
           :to="localePath('/podcast/new/edit/new')"
-          class="px-4 py-2.5 bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold rounded-xl shadow-lg transition-all flex items-center space-x-1.5"
+          class="px-4 py-2.5 bg-pink-600 hover:bg-pink-500 text-white text-xs font-semibold rounded-xl shadow-lg transition-all flex items-center space-x-1.5"
         >
           <span>{{ $t('admin.dashboard.createPodcastProject') }}</span>
         </NuxtLink>
@@ -110,21 +110,18 @@
   </template>
 
 <script setup lang="ts">
-const localePath = useLocalePath();
-
-
-
+import { ref, computed } from "vue";
+import BarChart from "../../components/admin/charts/BarChart.vue";
+import LineChart from "../../components/admin/charts/LineChart.vue";
+import PieChart from "../../components/admin/charts/PieChart.vue";
+import type { ChartData, ChartOptions } from 'chart.js';
 
 definePageMeta({
   layout: 'admin',
   middleware: 'admin'
 });
 
-import { ref, onMounted, computed } from "vue";
-import BarChart from "../../components/admin/charts/BarChart.vue";
-import LineChart from "../../components/admin/charts/LineChart.vue";
-import PieChart from "../../components/admin/charts/PieChart.vue";
-import type { ChartData, ChartOptions } from 'chart.js';
+const localePath = useLocalePath();
 
 // Reactive state
 const loading = ref(true);

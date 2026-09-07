@@ -206,16 +206,13 @@
   </template>
 
 <script setup lang="ts">
-
-
-
+import { ref, computed, onMounted } from "vue";
 
 definePageMeta({
   layout: 'admin',
   middleware: 'admin'
 });
 
-import { ref, computed, onMounted } from "vue";
 const supabase = useSupabaseClient();
 
 const getProfilePictureUrl = (path: string | null) => {

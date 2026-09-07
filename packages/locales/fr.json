@@ -496,40 +496,26 @@
       "saveStudioProfile": "Enregistrer le profil du studio",
       "studioSaved": "Studio enregistré avec succès",
       "failedToSave": "Échec de l'enregistrement du studio"
-    }
-  },
-  "contribute": {
-    "title": "Contribuer",
-    "description": "Aidez-nous à améliorer DubbingBase en contribuant à la base de données",
-    "bronzeContributor": "Contributeur Bronze",
-    "currentScore": "Score actuel",
-    "progressToSilver": "Progression vers Argent",
-    "readyToHelp": "Prêt à aider ?",
-    "readyToHelpDescription": "Commencez à contribuer pour gagner des points et débloquer des récompenses",
-    "startContributing": "Commencer à contribuer",
-    "noRecentActivities": "Aucune activité récente"
-  },
-  "dubbing": {
-    "cast": "Distribution",
-    "technicalTeam": "Équipe technique"
-  },
-  "movie": {
-    "addDubbingProject": "Ajouter un projet de doublage"
-  },
-  "report": {
-    "title": "Signaler",
-    "description": "Signaler un problème avec ce contenu",
-    "button": "Signaler",
-    "reason": "Raison",
-    "selectReason": "Sélectionnez une raison",
-    "reasons": {
-      "copyright": "Violation du droit d'auteur",
-      "inappropriate": "Contenu inapproprié",
-      "error": "Information incorrecte",
-      "other": "Autre"
     },
-    "details": "Détails",
-    "detailsPlaceholder": "Fournissez des détails supplémentaires sur le problème...",
-    "successMessage": "Signalement envoyé avec succès"
+    "users": {
+      "title": "Gestion des utilisateurs",
+      "description": "Gérer les rôles et permissions des utilisateurs",
+      "fetchingList": "Chargement des utilisateurs...",
+      "noUsersFound": "Aucun utilisateur trouvé",
+      "tryAdjustingSearch": "Essayez de modifier votre recherche",
+      "userDetails": "Détails de l'utilisateur",
+      "role": "Rôle",
+      "anonymousUser": "Anonyme",
+      "registered": "Inscrit : ",
+      "roleUser": "Utilisateur",
+      "roleAdmin": "Administrateur",
+      "confirmDelete": "Confirmer la suppression",
+      "confirmDeletePrompt": "Êtes-vous sûr de vouloir supprimer ",
+      "irreversibleAction": " ? Cette action est irréversible.",
+      "roleUpdated": "Rôle mis à jour pour {email} ({role})",
+      "userDeleted": "Utilisateur {email} supprimé avec succès",
+      "failedToUpdateRole": "Échec de la mise à jour du rôle",
+      "failedToDeleteUser": "Échec de la suppression de l'utilisateur"
+    }
   }
 }

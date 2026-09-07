@@ -151,13 +151,13 @@
 import { ref, computed, watch, onUnmounted } from "vue";
 import type { Database } from "@app/supabase";
 
-const supabase = useSupabaseClient();
-const localePath = useLocalePath();
-
 definePageMeta({
   layout: 'admin',
   middleware: 'admin'
 });
+
+const supabase = useSupabaseClient();
+const localePath = useLocalePath();
 
 type VoiceActor = any;
 type CellChange = { id: number; prop: string; newValue: any };

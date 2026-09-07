@@ -532,13 +532,13 @@ interface ToastState {
   type: "success" | "error" | "info";
 }
 
-const supabase = useSupabaseClient<Database>();
-const { t } = useI18n();
-
 definePageMeta({
   layout: "admin",
   middleware: "admin",
 });
+
+const supabase = useSupabaseClient<Database>();
+const { t } = useI18n();
 
 const queueItems = ref<QueueItem[]>([]);
 const usersMap = ref<Record<string, string>>({});

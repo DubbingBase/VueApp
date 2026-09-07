@@ -533,14 +533,12 @@
   </template>
 
 <script setup lang="ts">
-
+import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 
 definePageMeta({
   layout: "admin",
   middleware: "admin",
 });
-
-import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 
 interface VoiceActorCandidate {
   id: number;

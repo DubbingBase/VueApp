@@ -179,9 +179,9 @@
     "movies": "Movies",
     "series": "Series",
     "episodes": "Episodes",
-  "fetchWikipedia": "Fetch from Wikipedia",
-  "wikipediaUrl": "Wikipedia URL",
-  "enterWikipediaUrlDesc": "Enter a Wikipedia URL to fetch the voice actor's biography, name, and profile picture. You can also manually fill the details below."
+    "fetchWikipedia": "Fetch from Wikipedia",
+    "wikipediaUrl": "Wikipedia URL",
+    "enterWikipediaUrlDesc": "Enter a Wikipedia URL to fetch the voice actor's biography, name, and profile picture. You can also manually fill the details below."
   },
   "actor": {
     "title": "Actor",
@@ -496,6 +496,26 @@
       "saveStudioProfile": "Save Studio Profile",
       "studioSaved": "Studio saved successfully",
       "failedToSave": "Failed to save studio"
+    },
+    "users": {
+      "title": "User Management",
+      "description": "Manage user roles and permissions",
+      "fetchingList": "Fetching users...",
+      "noUsersFound": "No users found",
+      "tryAdjustingSearch": "Try adjusting your search",
+      "userDetails": "User Details",
+      "role": "Role",
+      "anonymousUser": "Anonymous",
+      "registered": "Registered: ",
+      "roleUser": "User",
+      "roleAdmin": "Admin",
+      "confirmDelete": "Confirm Delete",
+      "confirmDeletePrompt": "Are you sure you want to delete ",
+      "irreversibleAction": "? This action is irreversible.",
+      "roleUpdated": "Role updated for {email} ({role})",
+      "userDeleted": "User {email} deleted successfully",
+      "failedToUpdateRole": "Failed to update role",
+      "failedToDeleteUser": "Failed to delete user"
     }
   }
 }

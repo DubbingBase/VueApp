@@ -506,20 +506,15 @@
   </template>
 
 <script setup lang="ts">
-const supabase = useSupabaseClient();
-
-
-
+import { ref, onMounted, computed } from "vue";
+import imageCompression from "browser-image-compression";
 
 definePageMeta({
   layout: 'admin',
   middleware: 'admin'
 });
 
-import { ref, onMounted, computed } from "vue";
-
-import imageCompression from "browser-image-compression";
-
+const supabase = useSupabaseClient();
 const route = useRoute();
 const router = useRouter();
 const localePath = useLocalePath();
