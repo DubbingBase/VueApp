@@ -62,6 +62,18 @@ const dubbingExtractionSchema = z.object({
   ),
 });
 
+const dubbingExtractionSystemInstruction = `You are an expert at extracting dubbing data from Wikipedia pages. Extract the dubbing (distribution) data from the provided wikitext.
+
+Each row in a dubbing table = one credit. Output fields:
+- actor: the original/previous performer (the person who originally played the role)
+- voiceActorName: the localized/new voice actor's family/surname (e.g. "唐沢" for 唐沢寿明)
+- voiceActorFirstname: the localized/new voice actor's given name (e.g. "寿明" for 唐沢寿明)
+- performance: the character name (or null if not found)
+
+Skip any row where the voice actor name is not an exploitable person name (e.g. "N/A", "?", unknown or placeholder/dash-only) — omit it from items. Keep original spelling exactly, preserving accents/diacritics and hyphens/dashes.
+
+If no dubbing or voice-actor data exists in the section, return { items: [] }.`;
+
 export interface CheckSectionsResult {
   ok: boolean;
   title?: string;
@@ -403,15 +415,7 @@ export async function extractMediaDubbingCredits(options: {
         wikitext,
         dubbingExtractionSchema,
         {
-          systemInstruction: `You are an expert at extracting dubbing data from Wikipedia pages. Extract the dubbing (distribution) data from the provided wikitext.
-
-Each row in a dubbing table = one credit. Output fields:
-- actor: the original/previous performer (the person who originally played the role)
-- voiceActorName: the localized/new voice actor's family/surname (e.g. "唐沢" for 唐沢寿明)
-- voiceActorFirstname: the localized/new voice actor's given name (e.g. "寿明" for 唐沢寿明)
-- performance: the character name (or null if not found)
-
-If no dubbing or voice-actor data exists in the section, return { items: [] }.`,
+          systemInstruction: dubbingExtractionSystemInstruction,
           temperature: 0,
         },
       );
@@ -422,6 +426,12 @@ If no dubbing or voice-actor data exists in the section, return { items: [] }.`,
         let { actor, voiceActorFirstname, voiceActorName } = entry;
 
         if (actor && voiceActorFirstname && voiceActorName) {
+          if (
+            !isExploitableVoiceActorName(voiceActorFirstname) ||
+            !isExploitableVoiceActorName(voiceActorName)
+          ) {
+            continue;
+          }
           const langCast = await getLangCast(language);
           const castPool = langCast.length ? langCast : [];
 
@@ -561,15 +571,7 @@ export async function extractGameDubbingCredits(options: {
         wikitext,
         dubbingExtractionSchema,
         {
-          systemInstruction: `You are an expert at extracting dubbing data from Wikipedia pages. Extract the dubbing (distribution) data from the provided wikitext.
-
-Each row in a dubbing table = one credit. Output fields:
-- actor: the original/previous performer (the person who originally played the role)
-- voiceActorName: the localized/new voice actor's family/surname (e.g. "唐沢" for 唐沢寿明)
-- voiceActorFirstname: the localized/new voice actor's given name (e.g. "寿明" for 唐沢寿明)
-- performance: the character name (or null if not found)
-
-If no dubbing or voice-actor data exists in the section, return { items: [] }.`,
+          systemInstruction: dubbingExtractionSystemInstruction,
           temperature: 0,
         },
       );
@@ -580,6 +582,13 @@ If no dubbing or voice-actor data exists in the section, return { items: [] }.`,
         let { actor, voiceActorFirstname, voiceActorName } = entry;
 
         if (!actor || !voiceActorFirstname || !voiceActorName) {
+          continue;
+        }
+
+        if (
+          !isExploitableVoiceActorName(voiceActorFirstname) ||
+          !isExploitableVoiceActorName(voiceActorName)
+        ) {
           continue;
         }
 
