@@ -1,6 +1,7 @@
 [tools]
 deno = "2.1.9"
 node = "24"
+pnpm = "9.14.2"
 
 [env]
 # _.file = '.env.production'

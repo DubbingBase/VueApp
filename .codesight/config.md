@@ -31,6 +31,7 @@
 - `KEY_PASSWORD` **required** — .env.example
 - `KEYSTORE_PASSWORD` **required** — .env.example
 - `LLM_PROVIDER` (has default) — apps/website/nuxt.config.ts
+- `MISTRAL_TOKEN` (has default) — .env
 - `NDK_HOME` **required** — .env.example
 - `NITRO_PRESET` (has default) — apps/website/nuxt.config.ts
 - `NODE_ENV` (has default) — .env.example
@@ -52,8 +53,8 @@
 - `NUXT_LLM_PROVIDER` (has default) — apps/website/nuxt.config.ts
 - `NUXT_ONESIGNAL_APP_ID` **required** — apps/website/nuxt.config.ts
 - `NUXT_ONESIGNAL_REST_API_KEY` **required** — apps/website/nuxt.config.ts
-- `NUXT_PUBLIC_SUPABASE_KEY` (has default) — apps/website/nuxt.config.ts
-- `NUXT_PUBLIC_SUPABASE_URL` (has default) — apps/website/nuxt.config.ts
+- `NUXT_PUBLIC_SUPABASE_KEY` (has default) — .env
+- `NUXT_PUBLIC_SUPABASE_URL` (has default) — .env
 - `NUXT_RESEND_API_KEY` **required** — apps/website/nuxt.config.ts
 - `NUXT_RESEND_FROM_EMAIL` **required** — apps/website/nuxt.config.ts
 - `NUXT_RESEND_TO_EMAIL` **required** — apps/website/nuxt.config.ts
@@ -73,7 +74,7 @@
 - `TVDB_API_KEY` **required** — .env.example
 - `UPSTASH_REDIS_REST_TOKEN` **required** — .env.example
 - `UPSTASH_REDIS_REST_URL` **required** — .env.example
-- `VITE_API_BASE_URL` (has default) — apps/mobile/src/api/http.ts
+- `VITE_API_BASE_URL` (has default) — .env.example
 - `VITE_ONESIGNAL_APP_ID` **required** — .env.example
 - `VITE_SUPABASE_PUBLISHABLE_KEY` **required** — .env.example
 - `VITE_SUPABASE_URL` (has default) — .env.example

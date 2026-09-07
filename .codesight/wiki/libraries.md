@@ -2,7 +2,7 @@
 
 > **Navigation aid.** Library inventory extracted via AST. Read the source files listed here before modifying exported functions.
 
-**69 library files** across 5 modules
+**70 library files** across 5 modules
 
 ## Website (35 files)
 
@@ -33,7 +33,7 @@
 - `apps/website/server/utils/api/toy.ts` — ToyClient
 - _…and 10 more files_
 
-## Mobile (16 files)
+## Mobile (17 files)
 
 - `apps/mobile/src/composables/useVoiceActorManagement.ts` — useVoiceActorManagement, VoiceActor, WorkAndVoiceActor
 - `apps/mobile/src/utils/convert.ts` — cleanCharacterName, voiceActorToPersonData, actorToPersonData
@@ -42,6 +42,7 @@
 - `apps/mobile/src/composables/useVoiceActorSubscription.ts` — useVoiceActorSubscription, fetchAllSubscriptions
 - `apps/mobile/src/stores/index.ts` — setupStores, pinia
 - `apps/mobile/src/api/mediaQueue.ts` — enqueueMedia
+- `apps/mobile/src/api/nitro.ts` — nitroRequest
 - `apps/mobile/src/composables/useDeferredCharacters.ts` — useDeferredCharacters
 - `apps/mobile/src/composables/useFF.ts` — useFeatureFlags
 - `apps/mobile/src/composables/useLanguagePreference.ts` — useLanguagePreference

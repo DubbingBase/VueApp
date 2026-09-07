@@ -16,6 +16,7 @@ Structural map compiled from source code via AST. No LLM — deterministic, 200m
 - [Count-voice-actor-works.post](./count-voice-actor-works.post.md)
 - [Create-user-profile.post](./create-user-profile.post.md)
 - [Dashboard-stats.get](./dashboard-stats.get.md)
+- [Delete-user-voice-actor-link.post](./delete-user-voice-actor-link.post.md)
 - [Delete-voice-actor-link.post](./delete-voice-actor-link.post.md)
 - [Delete-work-entry.post](./delete-work-entry.post.md)
 - [Delete_user.post](./delete_user.post.md)
@@ -80,10 +81,10 @@ Structural map compiled from source code via AST. No LLM — deterministic, 200m
 
 ## Quick Stats
 
-- Routes: **79**
+- Routes: **80**
 - Models: **16**
 - Components: **178**
-- Env vars: **48** required, **28** with defaults
+- Env vars: **48** required, **29** with defaults
 
 ## How to Use
 
@@ -110,4 +111,4 @@ These exist in your codebase but are **not** reflected in wiki articles:
 When in doubt, search the source. The wiki is a starting point, not a complete inventory.
 
 ---
-_Last compiled: 2026-09-07 · 70 articles · [codesight](https://github.com/Houseofmvps/codesight)_
+_Last compiled: 2026-09-07 · 71 articles · [codesight](https://github.com/Houseofmvps/codesight)_
