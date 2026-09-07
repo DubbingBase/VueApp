@@ -424,6 +424,12 @@ If no dubbing or voice-actor data exists in the section, return { items: [] }.`,
         let { actor, voiceActorFirstname, voiceActorName } = entry;
 
         if (actor && voiceActorFirstname && voiceActorName) {
+          if (
+            !isExploitableVoiceActorName(voiceActorFirstname) ||
+            !isExploitableVoiceActorName(voiceActorName)
+          ) {
+            continue;
+          }
           const langCast = await getLangCast(language);
           const castPool = langCast.length ? langCast : [];
 
@@ -584,6 +590,13 @@ If no dubbing or voice-actor data exists in the section, return { items: [] }.`,
         let { actor, voiceActorFirstname, voiceActorName } = entry;
 
         if (!actor || !voiceActorFirstname || !voiceActorName) {
+          continue;
+        }
+
+        if (
+          !isExploitableVoiceActorName(voiceActorFirstname) ||
+          !isExploitableVoiceActorName(voiceActorName)
+        ) {
           continue;
         }
 

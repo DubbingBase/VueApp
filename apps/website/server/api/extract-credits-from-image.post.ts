@@ -76,7 +76,9 @@ export default defineEventHandler(async (event) => {
 
       return {
         ok: true,
-        result: parsed.data.extract,
+        result: parsed.data.extract.filter((r) =>
+          isExploitableVoiceActorName(r.voiceActor),
+        ),
         llmModel: parsed.model,
         llmQuota: parsed.quota,
       };
@@ -98,7 +100,9 @@ export default defineEventHandler(async (event) => {
 
     return {
       ok: true,
-      result: parsed.data.extract,
+      result: parsed.data.extract.filter((r) =>
+        isExploitableVoiceActorName(r.voiceActor),
+      ),
       llmModel: parsed.model,
       llmQuota: parsed.quota,
     };
