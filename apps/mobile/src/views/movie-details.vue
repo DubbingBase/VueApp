@@ -111,7 +111,7 @@ import AppActionSheet, {
   ActionSheetButton,
 } from "@/components/common/AppActionSheet.vue";
 
-import { MovieResponse } from "@supabase/functions/_shared/movie";
+import { MovieResponse } from "@app/shared-logic";
 import { supabase } from "../api/supabase";
 import { enqueueMedia } from "../api/mediaQueue";
 import { useVoiceActorManagement } from "@/composables/useVoiceActorManagement";

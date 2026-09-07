@@ -924,8 +924,9 @@ const searchMedia = async () => {
     const { data } = await supabase.functions.invoke("search", {
       body: { query: mediaSearchQuery.value.trim() },
     });
-    if (data?.results) {
-      mediaSearchResults.value = data.results.filter(
+    const results = Array.isArray(data) ? data : (data?.results || []);
+    if (results.length) {
+      mediaSearchResults.value = results.filter(
         (r: { character?: string }) => r.media_type === "movie" || r.media_type === "tv",
       );
     }

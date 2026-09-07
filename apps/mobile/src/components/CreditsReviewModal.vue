@@ -81,7 +81,7 @@ import XCircle from "~icons/lucide/x-circle";
 import Trash2 from "~icons/lucide/trash-2";
 import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
 import { supabase } from "@/api/supabase";
-import { Actor } from "@supabase/functions/_shared/types";
+import { Actor } from "@app/shared-logic";
 
 const props = defineProps<{
   isOpen: boolean;

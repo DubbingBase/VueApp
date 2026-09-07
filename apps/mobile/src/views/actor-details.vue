@@ -229,7 +229,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from "vue-i18n";
 import AppChip from '@/components/common/AppChip.vue';
 
-import type { Actor } from "@supabase/functions/_shared/types";
+import type { Actor } from "@app/shared-logic";
 import { supabase } from "../api/supabase";
 import { actorToPersonData, voiceActorToPersonData } from "@/utils/convert";
 import { PersonData } from "@/components/PersonItem.vue";

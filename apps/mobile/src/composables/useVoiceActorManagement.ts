@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 
 import { storeToRefs } from "pinia";
 import { useAuthStore } from "@/stores/auth";
+import { useLanguagePreference } from "@/composables/useLanguagePreference";
 import { supabase } from "@/api/supabase";
 import { useI18n } from "vue-i18n";
 import type { PersonData } from "@/components/PersonItem.vue";
@@ -117,6 +118,7 @@ export function useVoiceActorManagement(
   const linkVoiceActor = async (voiceActor: VoiceActor, contentId: string) => {
     console.log("selectedActor.value", selectedActor.value);
     try {
+      const { preferredLanguage } = useLanguagePreference();
       const response = await supabase.functions.invoke("link-voice-actor", {
         body: {
           actor_id: selectedActor.value,
@@ -124,6 +126,7 @@ export function useVoiceActorManagement(
           voice_actor_id: voiceActor.id,
           performance: "dialogues",
           media_id: contentId,
+          language: preferredLanguage.value || "fr",
         },
       });
 

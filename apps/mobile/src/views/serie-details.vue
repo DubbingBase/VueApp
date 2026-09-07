@@ -178,7 +178,7 @@ import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { actorToPersonData, voiceActorToPersonData } from "@/utils/convert";
 import { Role } from "@/components/PersonItem.vue";
 import { useI18n } from "vue-i18n";
-import { ShowResponse } from "@supabase/functions/_shared/types";
+import { ShowResponse } from "@app/shared-logic";
 
 const authStore = useAuthStore();
 const { isAdmin } = storeToRefs(authStore);

@@ -404,8 +404,8 @@ const handleAdminSearch = async () => {
     );
 
     if (error) throw error;
-    console.log("Search results:", data?.voice_actors);
-    adminSearchResults.value = data?.voice_actors || [];
+    console.log("Search results:", data);
+    adminSearchResults.value = Array.isArray(data) ? data : (data?.voice_actors || []);
   } catch (error) {
     console.error("Error searching voice actors:", error);
     adminSearchResults.value = [];

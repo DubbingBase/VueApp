@@ -1,9 +1,10 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { supabase } from "@/api/supabase";
+import { useLanguagePreference } from "@/composables/useLanguagePreference";
 import type { Tables } from "@/utils/database";
-import type { Movie } from "@supabase/functions/_shared/movie";
-import type { Serie } from "@supabase/functions/_shared/serie";
+import type { Movie } from "@app/shared-logic";
+import type { Serie } from "@app/shared-logic";
 
 interface VoiceActor extends Tables<"voice_actors"> {
   medias?: WorkEntry[];
@@ -354,6 +355,7 @@ export const useProfileStore = defineStore("profile", () => {
       isUpdating.value = true;
       error.value = null;
 
+      const { preferredLanguage } = useLanguagePreference();
       const { data, error: addError } = await supabase.functions.invoke(
         "link-voice-actor",
         {
@@ -363,6 +365,7 @@ export const useProfileStore = defineStore("profile", () => {
               workEntry.media_type === "serie" ? "tv" : workEntry.media_type,
             voice_actor_id: currentVoiceActor.value.id,
             targetUserId: identifiers.targetUserId,
+            language: preferredLanguage.value || "fr",
           },
         },
       );

@@ -4,4 +4,4 @@ export type {
   TablesInsert,
   TablesUpdate,
   Enums,
-} from "@supabase/functions/_shared/database.types";
+} from "@app/supabase";

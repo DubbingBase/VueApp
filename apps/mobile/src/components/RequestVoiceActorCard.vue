@@ -151,6 +151,8 @@ const submitRequest = async () => {
       const { error } = await supabase.functions.invoke("request-voice-actor-linkage", {
         body: {
           voice_actor_id: props.voiceActor.id,
+          firstname: props.voiceActor.firstname,
+          lastname: props.voiceActor.lastname,
           details: requestForm.value.details.trim(),
         },
       });
