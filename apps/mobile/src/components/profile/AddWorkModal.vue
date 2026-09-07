@@ -103,10 +103,10 @@ import AppSkeleton from '@/components/common/AppSkeleton.vue';
 import { ref, computed } from 'vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import { useProfileStore } from '@/stores/profile'
-import { supabase } from '@/api/supabase'
-import type { Movie } from '@supabase/functions/_shared/movie'
-import type { Serie } from '@supabase/functions/_shared/serie'
-import type { Cast } from '@supabase/functions/_shared/types'
+import { nitroRequest } from '@/api/nitro'
+import type { Movie } from '@app/shared-logic'
+import type { Serie } from '@app/shared-logic'
+import type { Cast } from '@app/shared-logic'
 type MovieCastMember = Cast;
 type SerieCastMember = Cast;
 
@@ -149,7 +149,7 @@ const searchMedia = (event: { target: { value: string } }) => {
       searchResults.value = []
       return
     }
-    const { data, error } = await supabase.functions.invoke('search', { body: { query } })
+    const { data, error } = await nitroRequest('/api/search', { query: { query } })
     if (error) {
       console.error(error)
       return
@@ -164,7 +164,7 @@ const selectMedia = async (media: Movie | Serie) => {
   searchResults.value = []
   selectedCastId.value = null
   characterSearchQuery.value = ''
-  const { data, error } = await supabase.functions.invoke('get-media-credits', { body: { media_type: media.media_type, media_id: media.id } })
+  const { data, error } = await nitroRequest('/api/get-media-credits', { query: { media_type: media.media_type, media_id: media.id } })
   if (error) {
     console.error(error)
     return

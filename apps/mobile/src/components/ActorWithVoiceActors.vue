@@ -238,7 +238,7 @@ import ThumbsDownIcon from "~icons/lucide/thumbs-down";
 import Edit3Icon from "~icons/lucide/edit-3";
 import Trash2Icon from "~icons/lucide/trash-2";
 import { useI18n } from "vue-i18n";
-import { Actor } from "@supabase/functions/_shared/types";
+import { Actor } from "@app/shared-logic";
 import type { VoiceActorInfo } from "@/types/models";
 
 export interface ActorWithVoiceActorsProps {

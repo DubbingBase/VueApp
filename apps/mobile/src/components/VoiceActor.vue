@@ -25,7 +25,7 @@
 
 <script lang="ts" setup>
 import { computed } from "vue";
-import { WorkAndVoiceActor } from "@supabase/functions/_shared/movie";
+import { WorkAndVoiceActor } from "@app/shared-logic";
 import { getAvatarFallbackUrl } from "@/utils/image";
 
 const props = defineProps<{

@@ -38,7 +38,7 @@ import AppSearchbar from '@/components/common/AppSearchbar.vue';
 import ActorWithVoiceActors from "./ActorWithVoiceActors.vue";
 import NoActors from "./NoActors.vue";
 import { PersonData } from "./PersonItem.vue";
-import { Actor } from "@supabase/functions/_shared/types";
+import { Actor } from "@app/shared-logic";
 import type { VoiceActorInfo } from "@/types/models";
 
 import { ref, computed } from "vue";

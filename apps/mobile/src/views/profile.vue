@@ -321,7 +321,7 @@ import RequestVoiceActorCard from "@/components/RequestVoiceActorCard.vue";
 import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
 import { toastController } from "@/composables/useToast";
 
-import { supabase } from "@/api/supabase";
+import { nitroRequest } from "@/api/nitro";
 
 const profileStore = useProfileStore();
 const authStore = useAuthStore();
@@ -394,18 +394,17 @@ const handleAdminSearch = async () => {
   }
 
   try {
-    // Import supabase directly
-    const { supabase } = await import("@/api/supabase");
-    // Use the search-voice-actors function to find voice actors
-    const { data, error } = await supabase.functions.invoke(
-      "search-voice-actors",
+    // Use the search-voice-actors endpoint to find voice actors
+    const { data, error } = await nitroRequest(
+      "/api/search-voice-actors",
       {
-        body: { query: adminSearchQuery.value }}
+        query: { query: adminSearchQuery.value },
+      },
     );
 
     if (error) throw error;
-    console.log("Search results:", data?.voice_actors);
-    adminSearchResults.value = data?.voice_actors || [];
+    console.log("Search results:", data);
+    adminSearchResults.value = Array.isArray(data) ? data : (data?.voice_actors || []);
   } catch (error) {
     console.error("Error searching voice actors:", error);
     adminSearchResults.value = [];

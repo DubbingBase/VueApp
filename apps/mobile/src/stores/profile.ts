@@ -1,9 +1,10 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
-import { supabase } from "@/api/supabase";
+import { nitroRequest } from "@/api/nitro";
+import { useLanguagePreference } from "@/composables/useLanguagePreference";
 import type { Tables } from "@/utils/database";
-import type { Movie } from "@supabase/functions/_shared/movie";
-import type { Serie } from "@supabase/functions/_shared/serie";
+import type { Movie } from "@app/shared-logic";
+import type { Serie } from "@app/shared-logic";
 
 interface VoiceActor extends Tables<"voice_actors"> {
   medias?: WorkEntry[];
@@ -138,8 +139,9 @@ export const useProfileStore = defineStore("profile", () => {
       isLoading.value = true;
       error.value = null;
 
-      const { data, error: fetchError } =
-        await supabase.functions.invoke("get-user-profile");
+      const { data, error: fetchError } = await nitroRequest(
+        "/api/get-user-profile",
+      );
 
       console.log("Profile store: fetchProfile response:", {
         data,
@@ -230,10 +232,13 @@ export const useProfileStore = defineStore("profile", () => {
       isLoading.value = true;
       error.value = null;
 
-      const { data, error: fetchError } = await supabase.functions.invoke(
-        "get-user-voice-actors",
+      const { data, error: fetchError } = await nitroRequest(
+        "/api/get-user-voice-actors",
         {
-          body: params,
+          query: {
+            page: params.page,
+            limit: params.limit,
+          },
         },
       );
 
@@ -274,9 +279,10 @@ export const useProfileStore = defineStore("profile", () => {
 
       if (profileType.value === "voice_actor" && currentVoiceActor.value) {
         const voiceActorUpdates = updates as Partial<VoiceActor>;
-        const { data, error: updateError } = await supabase.functions.invoke(
-          "update-voice-actor",
+        const { data, error: updateError } = await nitroRequest(
+          "/api/update-voice-actor",
           {
+            method: "POST",
             body: {
               voice_actor_id:
                 identifiers.voiceActorId || currentVoiceActor.value.id,
@@ -310,9 +316,10 @@ export const useProfileStore = defineStore("profile", () => {
         }
       } else if (profileType.value === "user_profile" && userProfile.value) {
         const userProfileUpdates = updates as Partial<UserProfile>;
-        const { data, error: updateError } = await supabase.functions.invoke(
-          "update-user-profile",
+        const { data, error: updateError } = await nitroRequest(
+          "/api/update-user-profile",
           {
+            method: "POST",
             body: userProfileUpdates,
           },
         );
@@ -354,15 +361,18 @@ export const useProfileStore = defineStore("profile", () => {
       isUpdating.value = true;
       error.value = null;
 
-      const { data, error: addError } = await supabase.functions.invoke(
-        "link-voice-actor",
+      const { preferredLanguage } = useLanguagePreference();
+      const { data, error: addError } = await nitroRequest(
+        "/api/link-voice-actor",
         {
+          method: "POST",
           body: {
             ...workEntry,
             media_type:
               workEntry.media_type === "serie" ? "tv" : workEntry.media_type,
             voice_actor_id: currentVoiceActor.value.id,
             targetUserId: identifiers.targetUserId,
+            language: preferredLanguage.value || "fr",
           },
         },
       );
@@ -397,9 +407,10 @@ export const useProfileStore = defineStore("profile", () => {
       isUpdating.value = true;
       error.value = null;
 
-      const { error: removeError } = await supabase.functions.invoke(
-        "delete-voice-actor-link",
+      const { error: removeError } = await nitroRequest(
+        "/api/delete-voice-actor-link",
         {
+          method: "POST",
           body: { id: workEntryId, targetUserId: identifiers.targetUserId },
         },
       );
@@ -430,9 +441,10 @@ export const useProfileStore = defineStore("profile", () => {
       isUpdating.value = true;
       error.value = null;
 
-      const { data, error: addError } = await supabase.functions.invoke(
-        "link-user-voice-actor",
+      const { data, error: addError } = await nitroRequest(
+        "/api/link-user-voice-actor",
         {
+          method: "POST",
           body: {
             voice_actor_id: voiceActorId,
             targetUserId: identifiers.targetUserId,
@@ -464,9 +476,10 @@ export const useProfileStore = defineStore("profile", () => {
       isUpdating.value = true;
       error.value = null;
 
-      const { error: removeError } = await supabase.functions.invoke(
-        "delete-user-voice-actor-link",
+      const { error: removeError } = await nitroRequest(
+        "/api/delete-user-voice-actor-link",
         {
+          method: "POST",
           body: {
             voice_actor_id: voiceActorId,
             targetUserId: identifiers.targetUserId,
@@ -507,9 +520,10 @@ export const useProfileStore = defineStore("profile", () => {
       isUpdating.value = true;
       error.value = null;
 
-      const { data, error: createError } = await supabase.functions.invoke(
-        "create-user-profile",
+      const { data, error: createError } = await nitroRequest(
+        "/api/create-user-profile",
         {
+          method: "POST",
           body: profileData,
         },
       );

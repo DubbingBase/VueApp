@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { ref, computed, onUnmounted } from "vue";
 import { supabase } from "@/api/supabase";
+import { nitroRequest } from "@/api/nitro";
 import type { User } from "@supabase/supabase-js";
 import type { Permission } from "@/types/permissions";
 import { useOneSignal } from "@/composables/useOneSignal";
@@ -85,7 +86,8 @@ export const useAuthStore = defineStore("auth", () => {
 
         // Auto-create user profile after successful signup
         try {
-          await supabase.functions.invoke("create-user-profile", {
+          await nitroRequest("/api/create-user-profile", {
+            method: "POST",
             body: {}, // Create empty profile
           });
         } catch (profileError) {

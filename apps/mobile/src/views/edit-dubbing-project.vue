@@ -597,6 +597,7 @@ import ChevronRight from "~icons/lucide/chevron-right";
 import { ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { supabase } from "@/api/supabase";
+import { nitroRequest } from "@/api/nitro";
 import imageCompression from "browser-image-compression";
 import { onIonViewWillEnter } from "@ionic/vue";
 import { useI18n } from "vue-i18n";
@@ -828,7 +829,7 @@ const getVoiceActorDisplayName = (row: CastRow) => {
 
 const fetchJobs = async () => {
   try {
-    const { data, error } = await supabase.functions.invoke("get-metadata", { body: { type: "jobs" } });
+    const { data, error } = await nitroRequest("/api/get-metadata", { query: { type: "jobs" } });
     if (error) throw error;
     availableJobs.value = data?.data || [];
   } catch (err) {
@@ -838,7 +839,7 @@ const fetchJobs = async () => {
 
 const fetchStudios = async () => {
   try {
-    const { data, error } = await supabase.functions.invoke("get-metadata", { body: { type: "studios" } });
+    const { data, error } = await nitroRequest("/api/get-metadata", { query: { type: "studios" } });
     if (error) throw error;
     studiosList.value = data?.data || [];
   } catch (err) {
@@ -848,7 +849,7 @@ const fetchStudios = async () => {
 
 const fetchVoiceActors = async () => {
   try {
-    const { data, error } = await supabase.functions.invoke("get-metadata", { body: { type: "voice_actors" } });
+    const { data, error } = await nitroRequest("/api/get-metadata", { query: { type: "voice_actors" } });
     if (error) throw error;
     voiceActorsList.value = data?.data || [];
   } catch (err) {
@@ -860,22 +861,17 @@ const fetchTmdbCast = async (tmdbId: number, targetType?: string) => {
   const currentType = targetType || contentType.value;
   const isShow =
     currentType === "tv" || currentType === "show" || currentType === "serie";
-  let functionName = isShow ? "show" : "movie";
+  const mediaType = isShow ? "show" : "movie";
 
   try {
-    let { data } = await supabase.functions.invoke(functionName, {
-      body: { id: tmdbId },
-    });
+    let { data } = await nitroRequest(`/api/${mediaType}/${tmdbId}`);
 
     if (!data?.movie && !data?.serie) {
-      const altFunctionName = functionName === "show" ? "movie" : "show";
-      const altRes = await supabase.functions.invoke(altFunctionName, {
-        body: { id: tmdbId },
-      });
+      const alternateMediaType = mediaType === "show" ? "movie" : "show";
+      const altRes = await nitroRequest(`/api/${alternateMediaType}/${tmdbId}`);
       if (altRes.data && (altRes.data.movie || altRes.data.serie)) {
         data = altRes.data;
-        functionName = altFunctionName;
-        if (altFunctionName === "show") contentType.value = "tv";
+        if (alternateMediaType === "show") contentType.value = "tv";
         else contentType.value = "movie";
       }
     }
@@ -921,11 +917,12 @@ const searchMedia = async () => {
     return;
   isSearchingMedia.value = true;
   try {
-    const { data } = await supabase.functions.invoke("search", {
-      body: { query: mediaSearchQuery.value.trim() },
+    const { data } = await nitroRequest("/api/search", {
+      query: { query: mediaSearchQuery.value.trim() },
     });
-    if (data?.results) {
-      mediaSearchResults.value = data.results.filter(
+    const results = Array.isArray(data) ? data : (data?.results || []);
+    if (results.length) {
+      mediaSearchResults.value = results.filter(
         (r: { character?: string }) => r.media_type === "movie" || r.media_type === "tv",
       );
     }
@@ -979,8 +976,8 @@ const fetchProjectDetails = async () => {
     let project = null;
 
     if (!isNaN(numericId)) {
-      const { data, error } = await supabase.functions.invoke("get-dubbing-project", {
-        body: { numericId },
+      const { data, error } = await nitroRequest("/api/get-dubbing-project", {
+        query: { numericId },
       });
 
       if (error) throw error;
@@ -1063,8 +1060,8 @@ const fetchProjectDetails = async () => {
       
       // We still need metadata if creating a new project
       if (id.value === "new") {
-        const { data: metaData } = await supabase.functions.invoke("get-metadata", {
-          body: { type: "all" },
+        const { data: metaData } = await nitroRequest("/api/get-metadata", {
+          query: { type: "all" },
         });
         if (metaData) {
           availableJobs.value = metaData.jobs;
@@ -1103,7 +1100,8 @@ const removeCastRow = (index: number) => {
 const quickCreateVoiceActor = async () => {
   if (!newPersonFirstname.value || !newPersonLastname.value) return;
   try {
-    const { data, error } = await supabase.functions.invoke("save-metadata", {
+    const { data, error } = await nitroRequest("/api/save-metadata", {
+      method: "POST",
       body: {
         type: "voice_actor",
         payload: {
@@ -1147,7 +1145,8 @@ const handleCreateNewPerson = (query?: string) => {
 const quickCreateJob = async () => {
   if (!newJobName.value) return;
   try {
-    const { data, error } = await supabase.functions.invoke("save-metadata", {
+    const { data, error } = await nitroRequest("/api/save-metadata", {
+      method: "POST",
       body: {
         type: "job",
         payload: { name: newJobName.value.trim() }
@@ -1183,7 +1182,8 @@ const saveProject = async () => {
 
     let projectId = dbProjectId.value;
 
-    const { data, error } = await supabase.functions.invoke("save-dubbing-project", {
+    const { data, error } = await nitroRequest("/api/save-dubbing-project", {
+      method: "POST",
       body: {
         projectId,
         projectPayload,
