@@ -8,7 +8,7 @@
 
 ## Scale
 
-79 API routes · 16 database models · 178 UI components · 69 library files · 11 middleware layers · 76 environment variables
+80 API routes · 16 database models · 178 UI components · 70 library files · 11 middleware layers · 76 environment variables
 
 ## Subsystems
 
@@ -18,6 +18,7 @@
 - **[Count-voice-actor-works.post](./count-voice-actor-works.post.md)** — 1 routes
 - **[Create-user-profile.post](./create-user-profile.post.md)** — 1 routes — touches: auth, db
 - **[Dashboard-stats.get](./dashboard-stats.get.md)** — 1 routes — touches: auth
+- **[Delete-user-voice-actor-link.post](./delete-user-voice-actor-link.post.md)** — 1 routes — touches: db
 - **[Delete-voice-actor-link.post](./delete-voice-actor-link.post.md)** — 1 routes — touches: auth, db
 - **[Delete-work-entry.post](./delete-work-entry.post.md)** — 1 routes — touches: auth, db
 - **[Delete_user.post](./delete_user.post.md)** — 1 routes — touches: auth
@@ -82,7 +83,7 @@
 
 **UI:** 178 components (vue) — see [ui.md](./ui.md)
 
-**Libraries:** 69 files — see [libraries.md](./libraries.md)
+**Libraries:** 70 files — see [libraries.md](./libraries.md)
 
 ## High-Impact Files
 

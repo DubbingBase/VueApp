@@ -1,6 +1,7 @@
 # Libraries
 
 - `apps/mobile/src/api/mediaQueue.ts` — function enqueueMedia: (params) => Promise<void>
+- `apps/mobile/src/api/nitro.ts` — function nitroRequest: (path, options?) => Promise<
 - `apps/mobile/src/composables/useDeferredCharacters.ts` — function useDeferredCharacters: (castSource) => void
 - `apps/mobile/src/composables/useFF.ts` — function useFeatureFlags: () => void
 - `apps/mobile/src/composables/useLanguagePreference.ts` — function useLanguagePreference: () => void

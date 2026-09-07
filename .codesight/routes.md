@@ -8,6 +8,7 @@
 - `POST` `/api/count-voice-actor-works`
 - `POST` `/api/create-user-profile` [auth, db]
 - `GET` `/api/dashboard-stats` [auth]
+- `POST` `/api/delete-user-voice-actor-link` [db]
 - `POST` `/api/delete-voice-actor-link` [auth, db]
 - `POST` `/api/delete-work-entry` [auth, db]
 - `POST` `/api/delete_user` [auth]
