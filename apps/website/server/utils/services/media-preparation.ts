@@ -411,6 +411,8 @@ Each row in a dubbing table = one credit. Output fields:
 - voiceActorFirstname: the localized/new voice actor's given name (e.g. "寿明" for 唐沢寿明)
 - performance: the character name (or null if not found)
 
+Skip any row where the voice actor name is not an exploitable person name (e.g. "N/A", "?", unknown or placeholder/dash-only) — omit it from items. Keep original spelling exactly, preserving accents/diacritics and hyphens/dashes.
+
 If no dubbing or voice-actor data exists in the section, return { items: [] }.`,
           temperature: 0,
         },
@@ -568,6 +570,8 @@ Each row in a dubbing table = one credit. Output fields:
 - voiceActorName: the localized/new voice actor's family/surname (e.g. "唐沢" for 唐沢寿明)
 - voiceActorFirstname: the localized/new voice actor's given name (e.g. "寿明" for 唐沢寿明)
 - performance: the character name (or null if not found)
+
+Skip any row where the voice actor name is not an exploitable person name (e.g. "N/A", "?", unknown or placeholder/dash-only) — omit it from items. Keep original spelling exactly, preserving accents/diacritics and hyphens/dashes.
 
 If no dubbing or voice-actor data exists in the section, return { items: [] }.`,
           temperature: 0,
