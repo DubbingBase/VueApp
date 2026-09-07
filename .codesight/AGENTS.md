@@ -3,9 +3,9 @@
 This is a typescript project using nuxt.
 It is a monorepo with workspaces: @app/mobile (apps/mobile), @app/website (apps/website), @app/supabase (packages/database), @app/locales (packages/locales), @app/og-image (packages/og-image), @app/shared-logic (packages/shared-logic).
 
-The API has 79 routes. See .codesight/routes.md for the full route map with methods, paths, and tags.
-The database has 16 models. See .codesight/schema.md for the full schema with fields, types, and relations.
-The UI has 178 components. See .codesight/components.md for the full list with props.
+The API has 79 routes. See routes.md for the full route map with methods, paths, and tags.
+The database has 16 models. See schema.md for the full schema with fields, types, and relations.
+The UI has 178 components. See components.md for the full list with props.
 Middleware includes: auth, custom, cors.
 
 High-impact files (most imported, changes here affect many other files):
@@ -35,8 +35,8 @@ Required environment variables (no defaults):
 - IGDB_CLIENT_ID (.env.example)
 - IGDB_CLIENT_SECRET (.env.example)
 
-See .codesight/cicd.md for additional cicd context.
-See .codesight/githooks.md for additional githooks context.
+See cicd.md for additional cicd context.
+See githooks.md for additional githooks context.
 
-Read .codesight/wiki/index.md for orientation (WHERE things live). Then read actual source files before implementing. Wiki articles are navigation aids, not implementation guides.
-Read .codesight/CODESIGHT.md for the complete AI context map including all routes, schema, components, libraries, config, middleware, and dependency graph.
+Read wiki/index.md for orientation (WHERE things live). Then read actual source files before implementing. Wiki articles are navigation aids, not implementation guides.
+Read CODESIGHT.md for the complete AI context map including all routes, schema, components, libraries, config, middleware, and dependency graph.
