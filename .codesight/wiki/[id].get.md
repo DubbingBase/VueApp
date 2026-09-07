@@ -25,10 +25,6 @@ The [id].get subsystem handles **9 routes** and touches: cache, queue.
 - `GET` `/api/voice-actor/:id` params(id) [cache]
   `apps/website/server/api/voice-actor/[id].get.ts`
 
-## High-Impact Files
-
-- `apps/website/server/api/movie/[id].get.ts` — imported by 2 files
-
 ## Source Files
 
 Read these before implementing or modifying this subsystem:

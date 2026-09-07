@@ -18,10 +18,10 @@
 - `apps/website/server/utils/normalize.ts` — imported by **4** files
 - `apps/website/server/utils/db/dubbing-project.ts` — imported by **3** files
 - `apps/website/server/utils/cache/constants.ts` — imported by **3** files
+- `apps/mobile/src/api/supabase.ts` — imported by **2** files
 - `apps/mobile/src/views/voice-actor-profile.vue` — imported by **2** files
 - `apps/mobile/src/views/edit-dubbing-project.vue` — imported by **2** files
 - `apps/mobile/src/views/edit-studio.vue` — imported by **2** files
-- `apps/website/server/api/movie/[id].get.ts` — imported by **2** files
 
 ## Import Map (who imports what)
 

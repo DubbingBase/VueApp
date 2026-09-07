@@ -73,7 +73,7 @@
 - `TVDB_API_KEY` **required** — .env.example
 - `UPSTASH_REDIS_REST_TOKEN` **required** — .env.example
 - `UPSTASH_REDIS_REST_URL` **required** — .env.example
-- `VITE_API_BASE_URL` (has default) — apps/mobile/src/api/http.ts
+- `VITE_API_BASE_URL` (has default) — .env.example
 - `VITE_ONESIGNAL_APP_ID` **required** — .env.example
 - `VITE_SUPABASE_PUBLISHABLE_KEY` **required** — .env.example
 - `VITE_SUPABASE_URL` (has default) — .env.example
