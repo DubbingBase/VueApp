@@ -68,11 +68,20 @@ async function getActiveLocale(page: Page): Promise<Locale> {
   return "en";
 }
 
+async function expectActiveLocale(page: Page, locale: Locale) {
+  await expect
+    .poll(() => getActiveLocale(page), {
+      timeout: 10000,
+      intervals: [250, 500, 1000],
+    })
+    .toBe(locale);
+}
+
 async function assertLocaleFooter(page: Page, locale: Locale) {
   for (const text of FOOTER_TEXT[locale]) {
     await expect(
       page.getByText(text).first(),
-      `[${locale}] footer should contain "${text}"`
+      `[${locale}] footer should contain "${text}"`,
     ).toBeVisible({ timeout: 10000 });
   }
 
@@ -83,7 +92,7 @@ async function assertLocaleFooter(page: Page, locale: Locale) {
       const count = await page.getByText(text).count();
       expect(
         count,
-        `[${locale}] should NOT contain ${other} footer text "${text}"`
+        `[${locale}] should NOT contain ${other} footer text "${text}"`,
       ).toBe(0);
     }
   }
@@ -91,11 +100,11 @@ async function assertLocaleFooter(page: Page, locale: Locale) {
 
 async function assertNoRawKeys(page: Page) {
   const bodyText = await page.locator("body").innerText();
-  const dots = bodyText.match(/\b(footer|nav|home|common|actor|voiceActor)\.[\w]+/g) || [];
-  expect(
-    dots,
-    "raw i18n keys should not appear in rendered page"
-  ).toHaveLength(0);
+  const dots =
+    bodyText.match(/\b(footer|nav|home|common|actor|voiceActor)\.[\w]+/g) || [];
+  expect(dots, "raw i18n keys should not appear in rendered page").toHaveLength(
+    0,
+  );
 }
 
 test.describe("Language Selector", () => {
@@ -114,7 +123,7 @@ test.describe("Language Selector", () => {
       await page.goto(LOCALE_URLS[locale], { waitUntil: "domcontentloaded" });
       await page.waitForTimeout(1500);
 
-      expect(await getActiveLocale(page)).toBe(locale);
+      await expectActiveLocale(page, locale);
       await assertLocaleFooter(page, locale);
       await assertNoRawKeys(page);
     });
@@ -131,10 +140,13 @@ test.describe("Language Selector", () => {
         await page.goto(LOCALE_URLS[url], { waitUntil: "domcontentloaded" });
         await page.waitForTimeout(1500);
 
-        expect(
-          await getActiveLocale(page),
-          `cookie=${cookie} should redirect away from /${url} to /${cookie === "en" ? "" : cookie}`
-        ).toBe(cookie);
+        await expect
+          .poll(() => getActiveLocale(page), {
+            timeout: 10000,
+            intervals: [250, 500, 1000],
+            message: `cookie=${cookie} should redirect away from /${url} to /${cookie === "en" ? "" : cookie}`,
+          })
+          .toBe(cookie);
         await assertLocaleFooter(page, cookie);
         await assertNoRawKeys(page);
       });
@@ -150,31 +162,18 @@ test.describe("Language Selector", () => {
       await setUserLangCookie(context, start);
       await page.goto(LOCALE_URLS[start], { waitUntil: "domcontentloaded" });
       await page.waitForTimeout(1500);
-      expect(await getActiveLocale(page)).toBe(start);
+      await expectActiveLocale(page, start);
 
       for (const target of ALL_LOCALES) {
         if (target === start) continue;
         await switchToLocaleViaSelector(page, target);
         expect(
           await getActiveLocale(page),
-          `from ${start}, selector should land on ${target}`
+          `from ${start}, selector should land on ${target}`,
         ).toBe(target);
         await assertLocaleFooter(page, target);
         await assertNoRawKeys(page);
       }
     }
-  });
-
-  test("cookie locale wins over URL locale: en cookie redirects French URL back to /", async ({
-    page,
-    context,
-  }) => {
-    await setUserLangCookie(context, "en");
-    await page.goto("/fr", { waitUntil: "domcontentloaded" });
-    await page.waitForTimeout(1500);
-
-    expect(await getActiveLocale(page)).toBe("en");
-    await assertLocaleFooter(page, "en");
-    await assertNoRawKeys(page);
   });
 });

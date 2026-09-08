@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-6xl mx-auto space-y-6">
+  <div class="admin-project-editor max-w-6xl mx-auto space-y-6">
     <!-- Header -->
     <div
       class="bg-gray-900 p-6 rounded-2xl border border-gray-800 flex justify-between items-center shadow-xl"
@@ -7,22 +7,22 @@
       <div>
         <h3 class="text-xl font-bold text-white flex items-center gap-2">
           <SmileIcon class="w-6 h-6 text-amber-500" />
-          {{ isEditMode
+          {{
+            isEditMode
               ? "Modifier le projet de jouet interactif / conteuse"
-              : "Créer un projet de jouet interactif / conteuse" }}
+              : "Créer un projet de jouet interactif / conteuse"
+          }}
         </h3>
         <p class="text-sm text-gray-400 mt-1">
-          {{ isEditMode
+          {{
+            isEditMode
               ? `Mise à jour du projet #${projectIdParam}`
-              : "Informations sur le produit, fabricant, studio et comédiens." }}
+              : "Informations sur le produit, fabricant, studio et comédiens."
+          }}
         </p>
       </div>
       <NuxtLink
-        :to="
-          parsedToyId
-            ? localePath(`/toy/${parsedToyId}`)
-            : localePath('/')
-        "
+        :to="parsedToyId ? localePath(`/toy/${parsedToyId}`) : localePath('/')"
         class="text-xs font-semibold px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-xl border border-gray-700 transition-colors flex items-center space-x-2"
       >
         <span>{{ parsedToyId ? "← Retour à l'objet" : "← Accueil" }}</span>
@@ -37,7 +37,7 @@
       <NuxtLink
         v-for="project in toyDubbingProjects"
         :key="project.id"
-        :to="localePath(`/toy/${parsedToyId}/edit/${project.id}`)"
+        :to="localePath(`/toy/${parsedToyId}/projects/${project.id}/edit`)"
         class="px-4 py-2 rounded-lg text-sm font-medium transition-colors border"
         :class="
           project.id === Number(projectIdParam)
@@ -51,14 +51,15 @@
         >
       </NuxtLink>
       <NuxtLink
-        :to="localePath(`/toy/${parsedToyId}/edit/new`)"
+        :to="localePath(`/toy/${parsedToyId}/projects/new`)"
         class="px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-dashed"
         :class="
           projectIdParam === 'new'
             ? 'bg-amber-900/50 text-amber-400 border-amber-800'
             : 'bg-gray-900 text-gray-400 border-gray-700 hover:bg-gray-800 hover:text-gray-300'
         "
-      >{{ $t('common.addLanguage') }}</NuxtLink>
+        >{{ $t("common.addLanguage") }}</NuxtLink
+      >
     </div>
 
     <!-- Loading overlay -->
@@ -67,7 +68,7 @@
       class="flex flex-col items-center justify-center py-24 gap-4 text-gray-400"
     >
       <Loader2Icon class="w-8 h-8 animate-spin text-amber-500" />
-      <span class="text-sm">{{ $t('common.loadingProjectData') }}</span>
+      <span class="text-sm">{{ $t("common.loadingProjectData") }}</span>
     </div>
 
     <form v-else @submit.prevent="saveToyProject" class="space-y-6">
@@ -79,15 +80,17 @@
           <h4
             class="text-sm font-bold text-gray-200 uppercase tracking-wider border-b border-gray-800 pb-3 flex items-center justify-between"
           >
-            <span>{{ $t('toyEditor.objectInfo') }}</span>
-            <span class="text-xs text-amber-400 font-normal">{{ $t('toyEditor.toyStoryteller') }}</span>
+            <span>{{ $t("toyEditor.objectInfo") }}</span>
+            <span class="text-xs text-amber-400 font-normal">{{
+              $t("toyEditor.toyStoryteller")
+            }}</span>
           </h4>
 
           <!-- Content ID -->
           <div class="space-y-1">
             <label
               class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-              >{{ $t('toyEditor.toyId') }}</label
+              >{{ $t("toyEditor.toyId") }}</label
             >
             <input
               v-model.number="contentId"
@@ -103,7 +106,7 @@
           <div class="space-y-1">
             <label
               class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-              >{{ $t('toyEditor.productName') }}</label
+              >{{ $t("toyEditor.productName") }}</label
             >
             <input
               v-model="mediaTitle"
@@ -118,24 +121,26 @@
           <div class="space-y-1">
             <label
               class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-              >{{ $t('common.language') }}</label
+              >{{ $t("common.language") }}</label
             >
-            <LanguageSelect v-model="language" required />
+            <AdminLanguageSelect v-model="language" required />
           </div>
 
           <!-- Status -->
           <div class="space-y-1">
             <label
               class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-              >{{ $t('common.status') }}</label
+              >{{ $t("common.status") }}</label
             >
             <select
               v-model="status"
               class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
             >
-              <option value="validated">{{ $t('common.validated') }}</option>
-              <option value="pending">{{ $t('common.pendingValidation') }}</option>
-              <option value="draft">{{ $t('common.draft') }}</option>
+              <option value="validated">{{ $t("common.validated") }}</option>
+              <option value="pending">
+                {{ $t("common.pendingValidation") }}
+              </option>
+              <option value="draft">{{ $t("common.draft") }}</option>
             </select>
           </div>
         </div>
@@ -147,8 +152,10 @@
           <h4
             class="text-sm font-bold text-gray-200 uppercase tracking-wider border-b border-gray-800 pb-3 flex items-center justify-between"
           >
-            <span>{{ $t('toyEditor.manufacturerStudio') }}</span>
-            <span class="text-xs text-gray-400">{{ $t('common.production') }}</span>
+            <span>{{ $t("toyEditor.manufacturerStudio") }}</span>
+            <span class="text-xs text-gray-400">{{
+              $t("common.production")
+            }}</span>
           </h4>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -156,9 +163,9 @@
             <div class="space-y-1">
               <label
                 class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-                >{{ $t('toyEditor.studioManufacturer') }}</label
+                >{{ $t("toyEditor.studioManufacturer") }}</label
               >
-              <AsyncAutocomplete
+              <AdminAsyncAutocomplete
                 v-model="selectedStudioId"
                 :options="studioOptions"
                 :loading="isSearchingStudios"
@@ -180,9 +187,9 @@
             <div class="space-y-1">
               <label
                 class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-                >{{ $t('toyEditor.artisticDirection') }}</label
+                >{{ $t("toyEditor.artisticDirection") }}</label
               >
-              <AsyncAutocomplete
+              <AdminAsyncAutocomplete
                 v-model="artisticDirectorId"
                 :options="voiceActorOptions"
                 :loading="isSearchingVoiceActors"
@@ -204,9 +211,9 @@
             <div class="space-y-1">
               <label
                 class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-                >{{ $t('toyEditor.recording') }}</label
+                >{{ $t("toyEditor.recording") }}</label
               >
-              <AsyncAutocomplete
+              <AdminAsyncAutocomplete
                 v-model="recordingId"
                 :options="voiceActorOptions"
                 :loading="isSearchingVoiceActors"
@@ -225,9 +232,9 @@
             <div class="space-y-1">
               <label
                 class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-                >{{ $t('toyEditor.mixing') }}</label
+                >{{ $t("toyEditor.mixing") }}</label
               >
-              <AsyncAutocomplete
+              <AdminAsyncAutocomplete
                 v-model="mixingId"
                 :options="voiceActorOptions"
                 :loading="isSearchingVoiceActors"
@@ -253,19 +260,30 @@
           class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-800 pb-4"
         >
           <div>
-            <h4 class="text-sm font-bold text-gray-200 uppercase tracking-wider">{{ $t('toyEditor.voiceNarrators') }}</h4>
-            <p class="text-xs text-gray-400 mt-0.5">{{ $t('toyEditor.associateActors') }}</p>
+            <h4
+              class="text-sm font-bold text-gray-200 uppercase tracking-wider"
+            >
+              {{ $t("toyEditor.voiceNarrators") }}
+            </h4>
+            <p class="text-xs text-gray-400 mt-0.5">
+              {{ $t("toyEditor.associateActors") }}
+            </p>
           </div>
           <button
             type="button"
             @click="addNewCastRow"
             class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors"
           >
-            <span>{{ $t('common.addVoice') }}</span>
+            <span>{{ $t("common.addVoice") }}</span>
           </button>
         </div>
 
-        <div v-if="castList.length === 0" class="text-center py-8 text-gray-500 text-sm">{{ $t('common.noVoiceRecorded') }}</div>
+        <div
+          v-if="castList.length === 0"
+          class="text-center py-8 text-gray-500 text-sm"
+        >
+          {{ $t("common.noVoiceRecorded") }}
+        </div>
 
         <div v-else class="space-y-4">
           <div
@@ -275,8 +293,11 @@
           >
             <!-- Voice Actor -->
             <div class="md:col-span-5 space-y-1">
-              <label class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{{ $t('common.actor') }}</label>
-              <AsyncAutocomplete
+              <label
+                class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider"
+                >{{ $t("common.actor") }}</label
+              >
+              <AdminAsyncAutocomplete
                 v-model="row.voice_actor_id"
                 :options="voiceActorOptions"
                 :loading="isSearchingVoiceActors"
@@ -296,7 +317,10 @@
 
             <!-- Role / Character Name -->
             <div class="md:col-span-3 space-y-1">
-              <label class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{{ $t('common.characterRole') }}</label>
+              <label
+                class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider"
+                >{{ $t("common.characterRole") }}</label
+              >
               <input
                 v-model="row.character_name"
                 type="text"
@@ -307,7 +331,10 @@
 
             <!-- Performance Type -->
             <div class="md:col-span-3 space-y-1">
-              <label class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{{ $t('common.performanceType') }}</label>
+              <label
+                class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider"
+                >{{ $t("common.performanceType") }}</label
+              >
               <input
                 v-model="row.performance"
                 type="text"
@@ -339,7 +366,9 @@
           type="button"
           @click="router.back()"
           class="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-semibold rounded-xl border border-gray-700 transition-colors"
-        >{{ $t('common.cancelButton') }}</button>
+        >
+          {{ $t("common.cancelButton") }}
+        </button>
 
         <button
           type="submit"
@@ -347,7 +376,9 @@
           class="px-6 py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-all shadow-lg flex items-center gap-2"
         >
           <Loader2Icon v-if="isSaving" class="w-4 h-4 animate-spin" />
-          <span>{{ isEditMode ? "Enregistrer les modifications" : "Créer le projet" }}</span>
+          <span>{{
+            isEditMode ? "Enregistrer les modifications" : "Créer le projet"
+          }}</span>
         </button>
       </div>
     </form>
@@ -362,15 +393,6 @@ import {
   Loader2 as Loader2Icon,
   Trash2 as Trash2Icon,
 } from "lucide-vue-next";
-
-defineRouteRules({
-  swr: false,
-  cache: false,
-});
-
-definePageMeta({
-  middleware: "admin",
-});
 
 const route = useRoute();
 const router = useRouter();
@@ -532,7 +554,9 @@ onMounted(async () => {
       const projectId = Number(projectIdParam.value);
       const { data: project } = await supabase
         .from("dubbing_projects")
-        .select("*, studios(id, name), work(*, voice_actors(id, firstname, lastname, profile_picture))")
+        .select(
+          "*, studios(id, name), work(*, voice_actors(id, firstname, lastname, profile_picture))",
+        )
         .eq("id", projectId)
         .single();
 
@@ -558,7 +582,8 @@ onMounted(async () => {
                 name: `${va.firstname} ${va.lastname}`,
               });
             }
-            if (member.job_id === 1) artisticDirectorId.value = member.person_id;
+            if (member.job_id === 1)
+              artisticDirectorId.value = member.person_id;
             if (member.job_id === 3) recordingId.value = member.person_id;
             if (member.job_id === 5) mixingId.value = member.person_id;
           }
@@ -620,7 +645,8 @@ async function saveToyProject() {
         .select("id")
         .single();
 
-      if (error || !newProject) throw error || new Error("Failed to create project");
+      if (error || !newProject)
+        throw error || new Error("Failed to create project");
       currentProjectId = newProject.id;
     }
 

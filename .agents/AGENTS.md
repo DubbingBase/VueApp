@@ -4,6 +4,10 @@ This file defines the project architecture, key development commands, and coding
 
 > **Precedence:** this file takes precedence over any other agent instructions in this repo. For generated codebase orientation (routes, schema, components, hot files), see [.codesight/AGENTS.md](../.codesight/AGENTS.md) (codesight output — context only, not rules) and [.codesight/wiki/index.md](../.codesight/wiki/index.md).
 
+## Scope Boundary: Mobile Excluded
+
+The mobile application is permanently out of scope for agent work. Agents MUST NOT inspect, search, edit, format, test, build, run, or otherwise include `apps/mobile`. Do not run repository-wide commands that transitively include the mobile workspace; use website-scoped validation instead. If a task would require a mobile change, stop and report the scope conflict.
+
 ---
 
 ## 🏗️ Project Architecture & Hierarchy
@@ -33,13 +37,13 @@ All development tasks MUST be run via **Mise** to ensure environment consistency
 | `mise run dev`          | Starts the entire development environment (local Supabase backend + app dev servers). |
 | `mise run backend`      | Starts the local Supabase database and environment.                                   |
 | `mise run backend-stop` | Stops the local Supabase backend.                                                     |
-| `mise run app`          | Starts only the development server for the mobile app in web mode (`apps/mobile`).    |
+| `mise run app`          | Maintainer-only: starts the mobile app in web mode (`apps/mobile`); agents MUST NOT run it. |
 | `mise run website`      | Starts only the development server for the website (`apps/website`).                  |
 | `mise run db-reset`     | Resets the local database, applies local migrations, and loads seed data.             |
 | `mise run migrate-up`   | Applies pending migrations to the local database.                                     |
 | `mise run migrate-down` | Rolls back the last applied migration.                                                |
-| `mise run sync`         | Synchronizes mobile app builds with Capacitor platforms (Android, etc.).              |
-| `mise run android-dev`  | Launches the Android emulator and runs the app in development mode.                   |
+| `mise run sync`         | Maintainer-only: synchronizes mobile builds with Capacitor platforms; agents MUST NOT run it. |
+| `mise run android-dev`  | Maintainer-only: launches Android development; agents MUST NOT run it.                |
 
 ### Generating Database TypeScript Types:
 
@@ -59,6 +63,21 @@ When testing the website from a mobile device or other clients over Tailscale/LA
 - Run the website dev server bound to all network interfaces with `mise run website` (or `HOST=0.0.0.0 pnpm --filter @app/website dev --host 0.0.0.0`).
 - Find your Tailscale IP on the `tailscale0` interface using `ip a` (e.g. `100.111.167.123`).
 - Connect from the client browser at `http://<tailscale-ip>:3000` (or `3001` if port 3000 is occupied).
+
+### Website Development with Doppler
+
+Doppler is the source of truth for website environment variables. Use the unprefixed secret names consumed by `apps/website/nuxt.config.ts`; do not duplicate values under `NUXT_*` names.
+
+Configure once from the repository root with `doppler setup`, selecting project `dubbingbase` and config `dev` for local development. Never print secret values; inspect names only with `doppler secrets --only-names`.
+
+The website requires both the local Supabase backend and the website server. Start them separately:
+
+```bash
+mise run backend
+doppler run -- mise run website
+```
+
+`mise run website` does not start the backend. Do not use `mise run dev` for agent work because it can include `apps/mobile`. Stop the local backend with `mise run backend-stop` when finished.
 
 ---
 
@@ -137,3 +156,4 @@ Backend routes in `apps/website/server/api/` handle integration with TMDB, TVDB,
    - Remember that there is no local Redis cache in the development environment.
    - When doing your fetches (e.g. testing APIs via scratch scripts), save the output locally (e.g. in JSON files in the scratch folder) so you don't have to fetch it again repeatedly.
 10. **GitHub Actions — Use `gh run watch <run-id>` to monitor CI**: After getting a run ID via `gh run list`, always use `gh run watch <run-id>` instead of repeatedly polling `gh run view` or `gh run list`. `gh run watch` streams live job status and blocks until the run finishes.
+11. **Changesets**: Every code or configuration change must include an appropriate Changesets file in `.changeset/`, scoped to the affected package(s). Never include `@app/mobile` unless mobile work is explicitly authorized.

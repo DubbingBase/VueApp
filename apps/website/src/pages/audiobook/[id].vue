@@ -95,8 +95,8 @@
 
         <ClientOnly>
           <NuxtLink
-            v-if="isAdmin"
-            :to="localePath(`/audiobook/${audiobook?.id || 'new'}/edit/${activeDubId || 'new'}`)"
+            v-if="isAdmin && audiobook?.id"
+            :to="localePath(activeDubId ? `/audiobook/${audiobook.id}/projects/${activeDubId}/edit` : `/audiobook/${audiobook.id}/projects/new`)"
             class="text-sm text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors flex items-center gap-1.5 font-medium"
           >
             <svg

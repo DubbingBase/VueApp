@@ -241,12 +241,20 @@
               <td class="px-4 py-3 text-xs text-gray-400">{{ work.performance || 'dialogues' }}</td>
               <td class="px-4 py-3 text-right">
                 <NuxtLink
-                  :to="localePath(getProjectEditLink(work.dubbing_projects?.content_type || work.content_type, work.dubbing_projects?.content_id, work.dubbing_project_id))"
+                  v-if="getProjectEditLink(work.dubbing_projects?.content_type, work.dubbing_projects?.content_id, work.dubbing_project_id)"
+                  :to="localePath(getProjectEditLink(work.dubbing_projects?.content_type, work.dubbing_projects?.content_id, work.dubbing_project_id))"
                   class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-blue-400 hover:text-blue-300 text-xs font-semibold rounded-lg border border-gray-700 transition-all inline-flex items-center space-x-1"
                 >
                   <span>{{ $t('common.edit') }}{{ getMediaTypeLabel(work.dubbing_projects?.content_type || work.content_type) }}</span>
                   <span>↗</span>
                 </NuxtLink>
+                <span
+                  v-else
+                  class="inline-flex items-center px-3 py-1.5 text-gray-500 text-xs rounded-lg border border-gray-800"
+                  :title="$t('voiceActorEdit.unsupportedMediaType')"
+                >
+                  {{ $t('voiceActorEdit.unsupportedMediaType') }}
+                </span>
               </td>
             </tr>
             <tr v-if="linkedWorks.length === 0">
@@ -504,7 +512,8 @@ const supabase = useSupabaseClient();
 
 
 
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
+import { getMediaEditorRoute } from "~/lib/media-editor-routes";
 
 
 const route = useRoute();
@@ -609,14 +618,7 @@ const uploadProfilePicture = async (voiceActorId: string | number) => {
 const linkedWorks = ref<any[]>([]);
 
 function getProjectEditLink(contentType?: string | null, contentId?: number | string, projectId?: number | string) {
-  if (!contentType || contentType === 'movie') return `/movie/${contentId || projectId}/edit/${projectId}`;
-  if (contentType === 'tv' || contentType === 'show' || contentType === 'serie') return `/show/${contentId || projectId}/edit/${projectId}`;
-  if (contentType === 'video_game' || contentType === 'game') return `/game/${contentId || projectId}/edit/${projectId}`;
-  if (contentType === 'audiobook') return `/audiobook/${contentId || projectId}/edit/${projectId}`;
-  if (contentType === 'podcast') return `/podcast/${contentId || projectId}/edit/${projectId}`;
-  if (contentType === 'advertisement') return `/advertisement/${contentId || projectId}/edit/${projectId}`;
-  if (contentType === 'toy') return `/toy/${contentId || projectId}/edit/${projectId}`;
-  return `/admin/movies/edit/${projectId}`;
+  return getMediaEditorRoute({ contentType, mediaId: contentId, projectId });
 }
 
 function getMediaTypeLabel(contentType?: string | null) {
@@ -755,6 +757,8 @@ const createMediaName = ref("");
 const createMediaBrand = ref("");
 const isCreatingMedia = ref(false);
 const mediaSearchTimer = ref<ReturnType<typeof setTimeout> | null>(null);
+let mediaSearchRequestId = 0;
+let creditsRequestId = 0;
 
 const mediaTypes = [
   { value: "movie", label: "Movie", icon: "🎬", note: "TMDB" },
@@ -771,6 +775,10 @@ const mediaTypeLabel = computed(() => {
 });
 
 function closeLinkWorkModal() {
+  mediaSearchRequestId += 1;
+  creditsRequestId += 1;
+  if (mediaSearchTimer.value) clearTimeout(mediaSearchTimer.value);
+  mediaSearchTimer.value = null;
   showLinkWorkModal.value = false;
   linkWorkStep.value = 1;
   selectedMediaType.value = "movie";
@@ -778,6 +786,8 @@ function closeLinkWorkModal() {
   mediaSearchResults.value = [];
   selectedMedia.value = null;
   linkWorkCast.value = [];
+  mediaSearchLoading.value = false;
+  linkWorkCastLoading.value = false;
   linkWorkActorName.value = "";
   linkWorkCharacterName.value = "";
   showCreateMedia.value = false;
@@ -786,16 +796,21 @@ function closeLinkWorkModal() {
 }
 
 function triggerMediaSearch() {
+  const requestId = ++mediaSearchRequestId;
   if (mediaSearchTimer.value) clearTimeout(mediaSearchTimer.value);
-  mediaSearchTimer.value = setTimeout(() => executeMediaSearch(), 300);
+  mediaSearchTimer.value = setTimeout(() => executeMediaSearch(requestId), 300);
 }
 
-async function executeMediaSearch() {
+async function executeMediaSearch(requestId: number) {
   const q = mediaSearchQuery.value.trim();
-  if (q.length < 2) { mediaSearchResults.value = []; return; }
+  if (q.length < 2) {
+    if (requestId === mediaSearchRequestId) mediaSearchResults.value = [];
+    return;
+  }
   mediaSearchLoading.value = true;
   try {
     const results = await $fetch<any[]>("/api/search", { params: { query: q } });
+    if (requestId !== mediaSearchRequestId) return;
     mediaSearchResults.value = (results ?? []).filter((r: any) => {
       if (selectedMediaType.value === "movie") return r.media_type === "movie";
       if (selectedMediaType.value === "tv") return r.media_type === "tv";
@@ -807,20 +822,29 @@ async function executeMediaSearch() {
       return true;
     });
   } catch (err) { console.error(err); }
-  finally { mediaSearchLoading.value = false; }
+  finally {
+    if (requestId === mediaSearchRequestId) mediaSearchLoading.value = false;
+  }
 }
 
 async function selectMediaItem(item: any) {
+  const requestId = ++creditsRequestId;
+  const mediaType = selectedMediaType.value;
   selectedMedia.value = item;
   linkWorkStep.value = 3;
 
-  const supportsCast = ["movie", "tv", "video_game"].includes(selectedMediaType.value);
+  const supportsCast = ["movie", "tv", "video_game"].includes(mediaType);
   if (supportsCast) {
     linkWorkCastLoading.value = true;
     try {
       const credits: any = await $fetch("/api/internal-media-credits", {
-        params: { media_type: selectedMediaType.value, media_id: item.id },
+        params: { media_type: mediaType, media_id: item.id },
       });
+      if (
+        requestId !== creditsRequestId ||
+        selectedMedia.value?.id !== item.id ||
+        selectedMediaType.value !== mediaType
+      ) return;
       linkWorkCast.value = (credits.cast ?? []).map((c: any) => ({
         id: c.id,
         name: c.name,
@@ -831,12 +855,23 @@ async function selectMediaItem(item: any) {
       console.error("Failed to load cast:", err);
       linkWorkCast.value = [];
     } finally {
-      linkWorkCastLoading.value = false;
+      if (requestId === creditsRequestId) linkWorkCastLoading.value = false;
     }
   } else {
     linkWorkCast.value = [];
+    linkWorkCastLoading.value = false;
   }
 }
+
+watch(selectedMediaType, () => {
+  mediaSearchRequestId += 1;
+  creditsRequestId += 1;
+  mediaSearchResults.value = [];
+  selectedMedia.value = null;
+  linkWorkCast.value = [];
+  mediaSearchLoading.value = false;
+  linkWorkCastLoading.value = false;
+});
 
 async function submitWorkLink(opts: { actorId?: number; actorName?: string; characterName?: string }) {
   if (!selectedMedia.value) return;
@@ -870,6 +905,8 @@ async function submitWorkLink(opts: { actorId?: number; actorName?: string; char
 
 async function createAndLink() {
   if (!createMediaName.value) return;
+  creditsRequestId += 1;
+  linkWorkCastLoading.value = false;
   isCreatingMedia.value = true;
   try {
     const result = await $fetch<any>("/api/internal-media-create", {

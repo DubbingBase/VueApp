@@ -66,6 +66,34 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: "Voice actor not found" });
   }
 
+  if (!isAdmin) {
+    const { data: voiceActorLink, error: voiceActorLinkError } =
+      await supabaseAdmin
+        .from("user_voice_actor_links")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("voice_actor_id", voice_actor_id)
+        .maybeSingle();
+
+    if (voiceActorLinkError) {
+      console.error(
+        "Error checking voice actor ownership:",
+        voiceActorLinkError,
+      );
+      throw createError({
+        statusCode: 500,
+        message: "Failed to authorize voice actor",
+      });
+    }
+
+    if (!voiceActorLink) {
+      throw createError({
+        statusCode: 403,
+        message: "Unauthorized: You do not own this voice actor",
+      });
+    }
+  }
+
   const dubbing_project_id = await findOrCreateDubbingProject(
     media_id,
     media_type,

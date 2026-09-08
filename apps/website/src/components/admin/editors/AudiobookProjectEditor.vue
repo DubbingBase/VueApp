@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-6xl mx-auto space-y-6">
+  <div class="admin-project-editor max-w-6xl mx-auto space-y-6">
     <!-- Header -->
     <div
       class="bg-gray-900 p-6 rounded-2xl border border-gray-800 flex justify-between items-center shadow-xl"
@@ -7,14 +7,18 @@
       <div>
         <h3 class="text-xl font-bold text-white flex items-center gap-2">
           <BookOpenIcon class="w-6 h-6 text-amber-500" />
-          {{ isEditMode
+          {{
+            isEditMode
               ? "Modifier le projet de livre audio"
-              : "Créer un projet de livre audio" }}
+              : "Créer un projet de livre audio"
+          }}
         </h3>
         <p class="text-sm text-gray-400 mt-1">
-          {{ isEditMode
+          {{
+            isEditMode
               ? `Mise à jour du projet #${projectIdParam}`
-              : "Informations OpenLibrary, studio, narrateurs et casting." }}
+              : "Informations OpenLibrary, studio, narrateurs et casting."
+          }}
         </p>
       </div>
       <NuxtLink
@@ -37,7 +41,11 @@
       <NuxtLink
         v-for="project in bookDubbingProjects"
         :key="project.id"
-        :to="localePath(`/audiobook/${openLibraryBookId}/edit/${project.id}`)"
+        :to="
+          localePath(
+            `/audiobook/${openLibraryBookId}/projects/${project.id}/edit`,
+          )
+        "
         class="px-4 py-2 rounded-lg text-sm font-medium transition-colors border"
         :class="
           project.id === Number(projectIdParam)
@@ -51,14 +59,15 @@
         >
       </NuxtLink>
       <NuxtLink
-        :to="localePath(`/audiobook/${openLibraryBookId}/edit/new`)"
+        :to="localePath(`/audiobook/${openLibraryBookId}/projects/new`)"
         class="px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-dashed"
         :class="
           projectIdParam === 'new'
             ? 'bg-amber-900/50 text-amber-400 border-amber-800'
             : 'bg-gray-900 text-gray-400 border-gray-700 hover:bg-gray-800 hover:text-gray-300'
         "
-      >{{ $t('common.addLanguage') }}</NuxtLink>
+        >{{ $t("common.addLanguage") }}</NuxtLink
+      >
     </div>
 
     <!-- Loading overlay -->
@@ -67,7 +76,7 @@
       class="flex flex-col items-center justify-center py-24 gap-4 text-gray-400"
     >
       <Loader2Icon class="w-8 h-8 animate-spin text-amber-500" />
-      <span class="text-sm">{{ $t('common.loadingProjectData') }}</span>
+      <span class="text-sm">{{ $t("common.loadingProjectData") }}</span>
     </div>
 
     <form v-else @submit.prevent="saveBookProject" class="space-y-6">
@@ -79,8 +88,10 @@
           <h4
             class="text-sm font-bold text-gray-200 uppercase tracking-wider border-b border-gray-800 pb-3 flex items-center justify-between"
           >
-            <span>{{ $t('audiobookEditor.bookInfo') }}</span>
-            <span class="text-xs text-amber-400 font-normal">{{ $t('audiobook.openLibrary') }}</span>
+            <span>{{ $t("audiobookEditor.bookInfo") }}</span>
+            <span class="text-xs text-amber-400 font-normal">{{
+              $t("audiobook.openLibrary")
+            }}</span>
           </h4>
 
           <!-- Cover Preview -->
@@ -97,7 +108,9 @@
               />
               <div v-else class="text-center p-3 text-gray-600">
                 <BookOpenIcon class="h-10 w-10 mx-auto mb-1 opacity-50" />
-                <span class="text-[10px]">{{ $t('audiobookEditor.noCover') }}</span>
+                <span class="text-[10px]">{{
+                  $t("audiobookEditor.noCover")
+                }}</span>
               </div>
             </div>
           </div>
@@ -106,7 +119,7 @@
           <div class="space-y-1">
             <label
               class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-              >{{ $t('audiobookEditor.openLibraryWorkId') }}</label
+              >{{ $t("audiobookEditor.openLibraryWorkId") }}</label
             >
             <div class="flex space-x-2">
               <input
@@ -127,7 +140,7 @@
                   v-if="isFetchingMetadata"
                   class="w-4 h-4 animate-spin"
                 />
-                <span v-else>{{ $t('common.fetch') }}</span>
+                <span v-else>{{ $t("common.fetch") }}</span>
               </button>
             </div>
           </div>
@@ -136,7 +149,7 @@
           <div class="space-y-1">
             <label
               class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-              >{{ $t('audiobookEditor.bookTitle') }}</label
+              >{{ $t("audiobookEditor.bookTitle") }}</label
             >
             <input
               v-model="mediaTitle"
@@ -150,24 +163,26 @@
           <div class="space-y-1">
             <label
               class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-              >{{ $t('audiobookEditor.narrationLanguage') }}</label
+              >{{ $t("audiobookEditor.narrationLanguage") }}</label
             >
-            <LanguageSelect v-model="language" required />
+            <AdminLanguageSelect v-model="language" required />
           </div>
 
           <!-- Status -->
           <div class="space-y-1">
             <label
               class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-              >{{ $t('common.status') }}</label
+              >{{ $t("common.status") }}</label
             >
             <select
               v-model="status"
               class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
             >
-              <option value="validated">{{ $t('common.validated') }}</option>
-              <option value="pending">{{ $t('common.pendingValidation') }}</option>
-              <option value="draft">{{ $t('common.draft') }}</option>
+              <option value="validated">{{ $t("common.validated") }}</option>
+              <option value="pending">
+                {{ $t("common.pendingValidation") }}
+              </option>
+              <option value="draft">{{ $t("common.draft") }}</option>
             </select>
           </div>
         </div>
@@ -179,8 +194,10 @@
           <h4
             class="text-sm font-bold text-gray-200 uppercase tracking-wider border-b border-gray-800 pb-3 flex items-center justify-between"
           >
-            <span>{{ $t('audiobookEditor.technicalProduction') }}</span>
-            <span class="text-xs text-gray-400">{{ $t('audiobookEditor.studioProduction') }}</span>
+            <span>{{ $t("audiobookEditor.technicalProduction") }}</span>
+            <span class="text-xs text-gray-400">{{
+              $t("audiobookEditor.studioProduction")
+            }}</span>
           </h4>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -188,9 +205,9 @@
             <div class="space-y-1">
               <label
                 class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-                >{{ $t('audiobookEditor.recordingStudio') }}</label
+                >{{ $t("audiobookEditor.recordingStudio") }}</label
               >
-              <AsyncAutocomplete
+              <AdminAsyncAutocomplete
                 v-model="selectedStudioId"
                 :options="studioOptions"
                 :loading="isSearchingStudios"
@@ -212,9 +229,9 @@
             <div class="space-y-1">
               <label
                 class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-                >{{ $t('audiobookEditor.artisticDirection') }}</label
+                >{{ $t("audiobookEditor.artisticDirection") }}</label
               >
-              <AsyncAutocomplete
+              <AdminAsyncAutocomplete
                 v-model="artisticDirectorId"
                 :options="voiceActorOptions"
                 :loading="isSearchingVoiceActors"
@@ -236,9 +253,9 @@
             <div class="space-y-1">
               <label
                 class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-                >{{ $t('audiobookEditor.recordingEngineer') }}</label
+                >{{ $t("audiobookEditor.recordingEngineer") }}</label
               >
-              <AsyncAutocomplete
+              <AdminAsyncAutocomplete
                 v-model="recordingId"
                 :options="voiceActorOptions"
                 :loading="isSearchingVoiceActors"
@@ -257,9 +274,9 @@
             <div class="space-y-1">
               <label
                 class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-                >{{ $t('audiobookEditor.mixing') }}</label
+                >{{ $t("audiobookEditor.mixing") }}</label
               >
-              <AsyncAutocomplete
+              <AdminAsyncAutocomplete
                 v-model="mixingId"
                 :options="voiceActorOptions"
                 :loading="isSearchingVoiceActors"
@@ -285,19 +302,30 @@
           class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-800 pb-4"
         >
           <div>
-            <h4 class="text-sm font-bold text-gray-200 uppercase tracking-wider">{{ $t('audiobookEditor.narratorsVoiceRoles') }}</h4>
-            <p class="text-xs text-gray-400 mt-0.5">{{ $t('audiobookEditor.associateActors') }}</p>
+            <h4
+              class="text-sm font-bold text-gray-200 uppercase tracking-wider"
+            >
+              {{ $t("audiobookEditor.narratorsVoiceRoles") }}
+            </h4>
+            <p class="text-xs text-gray-400 mt-0.5">
+              {{ $t("audiobookEditor.associateActors") }}
+            </p>
           </div>
           <button
             type="button"
             @click="addNewCastRow"
             class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors"
           >
-            <span>{{ $t('audiobookEditor.addNarrator') }}</span>
+            <span>{{ $t("audiobookEditor.addNarrator") }}</span>
           </button>
         </div>
 
-        <div v-if="castList.length === 0" class="text-center py-8 text-gray-500 text-sm">{{ $t('audiobookEditor.noRoleNarrator') }}</div>
+        <div
+          v-if="castList.length === 0"
+          class="text-center py-8 text-gray-500 text-sm"
+        >
+          {{ $t("audiobookEditor.noRoleNarrator") }}
+        </div>
 
         <div v-else class="space-y-4">
           <div
@@ -307,8 +335,11 @@
           >
             <!-- Voice Actor (Narrator) -->
             <div class="md:col-span-5 space-y-1">
-              <label class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{{ $t('audiobookEditor.actorNarrator') }}</label>
-              <AsyncAutocomplete
+              <label
+                class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider"
+                >{{ $t("audiobookEditor.actorNarrator") }}</label
+              >
+              <AdminAsyncAutocomplete
                 v-model="row.voice_actor_id"
                 :options="voiceActorOptions"
                 :loading="isSearchingVoiceActors"
@@ -328,7 +359,10 @@
 
             <!-- Role / Character Name -->
             <div class="md:col-span-3 space-y-1">
-              <label class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{{ $t('common.roleCharacter') }}</label>
+              <label
+                class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider"
+                >{{ $t("common.roleCharacter") }}</label
+              >
               <input
                 v-model="row.character_name"
                 type="text"
@@ -339,7 +373,10 @@
 
             <!-- Performance Type -->
             <div class="md:col-span-3 space-y-1">
-              <label class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{{ $t('common.performanceType') }}</label>
+              <label
+                class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider"
+                >{{ $t("common.performanceType") }}</label
+              >
               <input
                 v-model="row.performance"
                 type="text"
@@ -371,7 +408,9 @@
           type="button"
           @click="router.back()"
           class="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-semibold rounded-xl border border-gray-700 transition-colors"
-        >{{ $t('common.cancelButton') }}</button>
+        >
+          {{ $t("common.cancelButton") }}
+        </button>
 
         <button
           type="submit"
@@ -379,7 +418,9 @@
           class="px-6 py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-all shadow-lg flex items-center gap-2"
         >
           <Loader2Icon v-if="isSaving" class="w-4 h-4 animate-spin" />
-          <span>{{ isEditMode ? "Enregistrer les modifications" : "Créer le projet" }}</span>
+          <span>{{
+            isEditMode ? "Enregistrer les modifications" : "Créer le projet"
+          }}</span>
         </button>
       </div>
     </form>
@@ -394,15 +435,6 @@ import {
   Loader2 as Loader2Icon,
   Trash2 as Trash2Icon,
 } from "lucide-vue-next";
-
-defineRouteRules({
-  swr: false,
-  cache: false,
-});
-
-definePageMeta({
-  middleware: "admin",
-});
 
 const route = useRoute();
 const router = useRouter();
@@ -587,7 +619,9 @@ onMounted(async () => {
       const projectId = Number(projectIdParam.value);
       const { data: project } = await supabase
         .from("dubbing_projects")
-        .select("*, studios(id, name), work(*, voice_actors(id, firstname, lastname, profile_picture))")
+        .select(
+          "*, studios(id, name), work(*, voice_actors(id, firstname, lastname, profile_picture))",
+        )
         .eq("id", projectId)
         .single();
 
@@ -614,7 +648,8 @@ onMounted(async () => {
                 name: `${va.firstname} ${va.lastname}`,
               });
             }
-            if (member.job_id === 1) artisticDirectorId.value = member.person_id;
+            if (member.job_id === 1)
+              artisticDirectorId.value = member.person_id;
             if (member.job_id === 3) recordingId.value = member.person_id;
             if (member.job_id === 5) mixingId.value = member.person_id;
           }
@@ -677,7 +712,8 @@ async function saveBookProject() {
         .select("id")
         .single();
 
-      if (error || !newProject) throw error || new Error("Failed to create project");
+      if (error || !newProject)
+        throw error || new Error("Failed to create project");
       currentProjectId = newProject.id;
     }
 
