@@ -4,27 +4,27 @@
     <div class="bg-gray-900 p-6 rounded-2xl border border-gray-800 flex justify-between items-center shadow-xl">
       <div>
         <h3 class="text-xl font-bold text-white flex items-center gap-2">
-          <TvIcon class="w-6 h-6 text-cyan-400" />
-          {{ isEditMode ? $t('projectEditor.editShowProject') : $t('projectEditor.createShowProject') }}
+          <Gamepad2Icon class="w-6 h-6 text-cyan-400" />
+          {{ isEditMode ? $t('projectEditor.editGameProject') : $t('projectEditor.createGameProject') }}
         </h3>
         <p class="text-sm text-gray-400 mt-1">
-          {{ isEditMode ? `Updating dubbing project ID #${projectIdParam}` : $t('projectEditor.fillInfoTmdb') }}
+          {{ isEditMode ? `Updating dubbing project ID #${projectIdParam}` : $t('projectEditor.fillInfoGame') }}
         </p>
       </div>
       <NuxtLink
-        :to="tmdbShowId ? localePath(`/show/${tmdbShowId}`) : localePath('/')"
+        :to="igdbGameId ? localePath(`/game/${igdbGameId}`) : localePath('/')"
         class="text-xs font-semibold px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-xl border border-gray-700 transition-colors flex items-center space-x-2"
       >
-        <span>{{ tmdbShowId ? $t('projectEditor.backToShow') : $t('projectEditor.backHome') }}</span>
+        <span>{{ igdbGameId ? $t('projectEditor.backToGame') : $t('projectEditor.backHome') }}</span>
       </NuxtLink>
     </div>
 
     <!-- Navigation Tabs -->
-    <div v-if="tmdbShowId" class="flex flex-wrap gap-2 pb-2 border-b border-gray-800">
+    <div v-if="igdbGameId" class="flex flex-wrap gap-2 pb-2 border-b border-gray-800">
       <NuxtLink
-        v-for="project in showDubbingProjects"
+        v-for="project in gameDubbingProjects"
         :key="project.id"
-        :to="localePath(`/show/${tmdbShowId}/edit/${project.id}`)"
+        :to="localePath(`/game/${igdbGameId}/projects/${project.id}/edit`)"
         class="px-4 py-2 rounded-lg text-sm font-medium transition-colors border"
         :class="project.id === Number(projectIdParam) ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-900 text-gray-300 border-gray-800 hover:bg-gray-800'"
       >
@@ -32,7 +32,7 @@
         <span v-if="project.studios?.name" class="opacity-75 text-xs ml-1">({{ project.studios.name }})</span>
       </NuxtLink>
       <NuxtLink
-        :to="localePath(`/show/${tmdbShowId}/edit/new`)"
+        :to="localePath(`/game/${igdbGameId}/projects/new`)"
         class="px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-dashed"
         :class="projectIdParam === 'new' ? 'bg-cyan-900/50 text-cyan-400 border-cyan-800' : 'bg-gray-900 text-gray-400 border-gray-700 hover:bg-gray-800 hover:text-gray-300'"
       >{{ $t('projectEditor.addLanguage') }}</NuxtLink>
@@ -45,13 +45,13 @@
       <span class="text-sm">{{ $t('projectEditor.loadingData') }}</span>
     </div>
 
-    <form v-else @submit.prevent="saveShowProject" class="space-y-6">
+    <form v-else @submit.prevent="saveGameProject" class="space-y-6">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Media Metadata Card (Left Column) -->
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-5 h-fit shadow-xl">
           <h4 class="text-sm font-bold text-gray-200 uppercase tracking-wider border-b border-gray-800 pb-3 flex items-center justify-between">
             <span>{{ $t('admin.movieEditor.mediaInfo') }}</span>
-            <span class="text-xs text-cyan-400 font-normal">{{ $t('admin.movieEditor.tmdbLinked') }}</span>
+            <span class="text-xs text-cyan-400 font-normal">{{ $t('projectEditor.igdbLinked') }}</span>
           </h4>
 
           <!-- Poster Preview -->
@@ -69,25 +69,25 @@
             </div>
           </div>
 
-          <!-- Content ID / TMDB ID -->
+          <!-- Content ID / IGDB ID -->
           <div class="space-y-1">
-            <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">{{ $t('projectEditor.tmdbShowId') }}</label>
+            <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">{{ $t('projectEditor.igdbGameId') }}</label>
             <div class="flex space-x-2">
               <input
                 v-model.number="contentId"
                 type="number"
                 required
-                :disabled="!!tmdbShowId"
+                :disabled="!!igdbGameId"
                 placeholder="e.g. 1020"
                 class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               />
               <button
                 type="button"
-                @click="fetchTmdbMetadata"
-                :disabled="isFetchingTmdb || !contentId"
+                @click="fetchIgdbMetadata"
+                :disabled="isFetchingIgdb || !contentId"
                 class="px-3 py-2 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-gray-200 text-xs font-semibold rounded-xl border border-gray-700 whitespace-nowrap"
               >
-                <Loader2Icon v-if="isFetchingTmdb" class="w-4 h-4 animate-spin" />
+                <Loader2Icon v-if="isFetchingIgdb" class="w-4 h-4 animate-spin" />
                 <span v-else>{{ $t('common.fetch') }}</span>
               </button>
             </div>
@@ -281,17 +281,17 @@
             <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
               <!-- Character fields -->
               <div class="md:col-span-12 space-y-1">
-                <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">{{ $t('projectEditor.originalActorCharacter') }}</label>
+                <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">{{ $t('projectEditor.character') }}</label>
                 <AsyncAutocomplete
-                  v-model="row.actor_id"
-                  @update:model-value="(val: any) => handleActorSelect(row, val)"
-                  :options="filteredTmdbCast"
-                  :loading="isFetchingTmdb"
-                  placeholder="Search TMDB Cast..."
+                  v-model="row.character_id"
+                  @update:model-value="(val: any) => handleCharacterSelect(row, val)"
+                  :options="filteredIgdbCharacters"
+                  :loading="isFetchingIgdb"
+                  placeholder="Search Game Character..."
                   :allow-create="true"
-                  :display-fn="(id: any) => getActorName(id) || row.character_name"
-                  @search="searchActors"
-                  @create="(query: string) => handleActorCreate(row, query)"
+                  :display-fn="(id: any) => getCharacterName(id) || row.character_name"
+                  @search="searchCharacters"
+                  @create="(query: string) => handleCharacterCreate(row, query)"
                 />
               </div>
 
@@ -344,7 +344,7 @@
           class="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl flex items-center space-x-2 transition-colors disabled:opacity-50"
         >
           <Loader2Icon v-if="isSaving" class="w-5 h-5 animate-spin" />
-          <span v-else>{{ $t('projectEditor.saveShowProject') }}</span>
+          <span v-else>{{ $t('projectEditor.saveGameProject') }}</span>
         </button>
       </div>
     </form>
@@ -420,34 +420,25 @@
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { DialogRoot, DialogPortal, DialogOverlay, DialogContent, DialogTitle, DialogDescription, VisuallyHidden } from "reka-ui";
-import { TvIcon, Loader2Icon, ImageIcon, XIcon } from "lucide-vue-next";
-
-defineRouteRules({
-  swr: false,
-  cache: false
-});
-
-definePageMeta({
-  middleware: 'admin'
-});
+import { Gamepad2Icon, Loader2Icon, ImageIcon, XIcon } from "lucide-vue-next";
 
 const supabase = useSupabaseClient();
 const route = useRoute();
 const router = useRouter();
 const localePath = useLocalePath();
 
-const showIdParam = route.params.showId as string | undefined;
+const gameIdParam = route.params.gameId as string | undefined;
 const projectIdParam = route.params.projectId as string | undefined;
 
 const isEditMode = computed(() => !!projectIdParam && projectIdParam !== "new");
-const tmdbShowId = computed(() => (showIdParam && showIdParam !== "new") ? Number(showIdParam) : null);
+const igdbGameId = computed(() => (gameIdParam && gameIdParam !== "new") ? Number(gameIdParam) : null);
 
-const showDubbingProjects = ref<any[]>([]);
+const gameDubbingProjects = ref<any[]>([]);
 
 // Form state
 const contentId = ref<number | null>(null);
 const mediaTitle = ref("");
-const contentType = ref("tv");
+const contentType = ref("video_game");
 const language = ref("fr-FR");
 const posterUrl = ref("");
 const status = ref("validated");
@@ -480,7 +471,7 @@ let pendingVaSelectCallback: ((id: number) => void) | null = null;
 // Cast Rows
 interface CastRow {
   id?: number;
-  actor_id: number | string | null;
+  character_id: number | string | null;
   character_name: string;
   voice_actor_id: number | null;
   performance: string;
@@ -508,57 +499,45 @@ const getDisplayLanguage = (langCode: string | undefined | null) => {
   }
 };
 
-const isFetchingTmdb = ref(false);
+const isFetchingIgdb = ref(false);
 const isSaving = ref(false);
 const isLoading = ref(true);
 
 const addCastRow = () => {
-  castRows.value.push({ actor_id: null, character_name: "", voice_actor_id: null, performance: "dialogues", highlight: false });
+  castRows.value.push({ character_id: null, character_name: "", voice_actor_id: null, performance: "dialogues", highlight: false });
 };
 const removeCastRow = (index: number) => {
   castRows.value.splice(index, 1);
 };
 
-const tmdbCast = ref<any[]>([]);
-const filteredTmdbCast = ref<any[]>([]);
+const igdbCharacters = ref<any[]>([]);
+const filteredIgdbCharacters = ref<any[]>([]);
 
-const extractRoles = (c: any) => {
-  if (c.roles && c.roles.length > 0) {
-    return c.roles.map((r: any) => r.character).filter(Boolean).join(', ');
-  }
-  return c.character || '';
-}
-
-const searchActors = (query: string) => {
+const searchCharacters = (query: string) => {
   if (!query) {
-    filteredTmdbCast.value = tmdbCast.value.slice(0, 50);
+    filteredIgdbCharacters.value = igdbCharacters.value.slice(0, 50);
     return;
   }
-  filteredTmdbCast.value = tmdbCast.value.filter(c => {
-    const chars = extractRoles(c).toLowerCase();
-    return c.name.toLowerCase().includes(query.toLowerCase()) || chars.includes(query.toLowerCase());
-  }).slice(0, 50);
+  filteredIgdbCharacters.value = igdbCharacters.value.filter(c => c.name.toLowerCase().includes(query.toLowerCase())).slice(0, 50);
 };
 
-const getActorName = (id: number | string | null) => {
+const getCharacterName = (id: number | string | null) => {
   if (!id) return '';
-  const actor = tmdbCast.value.find(c => c.id === id);
-  if (!actor) return '';
-  const chars = extractRoles(actor);
-  return chars ? `${actor.name} (${chars})` : actor.name;
+  const char = igdbCharacters.value.find(c => c.id === id);
+  return char ? char.name : '';
 };
 
-const handleActorSelect = (row: CastRow, val: any) => {
-  const actor = tmdbCast.value.find(c => c.id === val);
-  if (actor) {
-    row.character_name = extractRoles(actor);
+const handleCharacterSelect = (row: CastRow, val: any) => {
+  const char = igdbCharacters.value.find(c => c.id === val);
+  if (char) {
+    row.character_name = char.name;
   }
 };
 
-const handleActorCreate = (row: CastRow, query: string) => {
+const handleCharacterCreate = (row: CastRow, query: string) => {
   const fakeId = `custom_${Date.now()}_${Math.random()}`;
-  tmdbCast.value.push({ id: fakeId, name: query, character: query });
-  row.actor_id = fakeId as any; // Type hack for UI fake IDs
+  igdbCharacters.value.push({ id: fakeId, name: query });
+  row.character_id = fakeId as any; // Type hack for UI fake IDs
   row.character_name = query;
 };
 
@@ -663,8 +642,8 @@ const createVoiceActor = async () => {
 };
 
 
-const saveShowProject = async () => {
-  if (!contentId.value) return showToast("TMDB ID required", "error");
+const saveGameProject = async () => {
+  if (!contentId.value) return showToast("IGDB ID required", "error");
   if (!language.value) return showToast("Language required", "error");
   isSaving.value = true;
   try {
@@ -686,7 +665,7 @@ const saveShowProject = async () => {
       
       if (projectId && contentId.value) {
         showToast("Project created! Redirecting...", "success");
-        router.push(localePath(`/show/${contentId.value}/edit/${projectId}`));
+        router.push(localePath(`/game/${contentId.value}/projects/${projectId}/edit`));
         return;
       }
     }
@@ -714,13 +693,13 @@ const saveShowProject = async () => {
     // Save Works (Cast)
     for (const row of castRows.value) {
       if (!row.voice_actor_id && !row.character_name) continue;
-      const isCustom = typeof row.actor_id === 'string' && row.actor_id.startsWith('custom_');
-      const actorId = isCustom || !row.actor_id ? null : row.actor_id;
+      const isCustom = typeof row.character_id === 'string' && row.character_id.startsWith('custom_');
+      const characterId = isCustom || !row.character_id ? null : row.character_id;
       const workPayload: any = {
         dubbing_project_id: projectId,
-        actor_id: actorId,
-        character_id: null,
-        character_name: row.character_name || null,
+        actor_id: null,
+        character_id: characterId,
+        character_name: isCustom ? row.character_name : null,
         voice_actor_id: row.voice_actor_id || null,
         performance: row.performance || "dialogues",
         highlight: row.highlight ? true : false,
@@ -737,31 +716,31 @@ const saveShowProject = async () => {
   }
 };
 
-const { data: initialData } = await useAsyncData(`show-edit-${tmdbShowId.value}-${projectIdParam}`, async () => {
-  let tmdbData: any = null;
+const { data: initialData } = await useAsyncData(`game-edit-${igdbGameId.value}-${projectIdParam}`, async () => {
+  let igdbData: any = null;
   let projects: any[] = [];
   let project: any = null;
   let studioName: string | null = null;
   let crew: any[] = [];
   let works: any[] = [];
 
-  if (tmdbShowId.value) {
-    // TMDB metadata
+  if (igdbGameId.value) {
+    // IGDB metadata
     try {
-      const data = await $fetch<any>('/api/show', { params: { id: tmdbShowId.value } });
+      const data = await $fetch<any>(`/api/game/${igdbGameId.value}`);
       if (data) {
-        tmdbData = data;
+        igdbData = data;
       }
     } catch (e) {
-      console.error("Failed to fetch TMDB data.", e);
+      console.error("Failed to fetch IGDB data.", e);
     }
     
-    // Fetch all dubbing projects for this show for the tabs
+    // Fetch all dubbing projects for this game for the tabs
     const { data: pData } = await supabase
       .from("dubbing_projects")
       .select("id, language, studio_id, studios(name)")
-      .eq("content_id", tmdbShowId.value)
-      .eq("content_type", "tv");
+      .eq("content_id", igdbGameId.value)
+      .eq("content_type", "video_game");
     projects = pData || [];
   }
 
@@ -790,28 +769,24 @@ const { data: initialData } = await useAsyncData(`show-edit-${tmdbShowId.value}-
   const { data: vaData } = await supabase.from("voice_actors").select("id, firstname, lastname").limit(10);
   const initialVoiceActors = (vaData || []).map(va => ({ id: va.id, name: `${va.firstname || ''} ${va.lastname || ''}`.trim() }));
 
-  return { tmdbData, projects, project, studioName, crew, works, initialStudios, initialVoiceActors };
+  return { igdbData, projects, project, studioName, crew, works, initialStudios, initialVoiceActors };
 });
 
 watch(initialData, (data) => {
   if (data) {
-    if (data.tmdbData) {
-      contentId.value = tmdbShowId.value;
-      if (data.tmdbData.serie) {
-        mediaTitle.value = data.tmdbData.serie.name;
-        let poster = data.tmdbData.serie.poster_path;
-        if (poster && poster.startsWith("/")) {
-          poster = `https://image.tmdb.org/t/p/w500${poster}`;
-        }
-        posterUrl.value = poster || "";
+    if (data.igdbData) {
+      contentId.value = igdbGameId.value;
+      if (data.igdbData.game) {
+        mediaTitle.value = data.igdbData.game.name;
+        posterUrl.value = data.igdbData.game.cover?.url?.replace('t_thumb', 't_cover_big') || "";
       }
-      if (data.tmdbData.aggregateCredits?.cast) {
-        tmdbCast.value = data.tmdbData.aggregateCredits.cast;
-        filteredTmdbCast.value = tmdbCast.value.slice(0, 50);
+      if (data.igdbData.characters) {
+        igdbCharacters.value = data.igdbData.characters;
+        filteredIgdbCharacters.value = igdbCharacters.value.slice(0, 50);
       }
     }
     
-    showDubbingProjects.value = data.projects;
+    gameDubbingProjects.value = data.projects;
 
     if (data.project) {
       contentId.value = data.project.content_id;
@@ -846,7 +821,7 @@ watch(initialData, (data) => {
         }
         return {
           id: w.id,
-          actor_id: w.actor_id,
+          character_id: w.character_id,
           character_name: w.character_name,
           voice_actor_id: w.voice_actor_id,
           performance: w.performance,
@@ -869,6 +844,8 @@ watch(initialData, (data) => {
   }
 }, { immediate: true });
 
-const fetchTmdbMetadata = async () => {}; // Dummy to prevent error if called
+
+
+const fetchIgdbMetadata = async () => {}; // Dummy to prevent error if called
 
 </script>

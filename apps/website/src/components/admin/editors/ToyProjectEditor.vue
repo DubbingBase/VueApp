@@ -6,42 +6,42 @@
     >
       <div>
         <h3 class="text-xl font-bold text-white flex items-center gap-2">
-          <RadioIcon class="w-6 h-6 text-pink-500" />
+          <SmileIcon class="w-6 h-6 text-amber-500" />
           {{ isEditMode
-              ? "Modifier le projet de podcast / fiction audio"
-              : "Créer un projet de podcast / fiction audio" }}
+              ? "Modifier le projet de jouet interactif / conteuse"
+              : "Créer un projet de jouet interactif / conteuse" }}
         </h3>
         <p class="text-sm text-gray-400 mt-1">
           {{ isEditMode
               ? `Mise à jour du projet #${projectIdParam}`
-              : "Informations podcast, studio, réalisation et casting vocal." }}
+              : "Informations sur le produit, fabricant, studio et comédiens." }}
         </p>
       </div>
       <NuxtLink
         :to="
-          parsedPodcastId
-            ? localePath(`/podcast/${parsedPodcastId}`)
+          parsedToyId
+            ? localePath(`/toy/${parsedToyId}`)
             : localePath('/')
         "
         class="text-xs font-semibold px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-xl border border-gray-700 transition-colors flex items-center space-x-2"
       >
-        <span>{{ parsedPodcastId ? "← Retour au podcast" : "← Accueil" }}</span>
+        <span>{{ parsedToyId ? "← Retour à l'objet" : "← Accueil" }}</span>
       </NuxtLink>
     </div>
 
     <!-- Navigation Tabs -->
     <div
-      v-if="parsedPodcastId"
+      v-if="parsedToyId"
       class="flex flex-wrap gap-2 pb-2 border-b border-gray-800"
     >
       <NuxtLink
-        v-for="project in podcastDubbingProjects"
+        v-for="project in toyDubbingProjects"
         :key="project.id"
-        :to="localePath(`/podcast/${parsedPodcastId}/edit/${project.id}`)"
+        :to="localePath(`/toy/${parsedToyId}/projects/${project.id}/edit`)"
         class="px-4 py-2 rounded-lg text-sm font-medium transition-colors border"
         :class="
           project.id === Number(projectIdParam)
-            ? 'bg-pink-600 text-white border-pink-600'
+            ? 'bg-amber-600 text-white border-amber-600'
             : 'bg-gray-900 text-gray-300 border-gray-800 hover:bg-gray-800'
         "
       >
@@ -51,11 +51,11 @@
         >
       </NuxtLink>
       <NuxtLink
-        :to="localePath(`/podcast/${parsedPodcastId}/edit/new`)"
+        :to="localePath(`/toy/${parsedToyId}/projects/new`)"
         class="px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-dashed"
         :class="
           projectIdParam === 'new'
-            ? 'bg-pink-900/50 text-pink-400 border-pink-800'
+            ? 'bg-amber-900/50 text-amber-400 border-amber-800'
             : 'bg-gray-900 text-gray-400 border-gray-700 hover:bg-gray-800 hover:text-gray-300'
         "
       >{{ $t('common.addLanguage') }}</NuxtLink>
@@ -66,11 +66,11 @@
       v-if="isLoading"
       class="flex flex-col items-center justify-center py-24 gap-4 text-gray-400"
     >
-      <Loader2Icon class="w-8 h-8 animate-spin text-pink-500" />
+      <Loader2Icon class="w-8 h-8 animate-spin text-amber-500" />
       <span class="text-sm">{{ $t('common.loadingProjectData') }}</span>
     </div>
 
-    <form v-else @submit.prevent="savePodcastProject" class="space-y-6">
+    <form v-else @submit.prevent="saveToyProject" class="space-y-6">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Media Metadata Card (Left Column) -->
         <div
@@ -79,70 +79,38 @@
           <h4
             class="text-sm font-bold text-gray-200 uppercase tracking-wider border-b border-gray-800 pb-3 flex items-center justify-between"
           >
-            <span>{{ $t('podcastEditor.podcastInfo') }}</span>
-            <span class="text-xs text-pink-400 font-normal">{{ $t('podcastEditor.itunesRss') }}</span>
+            <span>{{ $t('toyEditor.objectInfo') }}</span>
+            <span class="text-xs text-amber-400 font-normal">{{ $t('toyEditor.toyStoryteller') }}</span>
           </h4>
 
-          <!-- Cover Preview -->
-          <div class="flex justify-center">
-            <div
-              class="relative h-48 w-48 rounded-xl overflow-hidden border border-gray-800 bg-gray-950 flex items-center justify-center text-gray-500 shadow-md"
-            >
-              <NuxtImg
-                format="webp"
-                v-if="posterUrl"
-                :src="posterUrl"
-                class="h-full w-full object-cover"
-                alt="Cover"
-              />
-              <div v-else class="text-center p-3 text-gray-600">
-                <RadioIcon class="h-10 w-10 mx-auto mb-1 opacity-50" />
-                <span class="text-[10px]">{{ $t('podcastEditor.noThumbnail') }}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Content ID / iTunes ID -->
+          <!-- Content ID -->
           <div class="space-y-1">
             <label
               class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-              >{{ $t('podcastEditor.itunesCollectionId') }}</label
+              >{{ $t('toyEditor.toyId') }}</label
             >
-            <div class="flex space-x-2">
-              <input
-                v-model.number="contentId"
-                type="number"
-                required
-                :disabled="!!parsedPodcastId"
-                placeholder="Ex: 1478201201"
-                class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-              <button
-                type="button"
-                @click="fetchPodcastMetadata"
-                :disabled="isFetchingMetadata || !contentId"
-                class="px-3 py-2 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-gray-200 text-xs font-semibold rounded-xl border border-gray-700 whitespace-nowrap"
-              >
-                <Loader2Icon
-                  v-if="isFetchingMetadata"
-                  class="w-4 h-4 animate-spin"
-                />
-                <span v-else>{{ $t('common.fetch') }}</span>
-              </button>
-            </div>
+            <input
+              v-model.number="contentId"
+              type="number"
+              required
+              :disabled="!!parsedToyId"
+              placeholder="Ex: 8001"
+              class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            />
           </div>
 
-          <!-- Title -->
+          <!-- Name -->
           <div class="space-y-1">
             <label
               class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-              >{{ $t('podcastEditor.podcastTitle') }}</label
+              >{{ $t('toyEditor.productName') }}</label
             >
             <input
               v-model="mediaTitle"
               type="text"
               required
-              class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm"
+              placeholder="Ex: Lunii - Les Histoires de Suzanne et Gaston"
+              class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
             />
           </div>
 
@@ -163,7 +131,7 @@
             >
             <select
               v-model="status"
-              class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm"
+              class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
             >
               <option value="validated">{{ $t('common.validated') }}</option>
               <option value="pending">{{ $t('common.pendingValidation') }}</option>
@@ -179,22 +147,22 @@
           <h4
             class="text-sm font-bold text-gray-200 uppercase tracking-wider border-b border-gray-800 pb-3 flex items-center justify-between"
           >
-            <span>{{ $t('podcastEditor.technicalStudio') }}</span>
-            <span class="text-xs text-gray-400">{{ $t('podcastEditor.soundProduction') }}</span>
+            <span>{{ $t('toyEditor.manufacturerStudio') }}</span>
+            <span class="text-xs text-gray-400">{{ $t('common.production') }}</span>
           </h4>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <!-- Studio -->
+            <!-- Studio / Manufacturer -->
             <div class="space-y-1">
               <label
                 class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-                >{{ $t('podcastEditor.studioProducer') }}</label
+                >{{ $t('toyEditor.studioManufacturer') }}</label
               >
               <AsyncAutocomplete
                 v-model="selectedStudioId"
                 :options="studioOptions"
                 :loading="isSearchingStudios"
-                placeholder="Rechercher un studio (ex: Binge Audio, Radio France...)"
+                placeholder="Rechercher (ex: Lunii, VTech, Tonies...)"
                 :allow-create="true"
                 :display-fn="getStudioName"
                 @search="searchStudios"
@@ -212,13 +180,13 @@
             <div class="space-y-1">
               <label
                 class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-                >{{ $t('podcastEditor.directionArtistic') }}</label
+                >{{ $t('toyEditor.artisticDirection') }}</label
               >
               <AsyncAutocomplete
                 v-model="artisticDirectorId"
                 :options="voiceActorOptions"
                 :loading="isSearchingVoiceActors"
-                placeholder="Rechercher un réalisateur/D.A..."
+                placeholder="Rechercher..."
                 :allow-create="true"
                 :display-fn="getVoiceActorName"
                 @search="searchVoiceActors"
@@ -236,7 +204,7 @@
             <div class="space-y-1">
               <label
                 class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-                >{{ $t('podcastEditor.recordingSoundDesigner') }}</label
+                >{{ $t('toyEditor.recording') }}</label
               >
               <AsyncAutocomplete
                 v-model="recordingId"
@@ -257,7 +225,7 @@
             <div class="space-y-1">
               <label
                 class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-                >{{ $t('podcastEditor.mixingAudio') }}</label
+                >{{ $t('toyEditor.mixing') }}</label
               >
               <AsyncAutocomplete
                 v-model="mixingId"
@@ -285,19 +253,19 @@
           class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-800 pb-4"
         >
           <div>
-            <h4 class="text-sm font-bold text-gray-200 uppercase tracking-wider">{{ $t('podcastEditor.voiceDistribution') }}</h4>
-            <p class="text-xs text-gray-400 mt-0.5">{{ $t('podcastEditor.associateActors') }}</p>
+            <h4 class="text-sm font-bold text-gray-200 uppercase tracking-wider">{{ $t('toyEditor.voiceNarrators') }}</h4>
+            <p class="text-xs text-gray-400 mt-0.5">{{ $t('toyEditor.associateActors') }}</p>
           </div>
           <button
             type="button"
             @click="addNewCastRow"
-            class="px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors"
+            class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors"
           >
             <span>{{ $t('common.addVoice') }}</span>
           </button>
         </div>
 
-        <div v-if="castList.length === 0" class="text-center py-8 text-gray-500 text-sm">{{ $t('podcastEditor.noRoleRecorded') }}</div>
+        <div v-if="castList.length === 0" class="text-center py-8 text-gray-500 text-sm">{{ $t('common.noVoiceRecorded') }}</div>
 
         <div v-else class="space-y-4">
           <div
@@ -332,8 +300,8 @@
               <input
                 v-model="row.character_name"
                 type="text"
-                placeholder="Ex: Protagoniste, Narrateur..."
-                class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white text-xs placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-pink-500"
+                placeholder="Ex: Narrateur, Suzanne..."
+                class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white text-xs placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-amber-500"
               />
             </div>
 
@@ -343,8 +311,8 @@
               <input
                 v-model="row.performance"
                 type="text"
-                placeholder="Ex: Voix principale, Invité..."
-                class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white text-xs placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-pink-500"
+                placeholder="Ex: Narration, Voix chantée..."
+                class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white text-xs placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-amber-500"
               />
             </div>
 
@@ -376,7 +344,7 @@
         <button
           type="submit"
           :disabled="isSaving"
-          class="px-6 py-2.5 bg-pink-600 hover:bg-pink-500 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-all shadow-lg flex items-center gap-2"
+          class="px-6 py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-all shadow-lg flex items-center gap-2"
         >
           <Loader2Icon v-if="isSaving" class="w-4 h-4 animate-spin" />
           <span>{{ isEditMode ? "Enregistrer les modifications" : "Créer le projet" }}</span>
@@ -390,40 +358,30 @@
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
-  Radio as RadioIcon,
+  Smile as SmileIcon,
   Loader2 as Loader2Icon,
   Trash2 as Trash2Icon,
 } from "lucide-vue-next";
-
-defineRouteRules({
-  swr: false,
-  cache: false,
-});
-
-definePageMeta({
-  middleware: "admin",
-});
 
 const route = useRoute();
 const router = useRouter();
 const localePath = useLocalePath();
 const supabase = useSupabaseClient();
 
-const podcastIdParam = computed(() => route.params.podcastId as string);
+const toyIdParam = computed(() => route.params.toyId as string);
 const projectIdParam = computed(() => route.params.projectId as string);
 
 const isEditMode = computed(
   () => projectIdParam.value && projectIdParam.value !== "new",
 );
 
-const parsedPodcastId = computed(() => {
-  const num = parseInt(podcastIdParam.value, 10);
+const parsedToyId = computed(() => {
+  const num = parseInt(toyIdParam.value, 10);
   return isNaN(num) ? null : num;
 });
 
-const contentId = ref<number | null>(parsedPodcastId.value);
+const contentId = ref<number | null>(parsedToyId.value);
 const mediaTitle = ref("");
-const posterUrl = ref<string | null>(null);
 const language = ref("fr");
 const status = ref("validated");
 const selectedStudioId = ref<number | null>(null);
@@ -439,10 +397,9 @@ interface CastRow {
 }
 
 const castList = ref<CastRow[]>([]);
-const podcastDubbingProjects = ref<any[]>([]);
+const toyDubbingProjects = ref<any[]>([]);
 const isLoading = ref(true);
 const isSaving = ref(false);
-const isFetchingMetadata = ref(false);
 
 const studioOptions = ref<{ id: number; name: string }[]>([]);
 const isSearchingStudios = ref(false);
@@ -535,8 +492,8 @@ function openCreateVaDialog(name: string, cb: (id: number) => void) {
 function addNewCastRow() {
   castList.value.push({
     voice_actor_id: null,
-    character_name: "Voix",
-    performance: "Rôle",
+    character_name: "Voix / Personnage",
+    performance: "Narration",
   });
 }
 
@@ -550,34 +507,16 @@ function getDisplayLanguage(langCode?: string): string {
   return langCode || "Autre";
 }
 
-async function fetchPodcastMetadata() {
-  if (!contentId.value) return;
-  isFetchingMetadata.value = true;
-  try {
-    const data = await $fetch<any>(`/api/podcast/${contentId.value}`);
-    if (data?.podcast) {
-      mediaTitle.value = data.podcast.title;
-      posterUrl.value = data.podcast.cover_url || null;
-    }
-  } catch (err) {
-    console.error("Failed to fetch podcast metadata:", err);
-  } finally {
-    isFetchingMetadata.value = false;
-  }
-}
-
 onMounted(async () => {
   try {
-    if (parsedPodcastId.value) {
-      await fetchPodcastMetadata();
-
+    if (parsedToyId.value) {
       const { data: projects } = await supabase
         .from("dubbing_projects")
         .select("*, studios(id, name)")
-        .eq("content_id", parsedPodcastId.value)
-        .eq("content_type", "podcast");
+        .eq("content_id", parsedToyId.value)
+        .eq("content_type", "toy");
 
-      podcastDubbingProjects.value = projects || [];
+      toyDubbingProjects.value = projects || [];
     }
 
     if (isEditMode.value) {
@@ -635,13 +574,13 @@ onMounted(async () => {
       }
     }
   } catch (err) {
-    console.error("Error loading podcast project:", err);
+    console.error("Error loading toy project:", err);
   } finally {
     isLoading.value = false;
   }
 });
 
-async function savePodcastProject() {
+async function saveToyProject() {
   if (!contentId.value) return;
   isSaving.value = true;
 
@@ -664,7 +603,7 @@ async function savePodcastProject() {
         .from("dubbing_projects")
         .insert({
           content_id: contentId.value,
-          content_type: "podcast",
+          content_type: "toy",
           language: language.value,
           status: status.value,
           studio_id: selectedStudioId.value,
@@ -733,9 +672,9 @@ async function savePodcastProject() {
       }
     }
 
-    router.push(localePath(`/podcast/${contentId.value}`));
+    router.push(localePath(`/toy/${contentId.value}`));
   } catch (err) {
-    console.error("Failed to save podcast project:", err);
+    console.error("Failed to save toy project:", err);
     alert("Erreur lors de l'enregistrement.");
   } finally {
     isSaving.value = false;

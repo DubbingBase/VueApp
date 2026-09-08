@@ -241,12 +241,20 @@
               <td class="px-4 py-3 text-xs text-gray-400">{{ work.performance || 'dialogues' }}</td>
               <td class="px-4 py-3 text-right">
                 <NuxtLink
-                  :to="localePath(getProjectEditLink(work.dubbing_projects?.content_type || work.content_type, work.dubbing_projects?.content_id, work.dubbing_project_id))"
+                  v-if="getProjectEditLink(work.dubbing_projects?.content_type, work.dubbing_projects?.content_id, work.dubbing_project_id)"
+                  :to="localePath(getProjectEditLink(work.dubbing_projects?.content_type, work.dubbing_projects?.content_id, work.dubbing_project_id))"
                   class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-blue-400 hover:text-blue-300 text-xs font-semibold rounded-lg border border-gray-700 transition-all inline-flex items-center space-x-1"
                 >
                   <span>{{ $t('common.edit') }}{{ getMediaTypeLabel(work.dubbing_projects?.content_type || work.content_type) }}</span>
                   <span>↗</span>
                 </NuxtLink>
+                <span
+                  v-else
+                  class="inline-flex items-center px-3 py-1.5 text-gray-500 text-xs rounded-lg border border-gray-800"
+                  :title="$t('voiceActorEdit.unsupportedMediaType')"
+                >
+                  {{ $t('voiceActorEdit.unsupportedMediaType') }}
+                </span>
               </td>
             </tr>
             <tr v-if="linkedWorks.length === 0">
@@ -286,6 +294,7 @@ const supabase = useSupabaseClient();
 
 
 import { ref, onMounted, computed } from "vue";
+import { getMediaEditorRoute } from "~/lib/media-editor-routes";
 
 
 const route = useRoute();
@@ -390,14 +399,7 @@ const uploadProfilePicture = async (voiceActorId: string | number) => {
 const linkedWorks = ref<any[]>([]);
 
 function getProjectEditLink(contentType?: string | null, contentId?: number | string, projectId?: number | string) {
-  if (!contentType || contentType === 'movie') return `/movie/${contentId || projectId}/edit/${projectId}`;
-  if (contentType === 'tv' || contentType === 'show' || contentType === 'serie') return `/show/${contentId || projectId}/edit/${projectId}`;
-  if (contentType === 'video_game' || contentType === 'game') return `/game/${contentId || projectId}/edit/${projectId}`;
-  if (contentType === 'audiobook') return `/audiobook/${contentId || projectId}/edit/${projectId}`;
-  if (contentType === 'podcast') return `/podcast/${contentId || projectId}/edit/${projectId}`;
-  if (contentType === 'advertisement') return `/advertisement/${contentId || projectId}/edit/${projectId}`;
-  if (contentType === 'toy') return `/toy/${contentId || projectId}/edit/${projectId}`;
-  return `/admin/movies/edit/${projectId}`;
+  return getMediaEditorRoute({ contentType, mediaId: contentId, projectId });
 }
 
 function getMediaTypeLabel(contentType?: string | null) {

@@ -24,7 +24,7 @@
       <NuxtLink
         v-for="project in movieDubbingProjects"
         :key="project.id"
-        :to="localePath(`/movie/${tmdbMovieId}/edit/${project.id}`)"
+        :to="localePath(`/movie/${tmdbMovieId}/projects/${project.id}/edit`)"
         class="px-4 py-2 rounded-lg text-sm font-medium transition-colors border"
         :class="project.id === Number(projectIdParam) ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-900 text-gray-300 border-gray-800 hover:bg-gray-800'"
       >
@@ -32,7 +32,7 @@
         <span v-if="project.studios?.name" class="opacity-75 text-xs ml-1">({{ project.studios.name }})</span>
       </NuxtLink>
       <NuxtLink
-        :to="localePath(`/movie/${tmdbMovieId}/edit/new`)"
+        :to="localePath(`/movie/${tmdbMovieId}/projects/new`)"
         class="px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-dashed"
         :class="projectIdParam === 'new' ? 'bg-cyan-900/50 text-cyan-400 border-cyan-800' : 'bg-gray-900 text-gray-400 border-gray-700 hover:bg-gray-800 hover:text-gray-300'"
       >{{ $t('projectEditor.addLanguage') }}</NuxtLink>
@@ -422,15 +422,6 @@ import { useRoute, useRouter } from "vue-router";
 import { DialogRoot, DialogPortal, DialogOverlay, DialogContent, DialogTitle, DialogDescription, VisuallyHidden } from "reka-ui";
 import { FilmIcon, Loader2Icon, ImageIcon, XIcon } from "lucide-vue-next";
 
-defineRouteRules({
-  swr: false,
-  cache: false
-});
-
-definePageMeta({
-  middleware: 'admin'
-});
-
 const supabase = useSupabaseClient();
 const route = useRoute();
 const router = useRouter();
@@ -678,7 +669,7 @@ const saveMovieProject = async () => {
       
       if (projectId && contentId.value) {
         showToast("Project created! Redirecting...", "success");
-        router.push(localePath(`/movie/${contentId.value}/edit/${projectId}`));
+        router.push(localePath(`/movie/${contentId.value}/projects/${projectId}/edit`));
         return;
       }
     }

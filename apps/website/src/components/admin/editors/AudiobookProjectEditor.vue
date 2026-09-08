@@ -6,38 +6,38 @@
     >
       <div>
         <h3 class="text-xl font-bold text-white flex items-center gap-2">
-          <SmileIcon class="w-6 h-6 text-amber-500" />
+          <BookOpenIcon class="w-6 h-6 text-amber-500" />
           {{ isEditMode
-              ? "Modifier le projet de jouet interactif / conteuse"
-              : "Créer un projet de jouet interactif / conteuse" }}
+              ? "Modifier le projet de livre audio"
+              : "Créer un projet de livre audio" }}
         </h3>
         <p class="text-sm text-gray-400 mt-1">
           {{ isEditMode
               ? `Mise à jour du projet #${projectIdParam}`
-              : "Informations sur le produit, fabricant, studio et comédiens." }}
+              : "Informations OpenLibrary, studio, narrateurs et casting." }}
         </p>
       </div>
       <NuxtLink
         :to="
-          parsedToyId
-            ? localePath(`/toy/${parsedToyId}`)
+          openLibraryBookId
+            ? localePath(`/audiobook/${openLibraryBookId}`)
             : localePath('/')
         "
         class="text-xs font-semibold px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-xl border border-gray-700 transition-colors flex items-center space-x-2"
       >
-        <span>{{ parsedToyId ? "← Retour à l'objet" : "← Accueil" }}</span>
+        <span>{{ openLibraryBookId ? "← Retour au livre" : "← Accueil" }}</span>
       </NuxtLink>
     </div>
 
     <!-- Navigation Tabs -->
     <div
-      v-if="parsedToyId"
+      v-if="openLibraryBookId"
       class="flex flex-wrap gap-2 pb-2 border-b border-gray-800"
     >
       <NuxtLink
-        v-for="project in toyDubbingProjects"
+        v-for="project in bookDubbingProjects"
         :key="project.id"
-        :to="localePath(`/toy/${parsedToyId}/edit/${project.id}`)"
+        :to="localePath(`/audiobook/${openLibraryBookId}/projects/${project.id}/edit`)"
         class="px-4 py-2 rounded-lg text-sm font-medium transition-colors border"
         :class="
           project.id === Number(projectIdParam)
@@ -51,7 +51,7 @@
         >
       </NuxtLink>
       <NuxtLink
-        :to="localePath(`/toy/${parsedToyId}/edit/new`)"
+        :to="localePath(`/audiobook/${openLibraryBookId}/projects/new`)"
         class="px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-dashed"
         :class="
           projectIdParam === 'new'
@@ -70,7 +70,7 @@
       <span class="text-sm">{{ $t('common.loadingProjectData') }}</span>
     </div>
 
-    <form v-else @submit.prevent="saveToyProject" class="space-y-6">
+    <form v-else @submit.prevent="saveBookProject" class="space-y-6">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Media Metadata Card (Left Column) -->
         <div
@@ -79,37 +79,69 @@
           <h4
             class="text-sm font-bold text-gray-200 uppercase tracking-wider border-b border-gray-800 pb-3 flex items-center justify-between"
           >
-            <span>{{ $t('toyEditor.objectInfo') }}</span>
-            <span class="text-xs text-amber-400 font-normal">{{ $t('toyEditor.toyStoryteller') }}</span>
+            <span>{{ $t('audiobookEditor.bookInfo') }}</span>
+            <span class="text-xs text-amber-400 font-normal">{{ $t('audiobook.openLibrary') }}</span>
           </h4>
 
-          <!-- Content ID -->
-          <div class="space-y-1">
-            <label
-              class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-              >{{ $t('toyEditor.toyId') }}</label
+          <!-- Cover Preview -->
+          <div class="flex justify-center">
+            <div
+              class="relative h-48 w-32 rounded-xl overflow-hidden border border-gray-800 bg-gray-950 flex items-center justify-center text-gray-500 shadow-md"
             >
-            <input
-              v-model.number="contentId"
-              type="number"
-              required
-              :disabled="!!parsedToyId"
-              placeholder="Ex: 8001"
-              class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            />
+              <NuxtImg
+                format="webp"
+                v-if="posterUrl"
+                :src="posterUrl"
+                class="h-full w-full object-cover"
+                alt="Cover"
+              />
+              <div v-else class="text-center p-3 text-gray-600">
+                <BookOpenIcon class="h-10 w-10 mx-auto mb-1 opacity-50" />
+                <span class="text-[10px]">{{ $t('audiobookEditor.noCover') }}</span>
+              </div>
+            </div>
           </div>
 
-          <!-- Name -->
+          <!-- Content ID / OpenLibrary Work ID -->
           <div class="space-y-1">
             <label
               class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-              >{{ $t('toyEditor.productName') }}</label
+              >{{ $t('audiobookEditor.openLibraryWorkId') }}</label
+            >
+            <div class="flex space-x-2">
+              <input
+                v-model.number="contentId"
+                type="number"
+                required
+                :disabled="!!openLibraryBookId"
+                placeholder="Ex: 82563"
+                class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+              <button
+                type="button"
+                @click="fetchBookMetadata"
+                :disabled="isFetchingMetadata || !contentId"
+                class="px-3 py-2 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-gray-200 text-xs font-semibold rounded-xl border border-gray-700 whitespace-nowrap"
+              >
+                <Loader2Icon
+                  v-if="isFetchingMetadata"
+                  class="w-4 h-4 animate-spin"
+                />
+                <span v-else>{{ $t('common.fetch') }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Media Name / Title -->
+          <div class="space-y-1">
+            <label
+              class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
+              >{{ $t('audiobookEditor.bookTitle') }}</label
             >
             <input
               v-model="mediaTitle"
               type="text"
               required
-              placeholder="Ex: Lunii - Les Histoires de Suzanne et Gaston"
               class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
             />
           </div>
@@ -118,7 +150,7 @@
           <div class="space-y-1">
             <label
               class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-              >{{ $t('common.language') }}</label
+              >{{ $t('audiobookEditor.narrationLanguage') }}</label
             >
             <LanguageSelect v-model="language" required />
           </div>
@@ -147,22 +179,22 @@
           <h4
             class="text-sm font-bold text-gray-200 uppercase tracking-wider border-b border-gray-800 pb-3 flex items-center justify-between"
           >
-            <span>{{ $t('toyEditor.manufacturerStudio') }}</span>
-            <span class="text-xs text-gray-400">{{ $t('common.production') }}</span>
+            <span>{{ $t('audiobookEditor.technicalProduction') }}</span>
+            <span class="text-xs text-gray-400">{{ $t('audiobookEditor.studioProduction') }}</span>
           </h4>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <!-- Studio / Manufacturer -->
+            <!-- Studio / Publisher -->
             <div class="space-y-1">
               <label
                 class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-                >{{ $t('toyEditor.studioManufacturer') }}</label
+                >{{ $t('audiobookEditor.recordingStudio') }}</label
               >
               <AsyncAutocomplete
                 v-model="selectedStudioId"
                 :options="studioOptions"
                 :loading="isSearchingStudios"
-                placeholder="Rechercher (ex: Lunii, VTech, Tonies...)"
+                placeholder="Rechercher un studio (ex: Audiolib, Lizzie...)"
                 :allow-create="true"
                 :display-fn="getStudioName"
                 @search="searchStudios"
@@ -180,13 +212,13 @@
             <div class="space-y-1">
               <label
                 class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-                >{{ $t('toyEditor.artisticDirection') }}</label
+                >{{ $t('audiobookEditor.artisticDirection') }}</label
               >
               <AsyncAutocomplete
                 v-model="artisticDirectorId"
                 :options="voiceActorOptions"
                 :loading="isSearchingVoiceActors"
-                placeholder="Rechercher..."
+                placeholder="Rechercher un comédien/D.A..."
                 :allow-create="true"
                 :display-fn="getVoiceActorName"
                 @search="searchVoiceActors"
@@ -204,7 +236,7 @@
             <div class="space-y-1">
               <label
                 class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-                >{{ $t('toyEditor.recording') }}</label
+                >{{ $t('audiobookEditor.recordingEngineer') }}</label
               >
               <AsyncAutocomplete
                 v-model="recordingId"
@@ -221,11 +253,11 @@
               />
             </div>
 
-            <!-- Mixage -->
+            <!-- Montage / Mixage -->
             <div class="space-y-1">
               <label
                 class="text-xs font-semibold text-gray-400 uppercase tracking-wider"
-                >{{ $t('toyEditor.mixing') }}</label
+                >{{ $t('audiobookEditor.mixing') }}</label
               >
               <AsyncAutocomplete
                 v-model="mixingId"
@@ -245,7 +277,7 @@
         </div>
       </div>
 
-      <!-- Cast Roster Section -->
+      <!-- Narrators & Voice Cast Section -->
       <div
         class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-6 shadow-xl"
       >
@@ -253,19 +285,19 @@
           class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-800 pb-4"
         >
           <div>
-            <h4 class="text-sm font-bold text-gray-200 uppercase tracking-wider">{{ $t('toyEditor.voiceNarrators') }}</h4>
-            <p class="text-xs text-gray-400 mt-0.5">{{ $t('toyEditor.associateActors') }}</p>
+            <h4 class="text-sm font-bold text-gray-200 uppercase tracking-wider">{{ $t('audiobookEditor.narratorsVoiceRoles') }}</h4>
+            <p class="text-xs text-gray-400 mt-0.5">{{ $t('audiobookEditor.associateActors') }}</p>
           </div>
           <button
             type="button"
             @click="addNewCastRow"
             class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors"
           >
-            <span>{{ $t('common.addVoice') }}</span>
+            <span>{{ $t('audiobookEditor.addNarrator') }}</span>
           </button>
         </div>
 
-        <div v-if="castList.length === 0" class="text-center py-8 text-gray-500 text-sm">{{ $t('common.noVoiceRecorded') }}</div>
+        <div v-if="castList.length === 0" class="text-center py-8 text-gray-500 text-sm">{{ $t('audiobookEditor.noRoleNarrator') }}</div>
 
         <div v-else class="space-y-4">
           <div
@@ -273,9 +305,9 @@
             :key="index"
             class="grid grid-cols-1 md:grid-cols-12 gap-3 p-4 bg-gray-950 rounded-xl border border-gray-800 items-end"
           >
-            <!-- Voice Actor -->
+            <!-- Voice Actor (Narrator) -->
             <div class="md:col-span-5 space-y-1">
-              <label class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{{ $t('common.actor') }}</label>
+              <label class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{{ $t('audiobookEditor.actorNarrator') }}</label>
               <AsyncAutocomplete
                 v-model="row.voice_actor_id"
                 :options="voiceActorOptions"
@@ -296,11 +328,11 @@
 
             <!-- Role / Character Name -->
             <div class="md:col-span-3 space-y-1">
-              <label class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{{ $t('common.characterRole') }}</label>
+              <label class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{{ $t('common.roleCharacter') }}</label>
               <input
                 v-model="row.character_name"
                 type="text"
-                placeholder="Ex: Narrateur, Suzanne..."
+                placeholder="Ex: Narrateur, Harry..."
                 class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white text-xs placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-amber-500"
               />
             </div>
@@ -311,7 +343,7 @@
               <input
                 v-model="row.performance"
                 type="text"
-                placeholder="Ex: Narration, Voix chantée..."
+                placeholder="Ex: Narration intégrale, Rôle principal..."
                 class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white text-xs placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-amber-500"
               />
             </div>
@@ -358,39 +390,31 @@
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
-  Smile as SmileIcon,
+  BookOpen as BookOpenIcon,
   Loader2 as Loader2Icon,
   Trash2 as Trash2Icon,
 } from "lucide-vue-next";
-
-defineRouteRules({
-  swr: false,
-  cache: false,
-});
-
-definePageMeta({
-  middleware: "admin",
-});
 
 const route = useRoute();
 const router = useRouter();
 const localePath = useLocalePath();
 const supabase = useSupabaseClient();
 
-const toyIdParam = computed(() => route.params.toyId as string);
+const audiobookIdParam = computed(() => route.params.audiobookId as string);
 const projectIdParam = computed(() => route.params.projectId as string);
 
 const isEditMode = computed(
   () => projectIdParam.value && projectIdParam.value !== "new",
 );
 
-const parsedToyId = computed(() => {
-  const num = parseInt(toyIdParam.value, 10);
+const openLibraryBookId = computed(() => {
+  const num = parseInt(audiobookIdParam.value, 10);
   return isNaN(num) ? null : num;
 });
 
-const contentId = ref<number | null>(parsedToyId.value);
+const contentId = ref<number | null>(openLibraryBookId.value);
 const mediaTitle = ref("");
+const posterUrl = ref<string | null>(null);
 const language = ref("fr");
 const status = ref("validated");
 const selectedStudioId = ref<number | null>(null);
@@ -406,10 +430,12 @@ interface CastRow {
 }
 
 const castList = ref<CastRow[]>([]);
-const toyDubbingProjects = ref<any[]>([]);
+const bookDubbingProjects = ref<any[]>([]);
 const isLoading = ref(true);
 const isSaving = ref(false);
+const isFetchingMetadata = ref(false);
 
+// Auto-complete state
 const studioOptions = ref<{ id: number; name: string }[]>([]);
 const isSearchingStudios = ref(false);
 const voiceActorOptions = ref<{ id: number; name: string }[]>([]);
@@ -501,7 +527,7 @@ function openCreateVaDialog(name: string, cb: (id: number) => void) {
 function addNewCastRow() {
   castList.value.push({
     voice_actor_id: null,
-    character_name: "Voix / Personnage",
+    character_name: "Narrateur",
     performance: "Narration",
   });
 }
@@ -516,16 +542,36 @@ function getDisplayLanguage(langCode?: string): string {
   return langCode || "Autre";
 }
 
+async function fetchBookMetadata() {
+  if (!contentId.value) return;
+  isFetchingMetadata.value = true;
+  try {
+    const data = await $fetch<any>(`/api/audiobook/${contentId.value}`);
+    if (data?.audiobook) {
+      mediaTitle.value = data.audiobook.title;
+      posterUrl.value = data.audiobook.cover_url || null;
+    }
+  } catch (err) {
+    console.error("Failed to fetch audiobook metadata:", err);
+  } finally {
+    isFetchingMetadata.value = false;
+  }
+}
+
 onMounted(async () => {
   try {
-    if (parsedToyId.value) {
+    if (openLibraryBookId.value) {
+      // 1. Fetch metadata
+      await fetchBookMetadata();
+
+      // 2. Fetch other dubbing projects for tabs
       const { data: projects } = await supabase
         .from("dubbing_projects")
         .select("*, studios(id, name)")
-        .eq("content_id", parsedToyId.value)
-        .eq("content_type", "toy");
+        .eq("content_id", openLibraryBookId.value)
+        .eq("content_type", "audiobook");
 
-      toyDubbingProjects.value = projects || [];
+      bookDubbingProjects.value = projects || [];
     }
 
     if (isEditMode.value) {
@@ -544,6 +590,7 @@ onMounted(async () => {
           studioOptions.value = [project.studios];
         }
 
+        // Populate crew
         const { data: crew } = await supabase
           .from("dubbing_project_crew")
           .select("*, voice_actors(id, firstname, lastname), jobs(name)")
@@ -564,6 +611,7 @@ onMounted(async () => {
           }
         }
 
+        // Populate cast
         if (project.work) {
           castList.value = project.work.map((w: any) => {
             if (w.voice_actors) {
@@ -575,7 +623,7 @@ onMounted(async () => {
             return {
               id: w.id,
               voice_actor_id: w.voice_actor_id,
-              character_name: w.character_name || "Voix",
+              character_name: w.character_name || "Narrateur",
               performance: w.performance || "",
             };
           });
@@ -583,13 +631,13 @@ onMounted(async () => {
       }
     }
   } catch (err) {
-    console.error("Error loading toy project:", err);
+    console.error("Error loading project:", err);
   } finally {
     isLoading.value = false;
   }
 });
 
-async function saveToyProject() {
+async function saveBookProject() {
   if (!contentId.value) return;
   isSaving.value = true;
 
@@ -612,7 +660,7 @@ async function saveToyProject() {
         .from("dubbing_projects")
         .insert({
           content_id: contentId.value,
-          content_type: "toy",
+          content_type: "audiobook",
           language: language.value,
           status: status.value,
           studio_id: selectedStudioId.value,
@@ -681,9 +729,9 @@ async function saveToyProject() {
       }
     }
 
-    router.push(localePath(`/toy/${contentId.value}`));
+    router.push(localePath(`/audiobook/${contentId.value}`));
   } catch (err) {
-    console.error("Failed to save toy project:", err);
+    console.error("Failed to save audiobook project:", err);
     alert("Erreur lors de l'enregistrement.");
   } finally {
     isSaving.value = false;
