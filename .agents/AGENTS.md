@@ -37,13 +37,13 @@ All development tasks MUST be run via **Mise** to ensure environment consistency
 | `mise run dev`          | Starts the entire development environment (local Supabase backend + app dev servers). |
 | `mise run backend`      | Starts the local Supabase database and environment.                                   |
 | `mise run backend-stop` | Stops the local Supabase backend.                                                     |
-| `mise run app`          | Starts only the development server for the mobile app in web mode (`apps/mobile`).    |
+| `mise run app`          | Maintainer-only: starts the mobile app in web mode (`apps/mobile`); agents MUST NOT run it. |
 | `mise run website`      | Starts only the development server for the website (`apps/website`).                  |
 | `mise run db-reset`     | Resets the local database, applies local migrations, and loads seed data.             |
 | `mise run migrate-up`   | Applies pending migrations to the local database.                                     |
 | `mise run migrate-down` | Rolls back the last applied migration.                                                |
-| `mise run sync`         | Synchronizes mobile app builds with Capacitor platforms (Android, etc.).              |
-| `mise run android-dev`  | Launches the Android emulator and runs the app in development mode.                   |
+| `mise run sync`         | Maintainer-only: synchronizes mobile builds with Capacitor platforms; agents MUST NOT run it. |
+| `mise run android-dev`  | Maintainer-only: launches Android development; agents MUST NOT run it.                |
 
 ### Generating Database TypeScript Types:
 
