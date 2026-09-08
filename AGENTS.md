@@ -62,6 +62,30 @@ When testing the website from a mobile device or other clients over Tailscale/LA
 - Find your Tailscale IP on the `tailscale0` interface using `ip a` (e.g. `100.111.167.123`).
 - Connect from the client browser at `http://<tailscale-ip>:3000` (or `3001` if port 3000 is occupied).
 
+### Website Development with Doppler
+
+Doppler is the source of truth for website environment variables. Agents must use the unprefixed secret names consumed by `apps/website/nuxt.config.ts` (for example, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SECRET_KEY`, `TMDB_API_KEY`, `TVDB_API_KEY`, `IGDB_CLIENT_ID`, and `IGDB_CLIENT_SECRET`). Do not duplicate values under `NUXT_*` names; those names exist only as compatibility fallbacks.
+
+Configure the repository once from its root:
+
+```bash
+doppler setup
+```
+
+Select the `dubbingbase` project and the appropriate config (`dev` for local development). Never print secret values. To diagnose configuration, inspect names only with `doppler secrets --only-names`.
+
+The website requires both the local Supabase backend and the website server. Start them as separate steps from the repository root:
+
+```bash
+# Start local Supabase first.
+mise run backend
+
+# Then start the website with Doppler-injected variables.
+doppler run -- mise run website
+```
+
+`mise run website` does not depend on the backend task, so starting only the website is insufficient. Do not use `mise run dev`: it invokes the root workspace development task and can include `apps/mobile`, which is forbidden by the mobile scope boundary. Stop the local backend with `mise run backend-stop` when finished.
+
 ---
 
 ## 💡 Best Practices by Component
