@@ -137,3 +137,4 @@ Backend routes in `apps/website/server/api/` handle integration with TMDB, TVDB,
 8. **Caching Rules**:
    - Remember that there is no local Redis cache in the development environment.
    - When doing your fetches (e.g. testing APIs via scratch scripts), save the output locally (e.g. in JSON files in the scratch folder) so you don't have to fetch it again repeatedly.
+9. **Changesets**: Every code or configuration change must include an appropriate Changesets file in `.changeset/`. Keep the entry scoped to the affected package(s), and never include `@app/mobile` unless mobile work was explicitly authorized.
