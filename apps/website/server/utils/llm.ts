@@ -26,7 +26,7 @@ function getGroqModel(): string {
     globalEnv?.GROQ_MODEL ||
     process.env.NUXT_GROQ_MODEL ||
     process.env.GROQ_MODEL ||
-    "groq/compound"
+    "openai/gpt-oss-120b"
   );
 }
 
@@ -97,26 +97,191 @@ function isRateLimitError(error: unknown): boolean {
   );
 }
 
-interface LlmExecution<T> {
-  name: string;
-  fn: () => Promise<T>;
+// ponytail: quota cache to avoid dequeuing when all models are exhausted
+const quotaRemainingCache = new Map<string, number>();
+const quotaCacheAt = new Map<string, number>();
+const QUOTA_CACHE_TTL_MS = 60 * 60 * 1000; // 1h
+
+function parseRemainingFromHeaders(
+  headers?: Record<string, string> | Headers | null,
+): number | undefined {
+  const h = normalizeHeaders(headers as any);
+  if (!h) return undefined;
+  const rem =
+    h["x-ratelimit-remaining-requests"] ??
+    h["x-ratelimit-remaining"] ??
+    h["ratelimit-remaining"] ??
+    h["x-ratelimit-remaining-request"] ??
+    h["x-ratelimit-remaining-tokens"];
+  if (rem == null) return undefined;
+  const n = Number(String(rem).trim());
+  return Number.isFinite(n) ? n : undefined;
 }
 
-async function runWithFallbacks<T>(executions: LlmExecution<T>[]): Promise<T> {
+function updateQuotaCache(
+  model: string,
+  headers?: Record<string, string> | Headers | null,
+) {
+  const rem = parseRemainingFromHeaders(headers);
+  if (rem != null) {
+    quotaRemainingCache.set(model, rem);
+    quotaCacheAt.set(model, Date.now());
+  }
+}
+
+function isQuotaCacheStale(model: string): boolean {
+  const at = quotaCacheAt.get(model);
+  if (at == null) return true;
+  return Date.now() - at > QUOTA_CACHE_TTL_MS;
+}
+
+export function areAllLlmQuotasExhausted(): boolean {
+  // check all known models in chain; if we have no cache yet, assume not exhausted
+  // stale entries (older than 1h) are ignored — allow retry after quota reset window
+  const chain = [...getGeminiModelChain(), getGroqModel()];
+  let hasFreshCached = false;
+  for (const m of chain) {
+    const keys = [m, `Gemini (${m})`, `Groq (${m})`];
+    for (const k of keys) {
+      if (quotaRemainingCache.has(k)) {
+        if (isQuotaCacheStale(k)) continue;
+        hasFreshCached = true;
+        if ((quotaRemainingCache.get(k) ?? 1) > 0) return false;
+        break; // this model is 0, check next model
+      }
+    }
+    // if no fresh cache for this model, we don't know — assume not exhausted
+    if (
+      !keys.some((k) => quotaRemainingCache.has(k) && !isQuotaCacheStale(k))
+    ) {
+      return false;
+    }
+  }
+  // if we have fresh cached values and all are 0, then exhausted
+  return hasFreshCached;
+}
+
+export function getLlmQuotaCache() {
+  return new Map(quotaRemainingCache);
+}
+
+interface LlmExecution<T> {
+  name: string;
+  fn: () => Promise<{
+    data: T;
+    usage?: LlmUsage;
+    headers?: Record<string, string>;
+  }>;
+}
+
+interface LlmUsage {
+  promptTokens?: number;
+  completionTokens?: number;
+  totalTokens?: number;
+  inputTokens?: number;
+  outputTokens?: number;
+}
+
+interface LlmResult<T> {
+  data: T;
+  model: string;
+  usage?: LlmUsage;
+  quota?: string;
+  headers?: Record<string, string>;
+}
+
+function normalizeHeaders(
+  raw?: Record<string, string> | Headers | null,
+): Record<string, string> | undefined {
+  if (!raw) return undefined;
+  if (raw instanceof Headers) {
+    const out: Record<string, string> = {};
+    raw.forEach((v, k) => (out[k.toLowerCase()] = v));
+    return out;
+  }
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(raw)) out[k.toLowerCase()] = String(v);
+  return out;
+}
+
+function extractQuotaFromHeaders(
+  headers?: Record<string, string> | Headers | null,
+): string | undefined {
+  const h = normalizeHeaders(headers as any);
+  if (!h) return undefined;
+  const remReq =
+    h["x-ratelimit-remaining-requests"] ??
+    h["x-ratelimit-remaining"] ??
+    h["ratelimit-remaining"];
+  const limitReq =
+    h["x-ratelimit-limit-requests"] ??
+    h["x-ratelimit-limit"] ??
+    h["ratelimit-limit"];
+  const remTok = h["x-ratelimit-remaining-tokens"];
+  const limitTok = h["x-ratelimit-limit-tokens"];
+  const retryAfter = h["retry-after"];
+  // Groq / OpenAI compatible: prefer requests quota (daily)
+  if (remReq && limitReq) return `${remReq}/${limitReq} req remaining`;
+  if (remReq) return `${remReq} req remaining`;
+  if (remTok && limitTok) return `${remTok}/${limitTok} tokens remaining`;
+  if (remTok) return `${remTok} tokens remaining`;
+  if (limitReq) return `limit ${limitReq}`;
+  if (retryAfter) return `retry-after ${retryAfter}s`;
+  // Google / generic quota headers
+  for (const [k, v] of Object.entries(h)) {
+    if (k.includes("quota")) return `${k}: ${v}`;
+  }
+  for (const [k, v] of Object.entries(h)) {
+    if (k.includes("ratelimit")) return `${k}: ${v}`;
+  }
+  return undefined;
+}
+
+async function runWithFallbacks<T>(
+  executions: LlmExecution<T>[],
+): Promise<LlmResult<T>> {
+  // pre-check: if we know all quotas are 0, fail fast without consuming queue element time
+  if (areAllLlmQuotasExhausted()) {
+    throw new Error(
+      "LLM API Rate Limited (429) - all models quota exhausted (cached 0 remaining)",
+    );
+  }
   const failures: { name: string; msg: string }[] = [];
   for (const exec of executions) {
+    // skip models we know are exhausted (0 remaining) to avoid wasted calls, unless cache stale
+    const cached = quotaRemainingCache.get(exec.name);
+    if (cached != null && cached <= 0 && !isQuotaCacheStale(exec.name)) {
+      const msg = "quota exhausted (cached 0 remaining)";
+      console.warn(`[LLM] ${exec.name} skipped: ${msg}`);
+      failures.push({ name: exec.name, msg });
+      continue;
+    }
     try {
-      return await exec.fn();
+      const { data, usage, headers } = await exec.fn();
+      const quota = extractQuotaFromHeaders(headers);
+      updateQuotaCache(exec.name, headers);
+      return { data, model: exec.name, usage, quota, headers };
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
       console.warn(`[LLM] ${exec.name} failed: ${msg}`);
+      // cache 0 remaining if rate limited, so next call skips this model
+      if (isRateLimitError(error))
+        updateQuotaCache(exec.name, {
+          "x-ratelimit-remaining-requests": "0",
+        } as any);
       failures.push({ name: exec.name, msg });
     }
   }
-  const isRateLimit = failures.some(({ msg }) =>
+  const isRateLimit =
+    failures.length > 0 &&
+    failures.every(({ msg }) => isRateLimitError({ message: msg } as Error));
+  // also treat as rate limit if any failure was rate limit and we exhausted all models
+  const anyRateLimit = failures.some(({ msg }) =>
     isRateLimitError({ message: msg } as Error),
   );
-  const prefix = isRateLimit
+  const finalIsRateLimit =
+    isRateLimit || (anyRateLimit && failures.length === executions.length);
+  const prefix = finalIsRateLimit
     ? "LLM API Rate Limited (429) - "
     : "All LLM fallbacks failed - ";
   const detail = failures
@@ -144,7 +309,13 @@ export async function llmGenerate(
     systemInstruction?: string;
     temperature?: number;
   },
-): Promise<string> {
+): Promise<{
+  text: string;
+  model: string;
+  usage?: LlmUsage;
+  quota?: string;
+  headers?: Record<string, string>;
+}> {
   const system = options?.systemInstruction;
   const temperature = options?.temperature;
   const provider = getLlmProvider();
@@ -159,7 +330,12 @@ export async function llmGenerate(
         prompt,
         system,
         temperature,
-      }).then((r) => r.text),
+      }).then((r) => ({
+        data: r.text,
+        usage: (r as any).usage as LlmUsage | undefined,
+        headers: (r as any).response?.headers as
+          Record<string, string> | undefined,
+      })),
   };
 
   const geminiExecs: LlmExecution<string>[] = buildGeminiCalls(
@@ -172,7 +348,12 @@ export async function llmGenerate(
           prompt,
           system,
           temperature,
-        }).then((r) => r.text),
+        }).then((r) => ({
+          data: r.text,
+          usage: (r as any).usage as LlmUsage | undefined,
+          headers: (r as any).response?.headers as
+            Record<string, string> | undefined,
+        })),
     }),
   );
 
@@ -181,7 +362,14 @@ export async function llmGenerate(
       ? [groqExec, ...geminiExecs]
       : [...geminiExecs, groqExec];
 
-  return runWithFallbacks(chain);
+  const result = await runWithFallbacks(chain);
+  return {
+    text: result.data,
+    model: result.model,
+    usage: result.usage,
+    quota: result.quota,
+    headers: result.headers,
+  };
 }
 
 /**
@@ -196,7 +384,13 @@ export async function llmGenerateObject<T extends z.ZodType>(
     systemInstruction?: string;
     temperature?: number;
   },
-): Promise<z.infer<T>> {
+): Promise<{
+  data: z.infer<T>;
+  model: string;
+  usage?: LlmUsage;
+  quota?: string;
+  headers?: Record<string, string>;
+}> {
   const system = options?.systemInstruction;
   const temperature = options?.temperature;
   const provider = getLlmProvider();
@@ -212,7 +406,12 @@ export async function llmGenerateObject<T extends z.ZodType>(
         schema,
         system,
         temperature,
-      }).then((r) => r.object),
+      }).then((r) => ({
+        data: r.object,
+        usage: (r as any).usage as LlmUsage | undefined,
+        headers: (r as any).response?.headers as
+          Record<string, string> | undefined,
+      })),
   };
 
   const geminiExecs: LlmExecution<z.infer<T>>[] = buildGeminiCalls(
@@ -226,7 +425,12 @@ export async function llmGenerateObject<T extends z.ZodType>(
           schema,
           system,
           temperature,
-        }).then((r) => r.object),
+        }).then((r) => ({
+          data: r.object,
+          usage: (r as any).usage as LlmUsage | undefined,
+          headers: (r as any).response?.headers as
+            Record<string, string> | undefined,
+        })),
     }),
   );
 
@@ -235,7 +439,14 @@ export async function llmGenerateObject<T extends z.ZodType>(
       ? [groqExec, ...geminiExecs]
       : [...geminiExecs, groqExec];
 
-  return runWithFallbacks(chain);
+  const result = await runWithFallbacks(chain);
+  return {
+    data: result.data,
+    model: result.model,
+    usage: result.usage,
+    quota: result.quota,
+    headers: result.headers,
+  };
 }
 
 /**
@@ -252,7 +463,13 @@ export async function llmVision(
     systemInstruction?: string;
     temperature?: number;
   },
-): Promise<string> {
+): Promise<{
+  text: string;
+  model: string;
+  usage?: LlmUsage;
+  quota?: string;
+  headers?: Record<string, string>;
+}> {
   const system = options?.systemInstruction;
   const temperature = options?.temperature;
   const provider = getLlmProvider();
@@ -278,7 +495,12 @@ export async function llmVision(
         ],
         system,
         temperature,
-      }).then((r) => r.text),
+      }).then((r) => ({
+        data: r.text,
+        usage: (r as any).usage as LlmUsage | undefined,
+        headers: (r as any).response?.headers as
+          Record<string, string> | undefined,
+      })),
   };
 
   const geminiExecs: LlmExecution<string>[] = buildGeminiCalls(
@@ -296,7 +518,12 @@ export async function llmVision(
           ],
           system,
           temperature,
-        }).then((r) => r.text),
+        }).then((r) => ({
+          data: r.text,
+          usage: (r as any).usage as LlmUsage | undefined,
+          headers: (r as any).response?.headers as
+            Record<string, string> | undefined,
+        })),
     }),
   );
 
@@ -305,7 +532,14 @@ export async function llmVision(
       ? [groqExec, ...geminiExecs]
       : [...geminiExecs, groqExec];
 
-  return runWithFallbacks(chain);
+  const result = await runWithFallbacks(chain);
+  return {
+    text: result.data,
+    model: result.model,
+    usage: result.usage,
+    quota: result.quota,
+    headers: result.headers,
+  };
 }
 
 /**
@@ -322,7 +556,13 @@ export async function llmVisionObject<T extends z.ZodType>(
     systemInstruction?: string;
     temperature?: number;
   },
-): Promise<z.infer<T>> {
+): Promise<{
+  data: z.infer<T>;
+  model: string;
+  usage?: LlmUsage;
+  quota?: string;
+  headers?: Record<string, string>;
+}> {
   const system = options?.systemInstruction;
   const temperature = options?.temperature;
   const provider = getLlmProvider();
@@ -349,7 +589,12 @@ export async function llmVisionObject<T extends z.ZodType>(
         schema,
         system,
         temperature,
-      }).then((r) => r.object),
+      }).then((r) => ({
+        data: r.object,
+        usage: (r as any).usage as LlmUsage | undefined,
+        headers: (r as any).response?.headers as
+          Record<string, string> | undefined,
+      })),
   };
 
   const geminiExecs: LlmExecution<z.infer<T>>[] = buildGeminiCalls(
@@ -368,7 +613,12 @@ export async function llmVisionObject<T extends z.ZodType>(
           schema,
           system,
           temperature,
-        }).then((r) => r.object),
+        }).then((r) => ({
+          data: r.object,
+          usage: (r as any).usage as LlmUsage | undefined,
+          headers: (r as any).response?.headers as
+            Record<string, string> | undefined,
+        })),
     }),
   );
 
@@ -377,7 +627,14 @@ export async function llmVisionObject<T extends z.ZodType>(
       ? [groqExec, ...geminiExecs]
       : [...geminiExecs, groqExec];
 
-  return runWithFallbacks(chain);
+  const result = await runWithFallbacks(chain);
+  return {
+    data: result.data,
+    model: result.model,
+    usage: result.usage,
+    quota: result.quota,
+    headers: result.headers,
+  };
 }
 
 function parseImageData(imageData: string, mimeType: string) {

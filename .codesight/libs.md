@@ -1,0 +1,157 @@
+# Libraries
+
+- `apps/mobile/src/api/mediaQueue.ts` — function enqueueMedia: (params) => Promise<void>
+- `apps/mobile/src/api/nitro.ts` — function nitroRequest: (path, options?) => Promise<
+- `apps/mobile/src/composables/useDeferredCharacters.ts` — function useDeferredCharacters: (castSource) => void
+- `apps/mobile/src/composables/useFF.ts` — function useFeatureFlags: () => void
+- `apps/mobile/src/composables/useLanguagePreference.ts` — function useLanguagePreference: () => void
+- `apps/mobile/src/composables/useOneSignal.ts` — function useOneSignal: () => void
+- `apps/mobile/src/composables/usePermissions.ts` — function usePermissions: () => void
+- `apps/mobile/src/composables/usePostHog.ts` — function usePostHog: () => void
+- `apps/mobile/src/composables/useTheme.ts` — function useTheme: () => void
+- `apps/mobile/src/composables/useToast.ts` — function useToast: () => void, const toastController
+- `apps/mobile/src/composables/useVoiceActorManagement.ts`
+  - function useVoiceActorManagement: (workType) => void
+  - interface VoiceActor
+  - interface WorkAndVoiceActor
+- `apps/mobile/src/composables/useVoiceActorSubscription.ts` — function useVoiceActorSubscription: (voiceActorId) => void, function fetchAllSubscriptions: () => void
+- `apps/mobile/src/stores/index.ts` — function setupStores, const pinia
+- `apps/mobile/src/utils/convert.ts`
+  - function cleanCharacterName
+  - function voiceActorToPersonData
+  - const actorToPersonData
+- `apps/mobile/src/utils/deepLinks.ts`
+  - function parseDeepLink: (url) => DeepLink | null
+  - function handleDeepLink: (url) => boolean
+  - function useDeepLinkHandler: () => void
+- `apps/mobile/src/utils/image.ts` — function getAvatarFallbackUrl
+- `apps/mobile/src/utils/language.ts` — function getLanguageDisplayName: (langCode, uiLocale) => string
+- `apps/website/server/api/movie/[id].get.ts` — function fetchMovieData: (event, movieId) => void
+- `apps/website/server/api/show/[id].get.ts` — function fetchShowData: (event, showId) => void
+- `apps/website/server/utils/api/advertisement.ts` — class AdvertisementClient
+- `apps/website/server/utils/api/igdb.ts`
+  - function buildIgdbImageUrl: (hash, size) => string
+  - class IgdbClient
+  - interface IgdbPopularityPrimitive
+- `apps/website/server/utils/api/openlibrary.ts` — function buildOpenLibraryCoverUrl: (coverId, size) => string, class OpenLibraryClient
+- `apps/website/server/utils/api/podcast.ts` — class PodcastClient, interface ITunesPodcastResult
+- `apps/website/server/utils/api/tmdb.ts` — class TMDBClient
+- `apps/website/server/utils/api/toy.ts` — class ToyClient
+- `apps/website/server/utils/api/tvdb.ts` — class TVDBClient
+- `apps/website/server/utils/auth.ts` — function requireUser: (event) => User, function requireAdmin: (event) => User
+- `apps/website/server/utils/cache/constants.ts`
+  - class SimpleKeyBuilder
+  - class SimpleKeyValidator
+  - const API_PREFIXES
+  - const CACHE_SCHEMA_VERSION
+  - const CONTENT_TYPES
+  - const CACHE_KEYS
+- `apps/website/server/utils/cache/http.ts` — function setPublicCacheHeaders: (event, profile) => void, type CacheProfile
+- `apps/website/server/utils/cache/index.ts`
+  - class SimpleCache
+  - type CacheTTLPreset
+  - const CACHE_TTL
+- `apps/website/server/utils/cache/wikipedia.ts`
+  - function sortLanguagesByPopularity: (languages) => string[]
+  - function extractAvailableLanguages: (sitelinks, {...}) => string[]
+  - function cleanHeadingText: (raw) => string
+  - function isDubbingSectionHeading: (heading) => boolean
+  - function selectDubbingSections: (sections) => Promise<string[]>
+  - function sitelinkKey
+  - _...3 more_
+- `apps/website/server/utils/db/client.ts` — function useSupabaseAdmin: (event?) => SupabaseClient<Database>
+- `apps/website/server/utils/db/dubbing-project.ts` — function findOrCreateDubbingProject: (contentId, contentType, language) => Promise<number>
+- `apps/website/server/utils/db/queries.ts`
+  - function getVoiceActorWithWork: (id) => void
+  - function getWorkByActor: (actorId) => void
+  - function getDubbingProjects: (contentId, contentType) => void
+  - function getWorkVotes: (workIds, userId?) => Promise<
+  - function getTopContributors: (limit) => void
+- `apps/website/server/utils/featureFlags.ts` — function isEnqueueOnNavigateEnabled: () => Promise<boolean>
+- `apps/website/server/utils/index.ts`
+  - function getCloudflareKv: (event?) => any
+  - function useCache: (event?) => SimpleCache
+  - function useTmdbClient: () => TMDBClient
+  - function useTvdbClient: () => TVDBClient
+  - function useIgdbClient: () => IgdbClient
+  - function useOpenLibraryClient: () => OpenLibraryClient
+  - _...4 more_
+- `apps/website/server/utils/llm.ts`
+  - function areAllLlmQuotasExhausted: () => boolean
+  - function getLlmQuotaCache: () => void
+  - function llmGenerate: (prompt, options?) => Promise<
+  - function llmGenerateObject: (prompt, schema, options?) => Promise<
+  - function llmVision: (prompt, imageData, mimeType, options?) => Promise<
+  - function llmVisionObject: (prompt, imageData, schema, mimeType, options?) => Promise<
+- `apps/website/server/utils/normalize.ts` — function normalizeString: (input) => string, function isExploitableVoiceActorName: (input) => boolean
+- `apps/website/server/utils/notifications/discord.ts`
+  - function sendDiscordAdminNotification: (title, message, options?) => void
+  - interface DiscordWebhookOptions
+  - type QueueName
+- `apps/website/server/utils/notifications/onesignal.ts` — function sendOneSignalNotification: (title, message, options?) => void, interface OneSignalOptions
+- `apps/website/server/utils/services/media-preparation.ts`
+  - function checkMediaDubbingSections: (options) => Promise<CheckSectionsResult>
+  - function checkGameDubbingSections: (options) => Promise<CheckSectionsResult>
+  - function extractMediaDubbingCredits: (options) => Promise<ExtractCreditsResult>
+  - function extractGameDubbingCredits: (options) => Promise<ExtractCreditsResult>
+  - function prepareMedia: (options) => Promise<PrepareMediaResult>
+  - function prepareGame: (options) => Promise<PrepareGameResult>
+  - _...4 more_
+- `apps/website/server/utils/services/media.ts` — class MediaService
+- `apps/website/server/utils/services/voice-actor.ts`
+  - function upsertVoiceActor: (firstName, lastName) => void
+  - function upsertActor: (id, name, profile_path?) => void
+  - function upsertStudio: (name, logo_url?) => void
+  - function upsertWork: (voiceActorId, contentId, actorId, contentType, language, performance?, characterId?, characterName?) => void
+  - function insertVoiceActorAndWork: (firstName, lastName, contentId, actorId, contentType, language, performance?, characterId?, characterName?) => void
+- `apps/website/server/utils/urls/supabase.ts` — function buildSupabaseImageUrl: (imagePath, bucket, size) => string | null, function processVoiceActor
+- `apps/website/server/utils/urls/tmdb.ts`
+  - function buildTmdbImageUrl: (imagePath, size) => string | null
+  - function cleanCharacterName
+  - function processMedia
+  - const TMDB_CONFIG
+- `apps/website/src/composables/useContribute.ts` — function fetchRandomTask, function useContribute
+- `apps/website/src/composables/useDragScroll.ts` — function useDragScroll: (scrollRef) => void
+- `apps/website/src/composables/useProgressiveBatch.ts` — function useProgressiveBatch: (items, options) => void, interface UseProgressiveBatchOptions
+- `apps/website/src/composables/useReports.ts` — function useReports
+- `apps/website/src/composables/useSearchModal.ts` — function useSearchModal: () => void
+- `apps/website/src/composables/useTheme.ts` — function useTheme: () => void
+- `apps/website/src/lib/mediaQueue.ts` — function enqueueMedia: (params) => Promise<void>
+- `e2e/helpers/mock-api.ts` — function setupMockApi: (page, options) => void, interface MockApiOptions
+- `packages/og-image/src/index.ts`
+  - function generateTemplate: (options) => void
+  - interface GenerateOptions
+  - type GeneratorType
+- `packages/og-image/src/voice-actor.ts` — function voiceActorGenerator: (params) => void, interface VoiceActorOgParams
+- `packages/shared-logic/src/composables/useActorData.ts`
+  - function fetchActorData: (id) => Promise<ActorDataPayload | null>
+  - function useActorData: (initialData?) => void
+  - type ActorResponse
+  - type ActorDataPayload
+- `packages/shared-logic/src/composables/useAdvertisementData.ts` — function fetchAdvertisementData: (id, locale?) => Promise<AdvertisementResponse | null>
+- `packages/shared-logic/src/composables/useAudiobookData.ts` — function fetchAudiobookData: (id, locale?) => Promise<AudiobookResponse | null>
+- `packages/shared-logic/src/composables/useEpisodeData.ts` — function fetchEpisodeData: (showId, seasonNumber, episodeNumber, locale?) => Promise<any | null>
+- `packages/shared-logic/src/composables/useGameData.ts` — function fetchGameData: (id, locale?) => Promise<any | null>
+- `packages/shared-logic/src/composables/useHomeData.ts`
+  - function fetchHomeData: () => Promise<HomeDataPayload>
+  - function useHomeData: (initialData?) => void
+  - type HomeDataPayload
+- `packages/shared-logic/src/composables/useMovieData.ts` — function fetchMovieData: (id, locale?) => Promise<any | null>
+- `packages/shared-logic/src/composables/usePodcastData.ts` — function fetchPodcastData: (id, locale?) => Promise<PodcastResponse | null>
+- `packages/shared-logic/src/composables/useSearchData.ts` — function fetchSearchData: (query) => Promise<SearchResult[]>, type SearchResult
+- `packages/shared-logic/src/composables/useSeasonData.ts` — function fetchSeasonData: (showId, seasonNumber, locale?) => Promise<any | null>
+- `packages/shared-logic/src/composables/useShowData.ts` — function fetchShowData: (id, locale?) => Promise<any | null>
+- `packages/shared-logic/src/composables/useStudioData.ts`
+  - function fetchStudioDetails: (studioId) => Promise<StudioDetailsResponse | null>
+  - function fetchStudiosData: () => Promise<Studio[]>
+  - function useStudioData: (initialStudios?, initialStudioDetails?) => void
+  - type Studio
+  - type StudioDetailsResponse
+- `packages/shared-logic/src/composables/useToyData.ts` — function fetchToyData: (id, locale?) => Promise<ToyResponse | null>
+- `packages/shared-logic/src/composables/useVoiceActorData.ts`
+  - function fetchVoiceActorData: (id) => Promise<VoiceActorDataPayload | null>
+  - function useVoiceActorData: (initialData?) => void
+  - type VoiceActorResponse
+  - type EnhancedWorkItem
+  - type VoiceActorDataPayload
+- `packages/shared-logic/src/utils/character.ts` — function normalizeCharacterName, function findCharacter

@@ -80,7 +80,7 @@ export default defineNuxtConfig({
     geminiModel: env("GEMINI_MODEL") || "gemini-3.5-flash-lite",
     geminiModels: env("GEMINI_MODELS"),
     groqApiKey: env("GROQ_API_KEY"),
-    groqModel: env("GROQ_MODEL") || "groq/compound",
+    groqModel: env("GROQ_MODEL") || "openai/gpt-oss-120b",
     llmProvider: env("LLM_PROVIDER") || "gemini",
     onesignalAppId: env("ONESIGNAL_APP_ID"),
     onesignalRestApiKey: env("ONESIGNAL_REST_API_KEY"),
@@ -183,6 +183,7 @@ export default defineNuxtConfig({
   },
 
   i18n: {
+    langDir: "locales",
     locales: APP_LOCALES as any,
     defaultLocale: DEFAULT_LOCALE,
     strategy: "prefix_except_default",
@@ -190,7 +191,7 @@ export default defineNuxtConfig({
     detectBrowserLanguage: {
       useCookie: true,
       cookieKey: "user_lang",
-      redirectOn: "all", // Redirects on all paths (fixes 404 on URLs without language prefix)
+      redirectOn: "all",
     },
   },
 
