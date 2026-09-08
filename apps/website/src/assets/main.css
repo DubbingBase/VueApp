@@ -20,9 +20,98 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
   margin: 0;
   padding: 0;
   background-color: var(--app-bg);
   color: var(--app-text);
+}
+
+/* Project editors use neutral charcoal surfaces independently of media type. */
+.admin-project-editor .bg-gray-900,
+.admin-project-editor .bg-slate-900,
+.admin-project-editor .bg-blue-600,
+.admin-project-editor .bg-cyan-900\/50,
+.admin-project-editor .bg-amber-600,
+.admin-project-editor .bg-amber-900\/50,
+.admin-project-editor .bg-emerald-600,
+.admin-project-editor .bg-emerald-900\/50,
+.admin-project-editor .bg-pink-600,
+.admin-project-editor .bg-pink-900\/50 {
+  background-color: #1d1d1d;
+}
+
+.admin-project-editor .bg-gray-950,
+.admin-project-editor .bg-slate-950 {
+  background-color: #151515;
+}
+
+.admin-project-editor .bg-gray-800,
+.admin-project-editor .bg-slate-800 {
+  background-color: #2a2a2a;
+}
+
+.admin-project-editor .hover\:bg-gray-700:hover,
+.admin-project-editor .hover\:bg-gray-800:hover,
+.admin-project-editor .hover\:bg-blue-500:hover,
+.admin-project-editor .hover\:bg-amber-500:hover,
+.admin-project-editor .hover\:bg-emerald-500:hover,
+.admin-project-editor .hover\:bg-pink-500:hover {
+  background-color: #333333;
+}
+
+.admin-project-editor .border-gray-700,
+.admin-project-editor .border-gray-800,
+.admin-project-editor .border-slate-700,
+.admin-project-editor .border-slate-800,
+.admin-project-editor .border-blue-600,
+.admin-project-editor .border-cyan-800,
+.admin-project-editor .border-amber-600,
+.admin-project-editor .border-amber-800,
+.admin-project-editor .border-emerald-600,
+.admin-project-editor .border-emerald-800,
+.admin-project-editor .border-pink-600,
+.admin-project-editor .border-pink-800 {
+  border-color: #2a2a2a;
+}
+
+.admin-project-editor .text-white,
+.admin-project-editor .text-gray-200,
+.admin-project-editor .text-gray-300,
+.admin-project-editor .text-blue-400,
+.admin-project-editor .text-blue-500,
+.admin-project-editor .text-cyan-400,
+.admin-project-editor .text-amber-400,
+.admin-project-editor .text-amber-500,
+.admin-project-editor .text-emerald-400,
+.admin-project-editor .text-emerald-500,
+.admin-project-editor .text-pink-400,
+.admin-project-editor .text-pink-500 {
+  color: #e0e0e0;
+}
+
+.admin-project-editor .text-gray-400,
+.admin-project-editor .text-gray-500,
+.admin-project-editor .text-gray-600 {
+  color: #a0a0a0;
+}
+
+.admin-project-editor .focus\:ring-blue-500:focus,
+.admin-project-editor .focus\:ring-cyan-500:focus,
+.admin-project-editor .focus\:ring-amber-500:focus,
+.admin-project-editor .focus\:ring-emerald-500:focus,
+.admin-project-editor .focus\:ring-pink-500:focus {
+  --tw-ring-color: #a0a0a0;
+}
+
+.admin-project-editor input[type="checkbox"] {
+  accent-color: #a0a0a0;
 }
