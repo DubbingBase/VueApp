@@ -68,6 +68,15 @@ async function getActiveLocale(page: Page): Promise<Locale> {
   return "en";
 }
 
+async function expectActiveLocale(page: Page, locale: Locale) {
+  await expect
+    .poll(() => getActiveLocale(page), {
+      timeout: 10000,
+      intervals: [250, 500, 1000],
+    })
+    .toBe(locale);
+}
+
 async function assertLocaleFooter(page: Page, locale: Locale) {
   for (const text of FOOTER_TEXT[locale]) {
     await expect(
@@ -114,7 +123,7 @@ test.describe("Language Selector", () => {
       await page.goto(LOCALE_URLS[locale], { waitUntil: "domcontentloaded" });
       await page.waitForTimeout(1500);
 
-      expect(await getActiveLocale(page)).toBe(locale);
+      await expectActiveLocale(page, locale);
       await assertLocaleFooter(page, locale);
       await assertNoRawKeys(page);
     });
@@ -131,10 +140,13 @@ test.describe("Language Selector", () => {
         await page.goto(LOCALE_URLS[url], { waitUntil: "domcontentloaded" });
         await page.waitForTimeout(1500);
 
-        expect(
-          await getActiveLocale(page),
-          `cookie=${cookie} should redirect away from /${url} to /${cookie === "en" ? "" : cookie}`,
-        ).toBe(cookie);
+        await expect
+          .poll(() => getActiveLocale(page), {
+            timeout: 10000,
+            intervals: [250, 500, 1000],
+            message: `cookie=${cookie} should redirect away from /${url} to /${cookie === "en" ? "" : cookie}`,
+          })
+          .toBe(cookie);
         await assertLocaleFooter(page, cookie);
         await assertNoRawKeys(page);
       });
@@ -150,7 +162,7 @@ test.describe("Language Selector", () => {
       await setUserLangCookie(context, start);
       await page.goto(LOCALE_URLS[start], { waitUntil: "domcontentloaded" });
       await page.waitForTimeout(1500);
-      expect(await getActiveLocale(page)).toBe(start);
+      await expectActiveLocale(page, start);
 
       for (const target of ALL_LOCALES) {
         if (target === start) continue;
