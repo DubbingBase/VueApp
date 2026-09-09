@@ -659,11 +659,11 @@ export default defineEventHandler(async (event) => {
           targetUrl = `/movie/${payload.tmdb_id}`;
         } else if (payload.media_type === "tv") {
           if (payload.season_number && payload.episode_number) {
-            targetUrl = `/serie/${payload.tmdb_id}/season/${payload.season_number}/details/${payload.episode_number}`;
+            targetUrl = `/show/${payload.tmdb_id}/season/${payload.season_number}/episode/${payload.episode_number}`;
           } else if (payload.season_number) {
-            targetUrl = `/serie/${payload.tmdb_id}/season/${payload.season_number}`;
+            targetUrl = `/show/${payload.tmdb_id}/season/${payload.season_number}`;
           } else {
-            targetUrl = `/serie/${payload.tmdb_id}`;
+            targetUrl = `/show/${payload.tmdb_id}`;
           }
         } else if (payload.media_type === "video_game") {
           targetUrl = `/game/${payload.tmdb_id}`;
