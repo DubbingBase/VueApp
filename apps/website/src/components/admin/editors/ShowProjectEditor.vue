@@ -135,18 +135,6 @@
                 placeholder="e.g. 1020"
                 class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               />
-              <button
-                type="button"
-                @click="fetchTmdbMetadata"
-                :disabled="isFetchingTmdb || !contentId"
-                class="px-3 py-2 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-gray-200 text-xs font-semibold rounded-xl border border-gray-700 whitespace-nowrap"
-              >
-                <Loader2Icon
-                  v-if="isFetchingTmdb"
-                  class="w-4 h-4 animate-spin"
-                />
-                <span v-else>{{ $t("common.fetch") }}</span>
-              </button>
             </div>
           </div>
 
@@ -961,11 +949,7 @@ const saveShowProject = async () => {
       projectId = data?.id ?? null;
 
       if (projectId && contentId.value) {
-        showToast("Project created! Redirecting...", "success");
-        router.push(
-          localePath(`/show/${contentId.value}/projects/${projectId}/edit`),
-        );
-        return;
+        showToast("Project created!", "success");
       }
     }
 
@@ -1016,6 +1000,11 @@ const saveShowProject = async () => {
     }
 
     showToast("Project saved successfully!", "success");
+    if (!isEditMode.value && projectId && contentId.value) {
+      await router.push(
+        localePath(`/show/${contentId.value}/projects/${projectId}/edit`),
+      );
+    }
   } catch (err: any) {
     showToast(err.message, "error");
   } finally {
@@ -1109,7 +1098,7 @@ watch(
   [initialData, initialDataError],
   ([data, error]) => {
     if (error) {
-      loadError.value = t("common.errorGeneric");
+      loadError.value = t("common.error");
       isLoading.value = false;
       return;
     }
@@ -1197,5 +1186,4 @@ watch(
   { immediate: true },
 );
 
-const fetchTmdbMetadata = async () => {}; // Dummy to prevent error if called
 </script>

@@ -136,7 +136,7 @@ export async function fetchShowData(event: any, showId: number) {
                     imageUrl: `https://image.tmdb.org/t/p/w500${serieWithImageUrls.poster_path}`,
                   }
                 : {}),
-              url: `/serie/${showId}`,
+              url: `/show/${showId}`,
               color: 0x5865f2,
             },
           );
