@@ -804,7 +804,10 @@ function triggerMediaSearch() {
 async function executeMediaSearch(requestId: number) {
   const q = mediaSearchQuery.value.trim();
   if (q.length < 2) {
-    if (requestId === mediaSearchRequestId) mediaSearchResults.value = [];
+    if (requestId === mediaSearchRequestId) {
+      mediaSearchResults.value = [];
+      mediaSearchLoading.value = false;
+    }
     return;
   }
   mediaSearchLoading.value = true;
@@ -853,7 +856,13 @@ async function selectMediaItem(item: any) {
       }));
     } catch (err) {
       console.error("Failed to load cast:", err);
-      linkWorkCast.value = [];
+      if (
+        requestId === creditsRequestId &&
+        selectedMedia.value?.id === item.id &&
+        selectedMediaType.value === mediaType
+      ) {
+        linkWorkCast.value = [];
+      }
     } finally {
       if (requestId === creditsRequestId) linkWorkCastLoading.value = false;
     }

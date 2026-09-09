@@ -33,7 +33,7 @@ describe("Discord admin notifications", () => {
   it("uses a consistent neutral default and truncates descriptions", () => {
     const embed = buildDiscordEmbed("Event", "x".repeat(2100));
     expect(embed.color).toBe(0x2a2a2a);
-    expect(String(embed.description)).toHaveLength(2000);
+    expect(String(embed.description)).toHaveLength(1996);
     expect(String(embed.description)).toContain("(truncated)");
   });
 });
