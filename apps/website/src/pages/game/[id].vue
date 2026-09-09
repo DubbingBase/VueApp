@@ -218,6 +218,9 @@
                     <div v-if="char.voiceActor.performance" class="text-xs text-cyan-600 dark:text-cyan-400 truncate mt-1">
                       {{ char.voiceActor.performance }}
                     </div>
+                    <div v-if="char.voiceActor.note" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {{ char.voiceActor.note }}
+                    </div>
                   </div>
                 </template>
                 <template v-else>
@@ -405,7 +408,7 @@ const formattedCharacters = computed(() => {
   const igdbChars = characters.value || [];
   const matchedWorkIds = new Set();
 
-  const mappedIgdbChars = igdbChars.map((char: IgdbCharacter) => {
+  const mappedIgdbChars = igdbChars.flatMap((char: IgdbCharacter) => {
     // Character ID was mapped in prepare_game using igdbCharacterId
     const mappedActorId = igdbCharacterId(char.id);
     
@@ -416,21 +419,23 @@ const formattedCharacters = computed(() => {
 
     // Find the voice actor work for this character.
     // Check actor_id (set by prepare_game) and character_id (set by manual entry in the edit form).
-    const work = works.find((w: any) =>
+    const matchingWorks = works.filter((w: any) =>
       w.actor_id === mappedActorId ||
       w.actor_id === hashId ||
       w.character_id === char.id ||
       w.character_id === mappedActorId
     );
-    
-    if (work) {
+
+    if (matchingWorks.length === 0) return [{ ...char, voiceActor: null }];
+
+    return matchingWorks.map((work: any) => {
       matchedWorkIds.add(work.id);
-    }
-    
-    return {
-      ...char,
-      voiceActor: work ? { ...work.voice_actor, performance: work.performance } : null,
-    };
+      return {
+        ...char,
+        id: `${char.id}-${work.id}`,
+        voiceActor: { ...work.voice_actor, performance: work.performance, note: work.note },
+      };
+    });
   });
 
   // Find all works that were NOT matched to an IGDB character
@@ -449,7 +454,7 @@ const formattedCharacters = computed(() => {
       id: `mock-${work.id}`,
       name: resolvedName || 'Inconnu',
       mug_shot: null,
-      voiceActor: { ...work.voice_actor, performance: work.performance }
+      voiceActor: { ...work.voice_actor, performance: work.performance, note: work.note }
     };
   });
 
@@ -485,7 +490,8 @@ const filteredCharacters = computed(() => {
     const characterName = char.name?.toLowerCase() || '';
     const vaName = char.voiceActor ? `${char.voiceActor.firstname || ''} ${char.voiceActor.lastname || ''}`.toLowerCase() : '';
     const vaPerformance = char.voiceActor?.performance?.toLowerCase() || '';
-    return characterName.includes(query) || vaName.includes(query) || vaPerformance.includes(query);
+    const vaNote = char.voiceActor?.note?.toLowerCase() || '';
+    return characterName.includes(query) || vaName.includes(query) || vaPerformance.includes(query) || vaNote.includes(query);
   });
 });
 

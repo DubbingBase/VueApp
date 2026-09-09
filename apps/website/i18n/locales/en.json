@@ -1118,6 +1118,7 @@
     "tmdbShowId": "TMDB Show ID *",
     "viewDetails": "View Details ↗",
     "voiceActor": "Voice Actor *",
+    "castNote": "Note",
     "voiceCast": "Voice Cast"
   },
   "audiobookEditor": {

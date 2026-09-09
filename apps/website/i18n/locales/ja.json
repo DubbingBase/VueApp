@@ -1118,6 +1118,7 @@
     "tmdbShowId": "TMDBシリーズID *",
     "viewDetails": "詳細を表示 ↗",
     "voiceActor": "声優 *",
+    "castNote": "注記",
     "voiceCast": "声優キャスト"
   },
   "audiobookEditor": {
