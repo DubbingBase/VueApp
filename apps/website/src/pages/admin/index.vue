@@ -8,18 +8,6 @@
       </div>
       <div class="flex items-center space-x-3">
         <NuxtLink
-          :to="localePath('/admin/movies/new')"
-          class="px-4 py-2.5 bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 text-xs font-semibold rounded-xl shadow-lg transition-all flex items-center space-x-1.5"
-        >
-          <span>{{ $t('admin.dashboard.createMovieTvProject') }}</span>
-        </NuxtLink>
-        <NuxtLink
-          :to="localePath('/game/new/edit/new')"
-          class="px-4 py-2.5 bg-gray-900 hover:bg-gray-800 dark:bg-cyan-500 dark:hover:bg-cyan-400 text-white dark:text-gray-900 text-xs font-semibold rounded-xl shadow-lg transition-all flex items-center space-x-1.5"
-        >
-          <span>{{ $t('admin.dashboard.createVideoGameProject') }}</span>
-        </NuxtLink>
-        <NuxtLink
           :to="localePath('/voice-actor/new')"
           class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-[#2a2a2a] dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white text-xs font-semibold rounded-xl border border-gray-200 dark:border-gray-700 transition-all flex items-center space-x-1.5"
         >

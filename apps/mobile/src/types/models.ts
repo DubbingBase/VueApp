@@ -1,4 +1,4 @@
-import type { Tables } from "@supabase/functions/_shared/database.types";
+import type { Tables } from "@app/supabase";
 
 export interface ProfileWorkItem extends Tables<"work"> {
   content_type?: string;

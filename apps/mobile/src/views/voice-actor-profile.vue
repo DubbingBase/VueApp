@@ -128,7 +128,7 @@ import AddWorkModal from '@/components/profile/AddWorkModal.vue';
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue';
 
 import type { Tables } from '@/utils/database';
-import { supabase } from '@/api/supabase';
+import { nitroRequest } from '@/api/nitro';
 
 type VoiceActor = Tables<'voice_actors'>;
 
@@ -183,13 +183,14 @@ const loadProfileData = async () => {
   console.log("[loadProfileData] currentVoiceActor.id:", profileStore.currentVoiceActor?.id);
   
   if (profileStore.currentVoiceActor?.id !== voiceActorId.value) {
-    console.log("[loadProfileData] Voice actor mismatch, fetching directly via 'voice-actor' function");
+    console.log("[loadProfileData] Voice actor mismatch, fetching directly from the API route");
     try {
-      const { data, error } = await supabase.functions.invoke("voice-actor", {
-        body: { id: voiceActorId.value }});
+      const { data, error } = await nitroRequest(
+        `/api/voice-actor/${voiceActorId.value}`,
+      );
       console.log("[loadProfileData] voice-actor response:", { data, error });
       if (data && data.voiceActor) {
-        // The edge function returns work rows in data.voiceActor.work and medias in data.medias
+        // The API returns work rows in data.voiceActor.work and medias in data.medias
         const medias = data.medias || [];
         const mappedWorks = (data.voiceActor.work || []).map((work: Tables<'work'> & { dubbing_projects?: { content_id: number } }) => {
           const media = medias.find((m: { id: number }) => m.id === work.dubbing_projects?.content_id);

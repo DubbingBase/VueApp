@@ -171,60 +171,6 @@
       </form>
     </div>
 
-    <!-- Linked Works & Filmography (Bidirectional Linking) -->
-    <div v-if="isEditMode" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-        <div>
-          <h4 class="text-base font-bold text-white">{{ $t('voiceActorEdit.linkedWorksFilmography') }}</h4>
-          <p class="text-xs text-slate-400">{{ $t('voiceActorEdit.allCreditsLinked') }}</p>
-        </div>
-        <NuxtLink
-          :to="localePath(`/admin/add-voice-cast/${id}`)"
-          class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-xs shadow-md transition-all flex items-center space-x-1"
-        >
-          <span>{{ $t('voiceActorEdit.linkNewWork') }}</span>
-        </NuxtLink>
-      </div>
-
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm text-slate-300">
-          <thead class="bg-slate-950 text-xs font-semibold uppercase text-slate-400 border-b border-slate-800">
-            <tr>
-              <th class="px-4 py-3">{{ $t('voiceActorEdit.workId') }}</th>
-              <th class="px-4 py-3">{{ $t('voiceActorEdit.mediaContentId') }}</th>
-              <th class="px-4 py-3">{{ $t('admin.queue.type') }}</th>
-              <th class="px-4 py-3">{{ $t('details.character') }}</th>
-              <th class="px-4 py-3">{{ $t('admin.movieEditor.performance') }}</th>
-              <th class="px-4 py-3 text-right">{{ $t('voiceActorEdit.editProject') }}</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-800/60">
-            <tr v-for="work in linkedWorks" :key="work.id" class="hover:bg-slate-950/50 transition-colors">
-              <td class="px-4 py-3 font-mono text-xs text-slate-400">#{{ work.id }}</td>
-              <td class="px-4 py-3 font-mono text-xs text-blue-400">{{ $t('voiceActorEdit.projectNumber') }}{{ work.dubbing_project_id }}</td>
-              <td class="px-4 py-3 uppercase text-[10px] font-bold tracking-wider text-slate-400">
-                <span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700">{{ work.content_type || 'movie' }}</span>
-              </td>
-              <td class="px-4 py-3 font-medium text-white">{{ work.suggestions || 'Character' }}</td>
-              <td class="px-4 py-3 text-xs text-slate-400">{{ work.performance || 'dialogues' }}</td>
-              <td class="px-4 py-3 text-right">
-                <NuxtLink
-                  :to="localePath(`/admin/movies/edit/${work.dubbing_project_id}`)"
-                  class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-blue-400 hover:text-blue-300 text-xs font-semibold rounded-lg border border-slate-700 transition-all inline-flex items-center space-x-1"
-                >
-                  <span>{{ $t('voiceActorEdit.editMovie') }}</span>
-                  <span>↗</span>
-                </NuxtLink>
-              </td>
-            </tr>
-            <tr v-if="linkedWorks.length === 0">
-              <td colspan="6" class="text-center py-6 text-slate-500 text-xs">{{ $t('voiceActorEdit.noLinkedWorks') }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
     <!-- Toast Notifications -->
     <div
       v-if="toast.show"
@@ -334,52 +280,6 @@ const uploadProfilePicture = async (voiceActorId: string | number) => {
   }
   return profilePicture.value;
 };
-
-const linkedWorks = ref<any[]>([]);
-
-const fetchLinkedWorks = async () => {};
-
-const { data: initialData } = await useAsyncData(`voice-actor-new-${id}`, async () => {
-  if (!isEditMode.value || !id) return null;
-  const { data: va, error: vaErr } = await supabase
-    .from("voice_actors")
-    .select("*")
-    .eq("id", id)
-    .single();
-    
-  if (vaErr) throw vaErr;
-
-  const { data: works, error: worksErr } = await supabase
-    .from("work")
-    .select("*")
-    .eq("voice_actor_id", id);
-
-  return {
-    voiceActor: va,
-    linkedWorks: works || []
-  };
-});
-
-watch(initialData, (data) => {
-  if (data) {
-    if (data.voiceActor) {
-      firstname.value = data.voiceActor.firstname;
-      lastname.value = data.voiceActor.lastname;
-      bio.value = data.voiceActor.bio || "";
-      nationality.value = data.voiceActor.nationality || "";
-      dateOfBirth.value = data.voiceActor.date_of_birth || "";
-      awards.value = data.voiceActor.awards || "";
-      yearsActive.value = data.voiceActor.years_active || "";
-      socialMediaLinks.value = data.voiceActor.social_media_links ? JSON.stringify(data.voiceActor.social_media_links, null, 2) : "";
-      tmdbId.value = data.voiceActor.tmdb_id ? String(data.voiceActor.tmdb_id) : "";
-      profilePicture.value = data.voiceActor.profile_picture || "";
-      wikidataId.value = data.voiceActor.wikidata_id || "";
-    }
-    linkedWorks.value = data.linkedWorks;
-  }
-}, { immediate: true });
-
-const fetchVoiceActor = async () => {}; // Dummy
 
 const saveVoiceActor = async () => {
   isSaving.value = true;

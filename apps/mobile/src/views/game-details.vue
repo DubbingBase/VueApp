@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { supabase } from "@/api/supabase";
+import { nitroRequest } from "@/api/nitro";
 import { useI18n } from "vue-i18n";
 import { usePermissions } from "@/composables/usePermissions";
 import { EllipsisVertical, Gamepad2, Star, Calendar, Cpu, Building2 } from "lucide-vue-next";
@@ -50,9 +50,9 @@ async function fetchData() {
   fetchError.value = null;
 
   try {
-    const { data, error } = await supabase.functions.invoke("game", {
-      body: { id: Number(route.params.id) },
-    });
+    const { data, error } = await nitroRequest(
+      `/api/game/${Number(route.params.id)}`,
+    );
 
     if (error) throw error;
 
@@ -75,7 +75,8 @@ async function handleRefresh(event?: any) {
 
 async function triggerPrepareGame() {
   try {
-    const { data, error } = await supabase.functions.invoke("prepare_game", {
+    const { data, error } = await nitroRequest("/api/prepare_game", {
+      method: "POST",
       body: { igdbId: Number(route.params.id) },
     });
     if (error) throw error;

@@ -732,7 +732,7 @@ export type Database = {
       };
       normalize_actor_name: { Args: { str: string }; Returns: string };
       pop_media_queue_message: {
-        Args: { p_vt_seconds?: number };
+        Args: { p_queue_name: string; p_vt_seconds?: number };
         Returns: {
           enqueued_at: string;
           message: Json;

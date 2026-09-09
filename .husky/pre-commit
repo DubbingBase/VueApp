@@ -1,1 +1,2 @@
 mise run format-staged
+npx --yes codesight --wiki && git add .codesight

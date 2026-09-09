@@ -167,18 +167,19 @@ import CreditsReviewModal from "@/components/CreditsReviewModal.vue";
 import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
 import { useVoiceActorManagement } from "@/composables/useVoiceActorManagement";
 import { useDeferredCharacters } from "@/composables/useDeferredCharacters";
-import { findCharacter } from "@/utils/character";
+import { findCharacter } from "@app/shared-logic";
 import Share2 from "~icons/lucide/share-2";
 // Removed unused imports
 import { storeToRefs } from "pinia";
 import { useAuthStore } from "@/stores/auth";
 import { supabase } from "@/api/supabase";
+import { nitroRequest } from "@/api/nitro";
 import { enqueueMedia } from "@/api/mediaQueue";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { actorToPersonData, voiceActorToPersonData } from "@/utils/convert";
 import { Role } from "@/components/PersonItem.vue";
 import { useI18n } from "vue-i18n";
-import { ShowResponse } from "@supabase/functions/_shared/types";
+import { ShowResponse } from "@app/shared-logic";
 
 const authStore = useAuthStore();
 const { isAdmin } = storeToRefs(authStore);
@@ -419,9 +420,10 @@ const takePhoto = async () => {
       ) || [];
     formData.append("actors", JSON.stringify(simplifiedActors));
 
-    const response = await supabase.functions.invoke(
-      "extract-credits-from-image",
+    const response = await nitroRequest(
+      "/api/extract-credits-from-image",
       {
+        method: "POST",
         body: formData,
       },
     );
@@ -446,9 +448,7 @@ const takePhoto = async () => {
 
 const getSerie = async (id: string) => {
   try {
-    const response = await supabase.functions.invoke<ShowResponse>("show", {
-      body: { id },
-    });
+    const response = await nitroRequest<ShowResponse>(`/api/show/${id}`);
     return response;
   } catch (e: unknown) {
     console.error("Error fetching series data:", e);
