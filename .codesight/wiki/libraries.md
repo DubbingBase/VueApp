@@ -2,21 +2,21 @@
 
 > **Navigation aid.** Library inventory extracted via AST. Read the source files listed here before modifying exported functions.
 
-**70 library files** across 5 modules
+**71 library files** across 5 modules
 
-## Website (35 files)
+## Website (36 files)
 
 - `apps/website/server/utils/index.ts` — getCloudflareKv, useCache, useTmdbClient, useTvdbClient, useIgdbClient, useOpenLibraryClient, …
 - `apps/website/server/utils/services/media-preparation.ts` — checkMediaDubbingSections, checkGameDubbingSections, extractMediaDubbingCredits, extractGameDubbingCredits, prepareMedia, prepareGame, …
 - `apps/website/server/utils/cache/wikipedia.ts` — sortLanguagesByPopularity, extractAvailableLanguages, cleanHeadingText, isDubbingSectionHeading, selectDubbingSections, sitelinkKey, …
 - `apps/website/server/utils/cache/constants.ts` — SimpleKeyBuilder, SimpleKeyValidator, API_PREFIXES, CACHE_SCHEMA_VERSION, CONTENT_TYPES, CACHE_KEYS
 - `apps/website/server/utils/llm.ts` — areAllLlmQuotasExhausted, getLlmQuotaCache, llmGenerate, llmGenerateObject, llmVision, llmVisionObject
+- `apps/website/server/utils/notifications/discord.ts` — normalizeDiscordUrl, buildDiscordEmbed, sendDiscordAdminNotification, DiscordWebhookOptions, QueueName, DiscordNotificationCategory
 - `apps/website/server/utils/db/queries.ts` — getVoiceActorWithWork, getWorkByActor, getDubbingProjects, getWorkVotes, getTopContributors
 - `apps/website/server/utils/services/voice-actor.ts` — upsertVoiceActor, upsertActor, upsertStudio, upsertWork, insertVoiceActorAndWork
 - `apps/website/server/utils/urls/tmdb.ts` — buildTmdbImageUrl, cleanCharacterName, processMedia, TMDB_CONFIG
 - `apps/website/server/utils/api/igdb.ts` — buildIgdbImageUrl, IgdbClient, IgdbPopularityPrimitive
 - `apps/website/server/utils/cache/index.ts` — SimpleCache, CacheTTLPreset, CACHE_TTL
-- `apps/website/server/utils/notifications/discord.ts` — sendDiscordAdminNotification, DiscordWebhookOptions, QueueName
 - `apps/website/server/utils/api/openlibrary.ts` — buildOpenLibraryCoverUrl, OpenLibraryClient
 - `apps/website/server/utils/api/podcast.ts` — PodcastClient, ITunesPodcastResult
 - `apps/website/server/utils/auth.ts` — requireUser, requireAdmin
@@ -31,7 +31,7 @@
 - `apps/website/server/utils/api/advertisement.ts` — AdvertisementClient
 - `apps/website/server/utils/api/tmdb.ts` — TMDBClient
 - `apps/website/server/utils/api/toy.ts` — ToyClient
-- _…and 10 more files_
+- _…and 11 more files_
 
 ## Mobile (17 files)
 

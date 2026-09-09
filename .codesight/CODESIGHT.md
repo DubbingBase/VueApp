@@ -3,9 +3,9 @@
 > **Stack:** nuxt | none | vue | typescript
 > **Monorepo:** @app/mobile, @app/website, @app/supabase, @app/locales, @app/og-image, @app/shared-logic
 
-> 80 routes | 16 models | 178 components | 70 lib files | 76 env vars | 11 middleware | 2% test coverage
-> **Token savings:** this file is ~13,500 tokens. Without it, AI exploration would cost ~145,700 tokens. **Saves ~132,200 tokens per conversation.**
-> **Last scanned:** 2026-09-07 18:36 — re-run after significant changes
+> 80 routes | 16 models | 193 components | 71 lib files | 63 env vars | 11 middleware | 4% test coverage
+> **Token savings:** this file is ~13,900 tokens. Without it, AI exploration would cost ~149,200 tokens. **Saves ~135,300 tokens per conversation.**
+> **Last scanned:** 2026-09-09 12:54 — re-run after significant changes
 
 ---
 
@@ -322,6 +322,13 @@
 - **BarChart** [client] — `apps/website/src/components/admin/charts/BarChart.vue`
 - **LineChart** [client] — `apps/website/src/components/admin/charts/LineChart.vue`
 - **PieChart** [client] — `apps/website/src/components/admin/charts/PieChart.vue`
+- **AdvertisementProjectEditor** [client] — `apps/website/src/components/admin/editors/AdvertisementProjectEditor.vue`
+- **AudiobookProjectEditor** [client] — `apps/website/src/components/admin/editors/AudiobookProjectEditor.vue`
+- **GameProjectEditor** [client] — `apps/website/src/components/admin/editors/GameProjectEditor.vue`
+- **MovieProjectEditor** [client] — `apps/website/src/components/admin/editors/MovieProjectEditor.vue`
+- **PodcastProjectEditor** [client] — `apps/website/src/components/admin/editors/PodcastProjectEditor.vue`
+- **ShowProjectEditor** [client] — `apps/website/src/components/admin/editors/ShowProjectEditor.vue`
+- **ToyProjectEditor** [client] — `apps/website/src/components/admin/editors/ToyProjectEditor.vue`
 - **MediaDetailsLayout** [client] — props: title, backdropUrl, posterUrl, loading — `apps/website/src/components/layout/MediaDetailsLayout.vue`
 - **PersonDetailsLayout** [client] — props: name, profileUrl, backdropUrl, loading — `apps/website/src/components/layout/PersonDetailsLayout.vue`
 - **DetailsActionBar** [client] — `apps/website/src/components/layout/details/DetailsActionBar.vue`
@@ -337,8 +344,6 @@
 - **duplicates-work** [client] — `apps/website/src/pages/admin/duplicates-work.vue`
 - **index** [client] — `apps/website/src/pages/admin/index.vue`
 - **manual-merge-va** [client] — `apps/website/src/pages/admin/manual-merge-va.vue`
-- **[id]** [client] — `apps/website/src/pages/admin/movies/edit/[id].vue`
-- **new** [client] — `apps/website/src/pages/admin/movies/new.vue`
 - **queue** [client] — `apps/website/src/pages/admin/queue.vue`
 - **reports** [client] — `apps/website/src/pages/admin/reports.vue`
 - **[id]** [client] — `apps/website/src/pages/admin/studios/edit/[id].vue`
@@ -346,14 +351,18 @@
 - **user-va-profiles** [client] — `apps/website/src/pages/admin/user-va-profiles.vue`
 - **users** [client] — `apps/website/src/pages/admin/users.vue`
 - **voice-actor-spreadsheet** [client] — `apps/website/src/pages/admin/voice-actor-spreadsheet.vue`
-- **[projectId]** [client] — `apps/website/src/pages/advertisement/[adId]/edit/[projectId].vue`
+- **edit** [client] — `apps/website/src/pages/advertisement/[adId]/projects/[projectId]/edit.vue`
+- **new** [client] — `apps/website/src/pages/advertisement/[adId]/projects/new.vue`
 - **[id]** [client] — `apps/website/src/pages/advertisement/[id].vue`
-- **[projectId]** [client] — `apps/website/src/pages/audiobook/[audiobookId]/edit/[projectId].vue`
+- **new** [client] — `apps/website/src/pages/advertisement/new.vue`
+- **edit** [client] — `apps/website/src/pages/audiobook/[audiobookId]/projects/[projectId]/edit.vue`
+- **new** [client] — `apps/website/src/pages/audiobook/[audiobookId]/projects/new.vue`
 - **[id]** [client] — `apps/website/src/pages/audiobook/[id].vue`
 - **index** [client] — `apps/website/src/pages/contribute/index.vue`
 - **play** [client] — `apps/website/src/pages/contribute/task/play.vue`
 - **discussions** [client] — `apps/website/src/pages/discussions.vue`
-- **[projectId]** [client] — `apps/website/src/pages/game/[gameId]/edit/[projectId].vue`
+- **edit** [client] — `apps/website/src/pages/game/[gameId]/projects/[projectId]/edit.vue`
+- **new** [client] — `apps/website/src/pages/game/[gameId]/projects/new.vue`
 - **[id]** [client] — `apps/website/src/pages/game/[id].vue`
 - **guidelines** [client] — `apps/website/src/pages/guidelines.vue`
 - **index** [client] — `apps/website/src/pages/index.vue`
@@ -361,10 +370,13 @@
 - **legal** [client] — `apps/website/src/pages/legal.vue`
 - **login** [client] — `apps/website/src/pages/login.vue`
 - **[id]** [client] — `apps/website/src/pages/movie/[id].vue`
-- **[projectId]** [client] — `apps/website/src/pages/movie/[movieId]/edit/[projectId].vue`
+- **edit** [client] — `apps/website/src/pages/movie/[movieId]/projects/[projectId]/edit.vue`
+- **new** [client] — `apps/website/src/pages/movie/[movieId]/projects/new.vue`
 - **movies** [client] — `apps/website/src/pages/movies.vue`
 - **[id]** [client] — `apps/website/src/pages/podcast/[id].vue`
-- **[projectId]** [client] — `apps/website/src/pages/podcast/[podcastId]/edit/[projectId].vue`
+- **edit** [client] — `apps/website/src/pages/podcast/[podcastId]/projects/[projectId]/edit.vue`
+- **new** [client] — `apps/website/src/pages/podcast/[podcastId]/projects/new.vue`
+- **new** [client] — `apps/website/src/pages/podcast/new.vue`
 - **privacy** [client] — `apps/website/src/pages/privacy.vue`
 - **api-key** [client] — `apps/website/src/pages/profile/api-key.vue`
 - **index** [client] — `apps/website/src/pages/profile/index.vue`
@@ -375,14 +387,17 @@
 - **[episodeNumber]** [client] — `apps/website/src/pages/show/[id]/season/[seasonNumber]/episode/[episodeNumber].vue`
 - **[seasonNumber]** [client] — `apps/website/src/pages/show/[id]/season/[seasonNumber].vue`
 - **[id]** [client] — `apps/website/src/pages/show/[id].vue`
-- **[projectId]** [client] — `apps/website/src/pages/show/[showId]/edit/[projectId].vue`
+- **edit** [client] — `apps/website/src/pages/show/[showId]/projects/[projectId]/edit.vue`
+- **new** [client] — `apps/website/src/pages/show/[showId]/projects/new.vue`
 - **[id]** [client] — `apps/website/src/pages/studio/[id].vue`
 - **edit** [client] — `apps/website/src/pages/studio/[studioId]/edit.vue`
 - **studios** [client] — `apps/website/src/pages/studios.vue`
 - **terms-api** [client] — `apps/website/src/pages/terms-api.vue`
 - **terms** [client] — `apps/website/src/pages/terms.vue`
 - **[id]** [client] — `apps/website/src/pages/toy/[id].vue`
-- **[projectId]** [client] — `apps/website/src/pages/toy/[toyId]/edit/[projectId].vue`
+- **edit** [client] — `apps/website/src/pages/toy/[toyId]/projects/[projectId]/edit.vue`
+- **new** [client] — `apps/website/src/pages/toy/[toyId]/projects/new.vue`
+- **new** [client] — `apps/website/src/pages/toy/new.vue`
 - **[id]** [client] — `apps/website/src/pages/voice-actor/[id].vue`
 - **edit** [client] — `apps/website/src/pages/voice-actor/[voiceActorId]/edit.vue`
 - **new** [client] — `apps/website/src/pages/voice-actor/new.vue`
@@ -477,9 +492,12 @@
   - function llmVisionObject: (prompt, imageData, schema, mimeType, options?) => Promise<
 - `apps/website/server/utils/normalize.ts` — function normalizeString: (input) => string, function isExploitableVoiceActorName: (input) => boolean
 - `apps/website/server/utils/notifications/discord.ts`
+  - function normalizeDiscordUrl: (url) => string
+  - function buildDiscordEmbed: (title, message, options?) => Record<string, unknown>
   - function sendDiscordAdminNotification: (title, message, options?) => void
   - interface DiscordWebhookOptions
   - type QueueName
+  - type DiscordNotificationCategory
 - `apps/website/server/utils/notifications/onesignal.ts` — function sendOneSignalNotification: (title, message, options?) => void, interface OneSignalOptions
 - `apps/website/server/utils/services/media-preparation.ts`
   - function checkMediaDubbingSections: (options) => Promise<CheckSectionsResult>
@@ -508,6 +526,7 @@
 - `apps/website/src/composables/useReports.ts` — function useReports
 - `apps/website/src/composables/useSearchModal.ts` — function useSearchModal: () => void
 - `apps/website/src/composables/useTheme.ts` — function useTheme: () => void
+- `apps/website/src/lib/media-editor-routes.ts` — function getMediaEditorRoute: ({...}, mediaId, projectId }) => string | null
 - `apps/website/src/lib/mediaQueue.ts` — function enqueueMedia: (params) => Promise<void>
 - `e2e/helpers/mock-api.ts` — function setupMockApi: (page, options) => void, interface MockApiOptions
 - `packages/og-image/src/index.ts`
@@ -558,23 +577,22 @@
 - `CI` **required** — apps/mobile/capacitor.config.ts
 - `DEV` **required** — apps/mobile/src/api/supabase.ts
 - `DISCORD_ADMIN_WEBHOOK_LOG_URL` **required** — .env.example
-- `DISCORD_CHECK_WEBHOOK_URL` **required** — apps/website/nuxt.config.ts
-- `DISCORD_DISCOVERY_WEBHOOK_URL` **required** — apps/website/nuxt.config.ts
-- `DISCORD_EXTRACT_WEBHOOK_URL` **required** — apps/website/nuxt.config.ts
-- `DISCORD_WEBHOOK_CHECK_URL` (has default) — apps/website/nuxt.config.ts
-- `DISCORD_WEBHOOK_DISCOVERY_URL` (has default) — apps/website/nuxt.config.ts
-- `DISCORD_WEBHOOK_EXTRACT_URL` (has default) — apps/website/nuxt.config.ts
-- `DISCORD_WEBHOOK_URL` (has default) — apps/website/nuxt.config.ts
+- `DISCORD_CHECK_WEBHOOK_URL` **required** — apps/website/server/utils/notifications/discord.ts
+- `DISCORD_DISCOVERY_WEBHOOK_URL` **required** — apps/website/server/utils/notifications/discord.ts
+- `DISCORD_EXTRACT_WEBHOOK_URL` **required** — apps/website/server/utils/notifications/discord.ts
+- `DISCORD_WEBHOOK_CHECK_URL` **required** — apps/website/server/utils/notifications/discord.ts
+- `DISCORD_WEBHOOK_DISCOVERY_URL` **required** — apps/website/server/utils/notifications/discord.ts
+- `DISCORD_WEBHOOK_EXTRACT_URL` **required** — apps/website/server/utils/notifications/discord.ts
+- `DISCORD_WEBHOOK_URL` **required** — apps/website/server/utils/notifications/discord.ts
 - `DISCORD_WEBHOOK_URL_1` **required** — apps/website/server/utils/notifications/discord.ts
 - `DISCORD_WEBHOOK_URL_2` **required** — apps/website/server/utils/notifications/discord.ts
 - `DISCORD_WEBHOOK_URL_3` **required** — apps/website/server/utils/notifications/discord.ts
 - `E2E_TEST` **required** — apps/website/server/middleware/00-e2e-mock.ts
 - `GEMINI_API_KEY` (has default) — apps/website/server/utils/llm.ts
-- `GEMINI_MODEL` (has default) — apps/website/nuxt.config.ts
-- `GEMINI_MODELS` (has default) — apps/website/nuxt.config.ts
+- `GEMINI_MODELS` **required** — apps/website/server/utils/llm.ts
 - `GOOGLE_AI_KEY` **required** — .env.example
 - `GROQ_API_KEY` **required** — .env.example
-- `GROQ_MODEL` (has default) — apps/website/nuxt.config.ts
+- `GROQ_MODEL` (has default) — apps/website/server/utils/llm.ts
 - `IGDB_CLIENT_ID` **required** — .env.example
 - `IGDB_CLIENT_SECRET` **required** — .env.example
 - `JAVA_HOME` **required** — .env.example
@@ -582,37 +600,25 @@
 - `KEY_ALIAS` **required** — .env.example
 - `KEY_PASSWORD` **required** — .env.example
 - `KEYSTORE_PASSWORD` **required** — .env.example
-- `LLM_PROVIDER` (has default) — apps/website/nuxt.config.ts
+- `LLM_PROVIDER` (has default) — apps/website/server/utils/llm.ts
 - `NDK_HOME` **required** — .env.example
 - `NITRO_PRESET` (has default) — apps/website/nuxt.config.ts
 - `NODE_ENV` (has default) — .env.example
-- `NUXT_ADMIN_EMAIL` **required** — apps/website/nuxt.config.ts
-- `NUXT_DISCORD_WEBHOOK_CHECK_URL` (has default) — apps/website/nuxt.config.ts
-- `NUXT_DISCORD_WEBHOOK_DISCOVERY_URL` (has default) — apps/website/nuxt.config.ts
-- `NUXT_DISCORD_WEBHOOK_EXTRACT_URL` (has default) — apps/website/nuxt.config.ts
-- `NUXT_DISCORD_WEBHOOK_URL` (has default) — apps/website/nuxt.config.ts
+- `NUXT_DISCORD_WEBHOOK_CHECK_URL` **required** — apps/website/server/utils/notifications/discord.ts
+- `NUXT_DISCORD_WEBHOOK_DISCOVERY_URL` **required** — apps/website/server/utils/notifications/discord.ts
+- `NUXT_DISCORD_WEBHOOK_EXTRACT_URL` **required** — apps/website/server/utils/notifications/discord.ts
+- `NUXT_DISCORD_WEBHOOK_URL` **required** — apps/website/server/utils/notifications/discord.ts
 - `NUXT_DISCORD_WEBHOOK_URL_1` **required** — apps/website/server/utils/notifications/discord.ts
 - `NUXT_DISCORD_WEBHOOK_URL_2` **required** — apps/website/server/utils/notifications/discord.ts
 - `NUXT_DISCORD_WEBHOOK_URL_3` **required** — apps/website/server/utils/notifications/discord.ts
-- `NUXT_GEMINI_MODEL` (has default) — apps/website/nuxt.config.ts
-- `NUXT_GEMINI_MODELS` (has default) — apps/website/nuxt.config.ts
+- `NUXT_GEMINI_MODELS` (has default) — apps/website/server/utils/llm.ts
 - `NUXT_GOOGLE_AI_KEY` **required** — .env.example
 - `NUXT_GROQ_API_KEY` **required** — .env.example
-- `NUXT_GROQ_MODEL` (has default) — apps/website/nuxt.config.ts
-- `NUXT_IGDB_CLIENT_ID` **required** — apps/website/nuxt.config.ts
-- `NUXT_IGDB_CLIENT_SECRET` **required** — apps/website/nuxt.config.ts
-- `NUXT_LLM_PROVIDER` (has default) — apps/website/nuxt.config.ts
-- `NUXT_ONESIGNAL_APP_ID` **required** — apps/website/nuxt.config.ts
-- `NUXT_ONESIGNAL_REST_API_KEY` **required** — apps/website/nuxt.config.ts
-- `NUXT_PUBLIC_SUPABASE_KEY` (has default) — apps/website/nuxt.config.ts
-- `NUXT_PUBLIC_SUPABASE_URL` (has default) — apps/website/nuxt.config.ts
-- `NUXT_RESEND_API_KEY` **required** — apps/website/nuxt.config.ts
-- `NUXT_RESEND_FROM_EMAIL` **required** — apps/website/nuxt.config.ts
-- `NUXT_RESEND_TO_EMAIL` **required** — apps/website/nuxt.config.ts
-- `NUXT_SUPABASE_SECRET_KEY` **required** — apps/website/nuxt.config.ts
-- `NUXT_SUPABASE_URL` **required** — apps/website/nuxt.config.ts
-- `NUXT_TMDB_API_KEY` **required** — apps/website/nuxt.config.ts
-- `NUXT_TVDB_API_KEY` **required** — apps/website/nuxt.config.ts
+- `NUXT_GROQ_MODEL` (has default) — apps/website/server/utils/llm.ts
+- `NUXT_LLM_PROVIDER` (has default) — apps/website/server/utils/llm.ts
+- `NUXT_PUBLIC_SUPABASE_URL` (has default) — apps/website/server/api/og-image/index.get.ts
+- `NUXT_SUPABASE_SECRET_KEY` (has default) — apps/website/server/api/prepare-trending-media.post.ts
+- `NUXT_SUPABASE_URL` (has default) — apps/website/server/api/og-image/index.get.ts
 - `ONESIGNAL_APP_ID` **required** — .env.example
 - `ONESIGNAL_REST_API_KEY` **required** — .env.example
 - `RESEND_API_KEY` **required** — .env.example
@@ -643,13 +649,13 @@
 ## auth
 - auth — `apps/mobile/src/stores/auth.ts`
 - generate-social-content.post — `apps/website/server/api/generate-social-content.post.ts`
+- 00-cache — `apps/website/server/middleware/00-cache.ts`
 - auth — `apps/website/server/middleware/auth.ts`
 - auth — `apps/website/server/utils/auth.ts`
 - auth — `apps/website/src/middleware/auth.ts`
 - authenticated-fetch — `apps/website/src/plugins/authenticated-fetch.ts`
 
 ## custom
-- 00-cache — `apps/website/server/middleware/00-cache.ts`
 - 00-e2e-mock — `apps/website/server/middleware/00-e2e-mock.ts`
 - admin — `apps/website/src/middleware/admin.ts`
 - 20260618000000_migrate_to_pgmq — `packages/database/supabase/migrations/20260618000000_migrate_to_pgmq.sql`
@@ -701,11 +707,13 @@
 
 # Test Coverage
 
-> **2%** of routes and models are covered by tests
-> 14 test files found
+> **4%** of routes and models are covered by tests
+> 17 test files found
 
 ## Covered Models
 
+- voice_actors
+- source
 - work
 - studios
 

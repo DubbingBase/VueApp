@@ -298,6 +298,7 @@
                       {{ actor.voiceActor.firstname }}
                       {{ actor.voiceActor.lastname }}
                     </NuxtLink>
+                    <div v-if="actor.voiceActor.note" class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ actor.voiceActor.note }}</div>
                   </div>
                 </template>
                 <template v-else>
@@ -511,7 +512,7 @@ const formattedCast = computed(() => {
   // Get works (dubbing links) for the currently active dubbing project
   const works = activeDubProject.value?.works || [];
 
-  return movie.value.credits.cast.map((actor: any) => {
+  return movie.value.credits.cast.flatMap((actor: any) => {
     // TMDB returns profile_path without full URL sometimes in raw payload,
     // but the backend processMedia adds TMDB urls to it.
     // If it's a relative path starting with /, prepend tmdb url.
@@ -521,7 +522,10 @@ const formattedCast = computed(() => {
     }
 
     // Find the voice actor work for this physical actor
-    const work = works.find((w: any) => w.actor_id === actor.id);
+    const matchingWorks = works.filter((w: any) => w.actor_id === actor.id);
+    const cards = matchingWorks.length > 0 ? matchingWorks : [null];
+
+    return cards.map((work: any) => {
     const voiceActor = work?.voice_actor;
     // Fallback character name from DB when TMDB returns no character
     const workCharacterName = work?.character_name || null;
@@ -540,11 +544,13 @@ const formattedCast = computed(() => {
 
     return {
       ...actor,
+      id: work ? `${actor.id}-${work.id}` : actor.id,
       profile_path: profilePath,
-      voiceActor: voiceActor || null,
+      voiceActor: voiceActor ? { ...voiceActor, note: work.note } : null,
       characterImage,
       workCharacterName,
     };
+    });
   });
 });
 

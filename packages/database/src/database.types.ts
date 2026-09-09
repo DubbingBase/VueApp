@@ -530,6 +530,7 @@ export type Database = {
           dubbing_project_id: number;
           highlight: boolean | null;
           id: number;
+          note: string | null;
           performance: string | null;
           reviewed_status: string | null;
           source_id: number | null;
@@ -548,6 +549,7 @@ export type Database = {
           dubbing_project_id: number;
           highlight?: boolean | null;
           id?: number;
+          note?: string | null;
           performance?: string | null;
           reviewed_status?: string | null;
           source_id?: number | null;
@@ -566,6 +568,7 @@ export type Database = {
           dubbing_project_id?: number;
           highlight?: boolean | null;
           id?: number;
+          note?: string | null;
           performance?: string | null;
           reviewed_status?: string | null;
           source_id?: number | null;

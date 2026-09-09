@@ -2,7 +2,7 @@
 
 > **Navigation aid.** Component inventory and prop signatures extracted via AST. Read the source files before adding props or modifying component logic.
 
-**178 components** (vue)
+**193 components** (vue)
 
 ## Client Components
 
@@ -119,6 +119,13 @@
 - **BarChart** — `apps/website/src/components/admin/charts/BarChart.vue`
 - **LineChart** — `apps/website/src/components/admin/charts/LineChart.vue`
 - **PieChart** — `apps/website/src/components/admin/charts/PieChart.vue`
+- **AdvertisementProjectEditor** — `apps/website/src/components/admin/editors/AdvertisementProjectEditor.vue`
+- **AudiobookProjectEditor** — `apps/website/src/components/admin/editors/AudiobookProjectEditor.vue`
+- **GameProjectEditor** — `apps/website/src/components/admin/editors/GameProjectEditor.vue`
+- **MovieProjectEditor** — `apps/website/src/components/admin/editors/MovieProjectEditor.vue`
+- **PodcastProjectEditor** — `apps/website/src/components/admin/editors/PodcastProjectEditor.vue`
+- **ShowProjectEditor** — `apps/website/src/components/admin/editors/ShowProjectEditor.vue`
+- **ToyProjectEditor** — `apps/website/src/components/admin/editors/ToyProjectEditor.vue`
 - **MediaDetailsLayout** — props: title, backdropUrl, posterUrl, loading — `apps/website/src/components/layout/MediaDetailsLayout.vue`
 - **PersonDetailsLayout** — props: name, profileUrl, backdropUrl, loading — `apps/website/src/components/layout/PersonDetailsLayout.vue`
 - **DetailsActionBar** — `apps/website/src/components/layout/details/DetailsActionBar.vue`
@@ -134,8 +141,6 @@
 - **duplicates-work** — `apps/website/src/pages/admin/duplicates-work.vue`
 - **index** — `apps/website/src/pages/admin/index.vue`
 - **manual-merge-va** — `apps/website/src/pages/admin/manual-merge-va.vue`
-- **[id]** — `apps/website/src/pages/admin/movies/edit/[id].vue`
-- **new** — `apps/website/src/pages/admin/movies/new.vue`
 - **queue** — `apps/website/src/pages/admin/queue.vue`
 - **reports** — `apps/website/src/pages/admin/reports.vue`
 - **[id]** — `apps/website/src/pages/admin/studios/edit/[id].vue`
@@ -143,14 +148,18 @@
 - **user-va-profiles** — `apps/website/src/pages/admin/user-va-profiles.vue`
 - **users** — `apps/website/src/pages/admin/users.vue`
 - **voice-actor-spreadsheet** — `apps/website/src/pages/admin/voice-actor-spreadsheet.vue`
-- **[projectId]** — `apps/website/src/pages/advertisement/[adId]/edit/[projectId].vue`
+- **edit** — `apps/website/src/pages/advertisement/[adId]/projects/[projectId]/edit.vue`
+- **new** — `apps/website/src/pages/advertisement/[adId]/projects/new.vue`
 - **[id]** — `apps/website/src/pages/advertisement/[id].vue`
-- **[projectId]** — `apps/website/src/pages/audiobook/[audiobookId]/edit/[projectId].vue`
+- **new** — `apps/website/src/pages/advertisement/new.vue`
+- **edit** — `apps/website/src/pages/audiobook/[audiobookId]/projects/[projectId]/edit.vue`
+- **new** — `apps/website/src/pages/audiobook/[audiobookId]/projects/new.vue`
 - **[id]** — `apps/website/src/pages/audiobook/[id].vue`
 - **index** — `apps/website/src/pages/contribute/index.vue`
 - **play** — `apps/website/src/pages/contribute/task/play.vue`
 - **discussions** — `apps/website/src/pages/discussions.vue`
-- **[projectId]** — `apps/website/src/pages/game/[gameId]/edit/[projectId].vue`
+- **edit** — `apps/website/src/pages/game/[gameId]/projects/[projectId]/edit.vue`
+- **new** — `apps/website/src/pages/game/[gameId]/projects/new.vue`
 - **[id]** — `apps/website/src/pages/game/[id].vue`
 - **guidelines** — `apps/website/src/pages/guidelines.vue`
 - **index** — `apps/website/src/pages/index.vue`
@@ -158,10 +167,13 @@
 - **legal** — `apps/website/src/pages/legal.vue`
 - **login** — `apps/website/src/pages/login.vue`
 - **[id]** — `apps/website/src/pages/movie/[id].vue`
-- **[projectId]** — `apps/website/src/pages/movie/[movieId]/edit/[projectId].vue`
+- **edit** — `apps/website/src/pages/movie/[movieId]/projects/[projectId]/edit.vue`
+- **new** — `apps/website/src/pages/movie/[movieId]/projects/new.vue`
 - **movies** — `apps/website/src/pages/movies.vue`
 - **[id]** — `apps/website/src/pages/podcast/[id].vue`
-- **[projectId]** — `apps/website/src/pages/podcast/[podcastId]/edit/[projectId].vue`
+- **edit** — `apps/website/src/pages/podcast/[podcastId]/projects/[projectId]/edit.vue`
+- **new** — `apps/website/src/pages/podcast/[podcastId]/projects/new.vue`
+- **new** — `apps/website/src/pages/podcast/new.vue`
 - **privacy** — `apps/website/src/pages/privacy.vue`
 - **api-key** — `apps/website/src/pages/profile/api-key.vue`
 - **index** — `apps/website/src/pages/profile/index.vue`
@@ -172,14 +184,17 @@
 - **[episodeNumber]** — `apps/website/src/pages/show/[id]/season/[seasonNumber]/episode/[episodeNumber].vue`
 - **[seasonNumber]** — `apps/website/src/pages/show/[id]/season/[seasonNumber].vue`
 - **[id]** — `apps/website/src/pages/show/[id].vue`
-- **[projectId]** — `apps/website/src/pages/show/[showId]/edit/[projectId].vue`
+- **edit** — `apps/website/src/pages/show/[showId]/projects/[projectId]/edit.vue`
+- **new** — `apps/website/src/pages/show/[showId]/projects/new.vue`
 - **[id]** — `apps/website/src/pages/studio/[id].vue`
 - **edit** — `apps/website/src/pages/studio/[studioId]/edit.vue`
 - **studios** — `apps/website/src/pages/studios.vue`
 - **terms-api** — `apps/website/src/pages/terms-api.vue`
 - **terms** — `apps/website/src/pages/terms.vue`
 - **[id]** — `apps/website/src/pages/toy/[id].vue`
-- **[projectId]** — `apps/website/src/pages/toy/[toyId]/edit/[projectId].vue`
+- **edit** — `apps/website/src/pages/toy/[toyId]/projects/[projectId]/edit.vue`
+- **new** — `apps/website/src/pages/toy/[toyId]/projects/new.vue`
+- **new** — `apps/website/src/pages/toy/new.vue`
 - **[id]** — `apps/website/src/pages/voice-actor/[id].vue`
 - **edit** — `apps/website/src/pages/voice-actor/[voiceActorId]/edit.vue`
 - **new** — `apps/website/src/pages/voice-actor/new.vue`

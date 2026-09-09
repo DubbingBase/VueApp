@@ -8,7 +8,7 @@
 
 ## Scale
 
-80 API routes · 16 database models · 178 UI components · 70 library files · 11 middleware layers · 76 environment variables
+80 API routes · 16 database models · 193 UI components · 71 library files · 11 middleware layers · 63 environment variables
 
 ## Subsystems
 
@@ -81,9 +81,9 @@
 
 **Database:** unknown, 16 models — see [database.md](./database.md)
 
-**UI:** 178 components (vue) — see [ui.md](./ui.md)
+**UI:** 193 components (vue) — see [ui.md](./ui.md)
 
-**Libraries:** 70 files — see [libraries.md](./libraries.md)
+**Libraries:** 71 files — see [libraries.md](./libraries.md)
 
 ## High-Impact Files
 
@@ -102,15 +102,15 @@ Changes to these files have the widest blast radius across the codebase:
 - `CI` — `apps/mobile/capacitor.config.ts`
 - `DEV` — `apps/mobile/src/api/supabase.ts`
 - `DISCORD_ADMIN_WEBHOOK_LOG_URL` — `.env.example`
-- `DISCORD_CHECK_WEBHOOK_URL` — `apps/website/nuxt.config.ts`
-- `DISCORD_DISCOVERY_WEBHOOK_URL` — `apps/website/nuxt.config.ts`
-- `DISCORD_EXTRACT_WEBHOOK_URL` — `apps/website/nuxt.config.ts`
+- `DISCORD_CHECK_WEBHOOK_URL` — `apps/website/server/utils/notifications/discord.ts`
+- `DISCORD_DISCOVERY_WEBHOOK_URL` — `apps/website/server/utils/notifications/discord.ts`
+- `DISCORD_EXTRACT_WEBHOOK_URL` — `apps/website/server/utils/notifications/discord.ts`
+- `DISCORD_WEBHOOK_CHECK_URL` — `apps/website/server/utils/notifications/discord.ts`
+- `DISCORD_WEBHOOK_DISCOVERY_URL` — `apps/website/server/utils/notifications/discord.ts`
+- `DISCORD_WEBHOOK_EXTRACT_URL` — `apps/website/server/utils/notifications/discord.ts`
+- `DISCORD_WEBHOOK_URL` — `apps/website/server/utils/notifications/discord.ts`
 - `DISCORD_WEBHOOK_URL_1` — `apps/website/server/utils/notifications/discord.ts`
-- `DISCORD_WEBHOOK_URL_2` — `apps/website/server/utils/notifications/discord.ts`
-- `DISCORD_WEBHOOK_URL_3` — `apps/website/server/utils/notifications/discord.ts`
-- `E2E_TEST` — `apps/website/server/middleware/00-e2e-mock.ts`
-- `GOOGLE_AI_KEY` — `.env.example`
-- _...36 more_
+- _...33 more_
 
 ---
-_Back to [index.md](./index.md) · Generated 2026-09-07_
+_Back to [index.md](./index.md) · Generated 2026-09-09_

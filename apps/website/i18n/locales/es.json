@@ -1128,6 +1128,7 @@
     "tmdbShowId": "ID de TMDB de la serie *",
     "viewDetails": "Ver detalles ↗",
     "voiceActor": "Actor de doblaje *",
+    "castNote": "Nota",
     "voiceCast": "Reparto de doblaje"
   },
   "audiobookEditor": {

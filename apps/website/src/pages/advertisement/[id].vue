@@ -173,6 +173,7 @@
                 <span class="text-xs text-gray-400 block truncate mt-0.5">
                   {{ item.character_name || item.performance || "Voix off" }}
                 </span>
+                <span v-if="item.note" class="text-xs text-gray-500 block truncate mt-1">{{ item.note }}</span>
               </div>
             </div>
           </div>
@@ -264,6 +265,7 @@ interface FormattedCastItem {
   lastname: string;
   character_name?: string;
   performance?: string;
+  note?: string;
   profile_picture?: string | null;
 }
 
@@ -276,6 +278,7 @@ const formattedCast = computed<FormattedCastItem[]>(() => {
     lastname: w.voice_actors?.lastname || "",
     character_name: w.character_name || "",
     performance: w.performance || "",
+    note: w.note || "",
     profile_picture: resolveProfilePicture(w.voice_actors?.profile_picture),
   }));
 });

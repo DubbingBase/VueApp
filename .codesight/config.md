@@ -6,23 +6,22 @@
 - `CI` **required** — apps/mobile/capacitor.config.ts
 - `DEV` **required** — apps/mobile/src/api/supabase.ts
 - `DISCORD_ADMIN_WEBHOOK_LOG_URL` **required** — .env.example
-- `DISCORD_CHECK_WEBHOOK_URL` **required** — apps/website/nuxt.config.ts
-- `DISCORD_DISCOVERY_WEBHOOK_URL` **required** — apps/website/nuxt.config.ts
-- `DISCORD_EXTRACT_WEBHOOK_URL` **required** — apps/website/nuxt.config.ts
-- `DISCORD_WEBHOOK_CHECK_URL` (has default) — apps/website/nuxt.config.ts
-- `DISCORD_WEBHOOK_DISCOVERY_URL` (has default) — apps/website/nuxt.config.ts
-- `DISCORD_WEBHOOK_EXTRACT_URL` (has default) — apps/website/nuxt.config.ts
-- `DISCORD_WEBHOOK_URL` (has default) — apps/website/nuxt.config.ts
+- `DISCORD_CHECK_WEBHOOK_URL` **required** — apps/website/server/utils/notifications/discord.ts
+- `DISCORD_DISCOVERY_WEBHOOK_URL` **required** — apps/website/server/utils/notifications/discord.ts
+- `DISCORD_EXTRACT_WEBHOOK_URL` **required** — apps/website/server/utils/notifications/discord.ts
+- `DISCORD_WEBHOOK_CHECK_URL` **required** — apps/website/server/utils/notifications/discord.ts
+- `DISCORD_WEBHOOK_DISCOVERY_URL` **required** — apps/website/server/utils/notifications/discord.ts
+- `DISCORD_WEBHOOK_EXTRACT_URL` **required** — apps/website/server/utils/notifications/discord.ts
+- `DISCORD_WEBHOOK_URL` **required** — apps/website/server/utils/notifications/discord.ts
 - `DISCORD_WEBHOOK_URL_1` **required** — apps/website/server/utils/notifications/discord.ts
 - `DISCORD_WEBHOOK_URL_2` **required** — apps/website/server/utils/notifications/discord.ts
 - `DISCORD_WEBHOOK_URL_3` **required** — apps/website/server/utils/notifications/discord.ts
 - `E2E_TEST` **required** — apps/website/server/middleware/00-e2e-mock.ts
 - `GEMINI_API_KEY` (has default) — apps/website/server/utils/llm.ts
-- `GEMINI_MODEL` (has default) — apps/website/nuxt.config.ts
-- `GEMINI_MODELS` (has default) — apps/website/nuxt.config.ts
+- `GEMINI_MODELS` **required** — apps/website/server/utils/llm.ts
 - `GOOGLE_AI_KEY` **required** — .env.example
 - `GROQ_API_KEY` **required** — .env.example
-- `GROQ_MODEL` (has default) — apps/website/nuxt.config.ts
+- `GROQ_MODEL` (has default) — apps/website/server/utils/llm.ts
 - `IGDB_CLIENT_ID` **required** — .env.example
 - `IGDB_CLIENT_SECRET` **required** — .env.example
 - `JAVA_HOME` **required** — .env.example
@@ -30,37 +29,25 @@
 - `KEY_ALIAS` **required** — .env.example
 - `KEY_PASSWORD` **required** — .env.example
 - `KEYSTORE_PASSWORD` **required** — .env.example
-- `LLM_PROVIDER` (has default) — apps/website/nuxt.config.ts
+- `LLM_PROVIDER` (has default) — apps/website/server/utils/llm.ts
 - `NDK_HOME` **required** — .env.example
 - `NITRO_PRESET` (has default) — apps/website/nuxt.config.ts
 - `NODE_ENV` (has default) — .env.example
-- `NUXT_ADMIN_EMAIL` **required** — apps/website/nuxt.config.ts
-- `NUXT_DISCORD_WEBHOOK_CHECK_URL` (has default) — apps/website/nuxt.config.ts
-- `NUXT_DISCORD_WEBHOOK_DISCOVERY_URL` (has default) — apps/website/nuxt.config.ts
-- `NUXT_DISCORD_WEBHOOK_EXTRACT_URL` (has default) — apps/website/nuxt.config.ts
-- `NUXT_DISCORD_WEBHOOK_URL` (has default) — apps/website/nuxt.config.ts
+- `NUXT_DISCORD_WEBHOOK_CHECK_URL` **required** — apps/website/server/utils/notifications/discord.ts
+- `NUXT_DISCORD_WEBHOOK_DISCOVERY_URL` **required** — apps/website/server/utils/notifications/discord.ts
+- `NUXT_DISCORD_WEBHOOK_EXTRACT_URL` **required** — apps/website/server/utils/notifications/discord.ts
+- `NUXT_DISCORD_WEBHOOK_URL` **required** — apps/website/server/utils/notifications/discord.ts
 - `NUXT_DISCORD_WEBHOOK_URL_1` **required** — apps/website/server/utils/notifications/discord.ts
 - `NUXT_DISCORD_WEBHOOK_URL_2` **required** — apps/website/server/utils/notifications/discord.ts
 - `NUXT_DISCORD_WEBHOOK_URL_3` **required** — apps/website/server/utils/notifications/discord.ts
-- `NUXT_GEMINI_MODEL` (has default) — apps/website/nuxt.config.ts
-- `NUXT_GEMINI_MODELS` (has default) — apps/website/nuxt.config.ts
+- `NUXT_GEMINI_MODELS` (has default) — apps/website/server/utils/llm.ts
 - `NUXT_GOOGLE_AI_KEY` **required** — .env.example
 - `NUXT_GROQ_API_KEY` **required** — .env.example
-- `NUXT_GROQ_MODEL` (has default) — apps/website/nuxt.config.ts
-- `NUXT_IGDB_CLIENT_ID` **required** — apps/website/nuxt.config.ts
-- `NUXT_IGDB_CLIENT_SECRET` **required** — apps/website/nuxt.config.ts
-- `NUXT_LLM_PROVIDER` (has default) — apps/website/nuxt.config.ts
-- `NUXT_ONESIGNAL_APP_ID` **required** — apps/website/nuxt.config.ts
-- `NUXT_ONESIGNAL_REST_API_KEY` **required** — apps/website/nuxt.config.ts
-- `NUXT_PUBLIC_SUPABASE_KEY` (has default) — apps/website/nuxt.config.ts
-- `NUXT_PUBLIC_SUPABASE_URL` (has default) — apps/website/nuxt.config.ts
-- `NUXT_RESEND_API_KEY` **required** — apps/website/nuxt.config.ts
-- `NUXT_RESEND_FROM_EMAIL` **required** — apps/website/nuxt.config.ts
-- `NUXT_RESEND_TO_EMAIL` **required** — apps/website/nuxt.config.ts
-- `NUXT_SUPABASE_SECRET_KEY` **required** — apps/website/nuxt.config.ts
-- `NUXT_SUPABASE_URL` **required** — apps/website/nuxt.config.ts
-- `NUXT_TMDB_API_KEY` **required** — apps/website/nuxt.config.ts
-- `NUXT_TVDB_API_KEY` **required** — apps/website/nuxt.config.ts
+- `NUXT_GROQ_MODEL` (has default) — apps/website/server/utils/llm.ts
+- `NUXT_LLM_PROVIDER` (has default) — apps/website/server/utils/llm.ts
+- `NUXT_PUBLIC_SUPABASE_URL` (has default) — apps/website/server/api/og-image/index.get.ts
+- `NUXT_SUPABASE_SECRET_KEY` (has default) — apps/website/server/api/prepare-trending-media.post.ts
+- `NUXT_SUPABASE_URL` (has default) — apps/website/server/api/og-image/index.get.ts
 - `ONESIGNAL_APP_ID` **required** — .env.example
 - `ONESIGNAL_REST_API_KEY` **required** — .env.example
 - `RESEND_API_KEY` **required** — .env.example

@@ -259,6 +259,7 @@
                       >
                         {{ actor.voiceActor.firstname }} {{ actor.voiceActor.lastname }}
                       </NuxtLink>
+                      <div v-if="actor.voiceActor.note" class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ actor.voiceActor.note }}</div>
                     </div>
                   </template>
                   <template v-else>
@@ -474,13 +475,16 @@ const formattedCast = computed(() => {
 
   const works = activeDubProject.value?.works || [];
 
-  return episode.value.credits.cast.map((actor: any) => {
+  return episode.value.credits.cast.flatMap((actor: any) => {
     let profilePath = actor.profile_path;
     if (profilePath && profilePath.startsWith("/")) {
       profilePath = `https://image.tmdb.org/t/p/w185${profilePath}`;
     }
 
-    const work = works.find((w: any) => w.actor_id === actor.id);
+    const matchingWorks = works.filter((w: any) => w.actor_id === actor.id);
+    const cards = matchingWorks.length > 0 ? matchingWorks : [null];
+
+    return cards.map((work: any) => {
     const voiceActor = work?.voice_actor;
     const workCharacterName = work?.character_name || null;
 
@@ -505,11 +509,13 @@ const formattedCast = computed(() => {
 
     return {
       ...actor,
+      id: work ? `${actor.id}-${work.id}` : actor.id,
       profile_path: profilePath,
-      voiceActor: voiceActor || null,
+      voiceActor: voiceActor ? { ...voiceActor, note: work.note } : null,
       characterImage,
       workCharacterName,
     };
+    });
   });
 });
 

@@ -492,6 +492,11 @@
                 </select>
               </div>
 
+              <div class="md:col-span-4 space-y-1">
+                <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">{{ $t("projectEditor.castNote") }}</label>
+                <input v-model="row.note" type="text" class="w-full px-4 py-2 bg-gray-900 border border-gray-800 rounded-lg text-white focus:ring-2 focus:ring-blue-500 text-sm" />
+              </div>
+
               <div class="md:col-span-12 flex items-center space-x-2">
                 <input
                   type="checkbox"
@@ -711,6 +716,7 @@ interface CastRow {
   character_name: string;
   voice_actor_id: number | null;
   performance: string;
+  note: string;
   highlight: boolean;
 }
 const castRows = ref<CastRow[]>([]);
@@ -746,6 +752,7 @@ const addCastRow = () => {
     character_name: "",
     voice_actor_id: null,
     performance: "dialogues",
+    note: "",
     highlight: false,
   });
 };
@@ -983,6 +990,7 @@ const saveMovieProject = async () => {
         character_name: row.character_name || null,
         voice_actor_id: row.voice_actor_id || null,
         performance: row.performance || "dialogues",
+        note: row.note || null,
         highlight: row.highlight ? true : false,
       };
       if (row.id) workPayload.id = row.id;
@@ -1149,6 +1157,7 @@ watch(
             character_name: w.character_name,
             voice_actor_id: w.voice_actor_id,
             performance: w.performance,
+            note: w.note || "",
             highlight: w.highlight,
           };
         });

@@ -334,7 +334,7 @@
             class="grid grid-cols-1 md:grid-cols-12 gap-3 p-4 bg-gray-950 rounded-xl border border-gray-800 items-end"
           >
             <!-- Voice Actor (Narrator) -->
-            <div class="md:col-span-5 space-y-1">
+            <div class="md:col-span-4 space-y-1">
               <label
                 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider"
                 >{{ $t("audiobookEditor.actorNarrator") }}</label
@@ -358,7 +358,7 @@
             </div>
 
             <!-- Role / Character Name -->
-            <div class="md:col-span-3 space-y-1">
+            <div class="md:col-span-2 space-y-1">
               <label
                 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider"
                 >{{ $t("common.roleCharacter") }}</label
@@ -369,6 +369,11 @@
                 placeholder="Ex: Narrateur, Harry..."
                 class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white text-xs placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-amber-500"
               />
+            </div>
+
+            <div class="md:col-span-2 space-y-1">
+              <label class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{{ $t('projectEditor.castNote') }}</label>
+              <input v-model="row.note" type="text" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white text-xs placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-pink-500" />
             </div>
 
             <!-- Performance Type -->
@@ -468,6 +473,7 @@ interface CastRow {
   voice_actor_id: number | null;
   character_name: string;
   performance: string;
+  note: string;
 }
 
 const castList = ref<CastRow[]>([]);
@@ -570,6 +576,7 @@ function addNewCastRow() {
     voice_actor_id: null,
     character_name: "Narrateur",
     performance: "Narration",
+    note: "",
   });
 }
 
@@ -669,6 +676,7 @@ onMounted(async () => {
               voice_actor_id: w.voice_actor_id,
               character_name: w.character_name || "Narrateur",
               performance: w.performance || "",
+              note: w.note || "",
             };
           });
         }
@@ -759,6 +767,7 @@ async function saveBookProject() {
             voice_actor_id: cast.voice_actor_id,
             character_name: cast.character_name,
             performance: cast.performance,
+            note: cast.note || null,
             status: "validated",
             updated_at: new Date().toISOString(),
           })
@@ -769,6 +778,7 @@ async function saveBookProject() {
           voice_actor_id: cast.voice_actor_id,
           character_name: cast.character_name,
           performance: cast.performance,
+          note: cast.note || null,
           status: "validated",
         });
       }

@@ -85,9 +85,12 @@
   - function llmVisionObject: (prompt, imageData, schema, mimeType, options?) => Promise<
 - `apps/website/server/utils/normalize.ts` — function normalizeString: (input) => string, function isExploitableVoiceActorName: (input) => boolean
 - `apps/website/server/utils/notifications/discord.ts`
+  - function normalizeDiscordUrl: (url) => string
+  - function buildDiscordEmbed: (title, message, options?) => Record<string, unknown>
   - function sendDiscordAdminNotification: (title, message, options?) => void
   - interface DiscordWebhookOptions
   - type QueueName
+  - type DiscordNotificationCategory
 - `apps/website/server/utils/notifications/onesignal.ts` — function sendOneSignalNotification: (title, message, options?) => void, interface OneSignalOptions
 - `apps/website/server/utils/services/media-preparation.ts`
   - function checkMediaDubbingSections: (options) => Promise<CheckSectionsResult>
@@ -116,6 +119,7 @@
 - `apps/website/src/composables/useReports.ts` — function useReports
 - `apps/website/src/composables/useSearchModal.ts` — function useSearchModal: () => void
 - `apps/website/src/composables/useTheme.ts` — function useTheme: () => void
+- `apps/website/src/lib/media-editor-routes.ts` — function getMediaEditorRoute: ({...}, mediaId, projectId }) => string | null
 - `apps/website/src/lib/mediaQueue.ts` — function enqueueMedia: (params) => Promise<void>
 - `e2e/helpers/mock-api.ts` — function setupMockApi: (page, options) => void, interface MockApiOptions
 - `packages/og-image/src/index.ts`
