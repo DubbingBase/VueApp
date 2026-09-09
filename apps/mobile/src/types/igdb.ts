@@ -62,7 +62,7 @@ export interface IgdbCharacter {
   games?: number[];
 }
 
-/** Response shape from the `game` edge function */
+/** Response shape from the game API route */
 export interface GameResponse {
   game: IgdbGame | null;
   characters: IgdbCharacter[];

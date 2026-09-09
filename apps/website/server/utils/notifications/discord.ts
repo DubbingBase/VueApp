@@ -1,15 +1,26 @@
+import type { H3Event } from "h3";
+
 export type QueueName =
-  "wiki_discovery" | "wiki_check" | "wiki_extract" | string;
+  | "wiki_discovery"
+  | "wiki_check"
+  | "wiki_extract"
+  | string;
+export type DiscordNotificationCategory =
+  | "general"
+  | "discovery"
+  | "check"
+  | "extract";
 
 export interface DiscordWebhookOptions {
   queue?: QueueName;
   url?: string;
   imageUrl?: string;
   color?: number;
-  event?: any;
+  event?: H3Event;
+  category?: DiscordNotificationCategory;
 }
 
-function getDiscordWebhookUrls(queue?: string, event?: any): string[] {
+function getDiscordWebhookUrls(queue?: string, event?: H3Event): string[] {
   let config: any;
   try {
     config = event ? useRuntimeConfig(event) : useRuntimeConfig();
@@ -81,6 +92,53 @@ function getDiscordWebhookUrls(queue?: string, event?: any): string[] {
   return Array.from(targetUrls);
 }
 
+export function normalizeDiscordUrl(url: string): string {
+  if (/^https?:\/\//i.test(url)) return url;
+  const path = url.startsWith("/") ? url : `/${url}`;
+  const withoutLocale = path.replace(/^\/(?:fr|en|es|ja)(?=\/|$)/, "");
+  return `https://dubbingbase.com/fr${withoutLocale}`;
+}
+
+function categoryFor(
+  options?: DiscordWebhookOptions,
+): DiscordNotificationCategory {
+  if (options?.category) return options.category;
+  if (options?.queue === "wiki_discovery" || options?.queue === "discovery") {
+    return "discovery";
+  }
+  if (options?.queue === "wiki_check" || options?.queue === "check") {
+    return "check";
+  }
+  if (options?.queue === "wiki_extract" || options?.queue === "extract") {
+    return "extract";
+  }
+  return "general";
+}
+
+export function buildDiscordEmbed(
+  title: string,
+  message: string,
+  options?: DiscordWebhookOptions,
+): Record<string, unknown> {
+  const category = categoryFor(options);
+  const label = category[0].toUpperCase() + category.slice(1);
+  const description =
+    message.length > 2000
+      ? message.slice(0, 1980) + "\n... (truncated)"
+      : message;
+  const embed: Record<string, unknown> = {
+    title: `[${label}] ${title}`.slice(0, 250),
+    description,
+    color: options?.color ?? 0x2a2a2a,
+    timestamp: new Date().toISOString(),
+    author: { name: `DubbingBase • ${label}` },
+    footer: { text: "DubbingBase Admin Notifications" },
+  };
+  if (options?.url) embed.url = normalizeDiscordUrl(options.url);
+  if (options?.imageUrl) embed.image = { url: options.imageUrl };
+  return embed;
+}
+
 export async function sendDiscordAdminNotification(
   title: string,
   message: string,
@@ -94,30 +152,7 @@ export async function sendDiscordAdminNotification(
   }
 
   try {
-    const truncatedMessage =
-      message.length > 2000
-        ? message.slice(0, 1980) + "\n... (truncated)"
-        : message;
-
-    const embed: any = {
-      title: title.slice(0, 250),
-      description: truncatedMessage,
-      color: options?.color ?? 0x5865f2,
-      timestamp: new Date().toISOString(),
-    };
-
-    if (options?.url) {
-      let targetUrl = options.url;
-      if (targetUrl.startsWith("/")) {
-        const baseUrl = "https://dubbingbase.com";
-        targetUrl = `${baseUrl.replace(/\/+$/, "")}/fr${targetUrl}`;
-      }
-      embed.url = targetUrl;
-    }
-
-    if (options?.imageUrl) {
-      embed.image = { url: options.imageUrl };
-    }
+    const embed = buildDiscordEmbed(title, message, options);
 
     const payload = JSON.stringify({ embeds: [embed] });
 

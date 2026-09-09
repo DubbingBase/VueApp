@@ -73,10 +73,12 @@
         </template>
 
         <NuxtLink
-          v-show="isAdmin"
+          v-if="isAdmin && movie?.id"
           :to="
             localePath(
-              `/movie/${movie?.id || 'new'}/edit/${activeDubId || 'new'}`,
+              activeDubId
+                ? `/movie/${movie.id}/projects/${activeDubId}/edit`
+                : `/movie/${movie.id}/projects/new`,
             )
           "
           class="text-sm text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors flex items-center gap-1.5 font-medium"

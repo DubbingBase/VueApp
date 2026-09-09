@@ -138,6 +138,7 @@ import Pencil from '~icons/lucide/pencil';
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { supabase } from "@/api/supabase";
+import { nitroRequest } from "@/api/nitro";
 
 const route = useRoute();
 const studioId = route.params.id as string;
@@ -158,10 +159,10 @@ const fetchStudioDetails = async () => {
   isLoading.value = true;
   error.value = null;
   try {
-    const { data, error: funcError } = await supabase.functions.invoke(
-      "get-studio-details",
+    const { data, error: funcError } = await nitroRequest(
+      "/api/get-studio-details",
       {
-        body: { studioId },
+        query: { studioId },
       }
     );
 

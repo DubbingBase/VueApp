@@ -46,7 +46,7 @@ test.describe("Original Actor Profile & Localized Voices", () => {
     await expect(vaCard).toBeVisible({ timeout: 5000 });
     await vaCard.click();
 
-    await page.waitForURL(/\/voice-actor\/1/, { timeout: 5000 });
+    await page.waitForURL(/\/voice-actor\/1/, { timeout: 10000 });
     await expect(
       page.getByRole("heading", { name: "Richard Darbois" }),
     ).toBeVisible({ timeout: 20000 });

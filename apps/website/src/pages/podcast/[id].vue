@@ -74,6 +74,14 @@
             media-type="podcast"
             :media-id="podcast.id"
           />
+
+          <NuxtLink
+            v-if="isAdmin"
+            :to="localePath(podcast?.id ? activeDubId ? `/podcast/${podcast.id}/projects/${activeDubId}/edit` : `/podcast/${podcast.id}/projects/new` : '/podcast/new')"
+            class="px-3 py-1.5 bg-pink-600/20 hover:bg-pink-600/30 text-pink-400 text-xs font-semibold rounded-xl border border-pink-500/30 flex items-center gap-1.5 transition-colors"
+          >
+            <span>{{ activeDubId ? $t('common.edit') : $t('common.create') }}</span>
+          </NuxtLink>
         </div>
       </template>
 

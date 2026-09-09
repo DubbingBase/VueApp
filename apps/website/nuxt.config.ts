@@ -12,6 +12,13 @@ const SWR_CONFIG = {
   swr: process.env.NODE_ENV === "development" ? false : 3600,
 };
 
+function env(name: string): string | undefined {
+  return process.env[name] ?? process.env[`NUXT_${name}`];
+}
+
+const supabaseUrl = env("SUPABASE_URL") ?? env("PUBLIC_SUPABASE_URL");
+const supabaseAnonKey = env("SUPABASE_ANON_KEY") ?? env("PUBLIC_SUPABASE_KEY");
+
 function generateRouteRules() {
   const rules: Record<string, typeof SWR_CONFIG> = {};
   for (const prefix of MEDIA_ROUTE_PREFIXES) {
@@ -63,56 +70,42 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    supabaseSecretKey: process.env.NUXT_SUPABASE_SECRET_KEY,
-    supabaseUrl: process.env.NUXT_SUPABASE_URL,
-    tmdbApiKey: process.env.NUXT_TMDB_API_KEY,
-    tvdbApiKey: process.env.NUXT_TVDB_API_KEY,
-    igdbClientId: process.env.NUXT_IGDB_CLIENT_ID,
-    igdbClientSecret: process.env.NUXT_IGDB_CLIENT_SECRET,
-    googleAiKey: process.env.NUXT_GOOGLE_AI_KEY || process.env.GOOGLE_AI_KEY,
-    geminiModel:
-      process.env.NUXT_GEMINI_MODEL ||
-      process.env.GEMINI_MODEL ||
-      "gemini-3.5-flash-lite",
-    geminiModels:
-      process.env.NUXT_GEMINI_MODELS || process.env.GEMINI_MODELS || undefined,
-    groqApiKey: process.env.NUXT_GROQ_API_KEY || process.env.GROQ_API_KEY,
-    groqModel:
-      process.env.NUXT_GROQ_MODEL || process.env.GROQ_MODEL || "groq/compound",
-    llmProvider:
-      process.env.NUXT_LLM_PROVIDER || process.env.LLM_PROVIDER || "gemini",
-    onesignalAppId: process.env.NUXT_ONESIGNAL_APP_ID,
-    onesignalRestApiKey: process.env.NUXT_ONESIGNAL_REST_API_KEY,
+    supabaseSecretKey: env("SUPABASE_SECRET_KEY"),
+    supabaseUrl,
+    tmdbApiKey: env("TMDB_API_KEY"),
+    tvdbApiKey: env("TVDB_API_KEY"),
+    igdbClientId: env("IGDB_CLIENT_ID"),
+    igdbClientSecret: env("IGDB_CLIENT_SECRET"),
+    googleAiKey: env("GOOGLE_AI_KEY"),
+    geminiModel: env("GEMINI_MODEL") || "gemini-3.5-flash-lite",
+    geminiModels: env("GEMINI_MODELS"),
+    groqApiKey: env("GROQ_API_KEY"),
+    groqModel: env("GROQ_MODEL") || "openai/gpt-oss-120b",
+    llmProvider: env("LLM_PROVIDER") || "gemini",
+    onesignalAppId: env("ONESIGNAL_APP_ID"),
+    onesignalRestApiKey: env("ONESIGNAL_REST_API_KEY"),
     discordWebhookDiscoveryUrl:
-      process.env.NUXT_DISCORD_WEBHOOK_DISCOVERY_URL ||
-      process.env.DISCORD_WEBHOOK_DISCOVERY_URL ||
-      process.env.DISCORD_DISCOVERY_WEBHOOK_URL,
+      env("DISCORD_WEBHOOK_DISCOVERY_URL") ||
+      env("DISCORD_DISCOVERY_WEBHOOK_URL"),
     discordWebhookCheckUrl:
-      process.env.NUXT_DISCORD_WEBHOOK_CHECK_URL ||
-      process.env.DISCORD_WEBHOOK_CHECK_URL ||
-      process.env.DISCORD_CHECK_WEBHOOK_URL,
+      env("DISCORD_WEBHOOK_CHECK_URL") || env("DISCORD_CHECK_WEBHOOK_URL"),
     discordWebhookExtractUrl:
-      process.env.NUXT_DISCORD_WEBHOOK_EXTRACT_URL ||
-      process.env.DISCORD_WEBHOOK_EXTRACT_URL ||
-      process.env.DISCORD_EXTRACT_WEBHOOK_URL,
+      env("DISCORD_WEBHOOK_EXTRACT_URL") || env("DISCORD_EXTRACT_WEBHOOK_URL"),
     discordWebhookUrl:
-      process.env.NUXT_DISCORD_WEBHOOK_URL ||
-      process.env.DISCORD_WEBHOOK_URL ||
-      process.env.DISCORD_ADMIN_WEBHOOK_LOG_URL,
-    resendApiKey: process.env.NUXT_RESEND_API_KEY,
-    resendFromEmail: process.env.NUXT_RESEND_FROM_EMAIL,
-    resendToEmail: process.env.NUXT_RESEND_TO_EMAIL,
-    adminEmail: process.env.NUXT_ADMIN_EMAIL,
+      env("DISCORD_WEBHOOK_URL") || env("DISCORD_ADMIN_WEBHOOK_LOG_URL"),
+    resendApiKey: env("RESEND_API_KEY"),
+    resendFromEmail: env("RESEND_FROM_EMAIL"),
+    resendToEmail: env("RESEND_TO_EMAIL"),
+    adminEmail: env("ADMIN_EMAIL"),
     public: {
-      supabaseUrl:
-        process.env.NUXT_PUBLIC_SUPABASE_URL || "https://mock.supabase.co",
-      supabaseKey: process.env.NUXT_PUBLIC_SUPABASE_KEY || "mock-anon-key",
+      supabaseUrl: supabaseUrl || "https://mock.supabase.co",
+      supabaseKey: supabaseAnonKey || "mock-anon-key",
     },
   },
 
   supabase: {
-    url: process.env.NUXT_PUBLIC_SUPABASE_URL || "https://mock.supabase.co",
-    key: process.env.NUXT_PUBLIC_SUPABASE_KEY || "mock-anon-key",
+    url: supabaseUrl || "https://mock.supabase.co",
+    key: supabaseAnonKey || "mock-anon-key",
     redirect: false,
     types: resolve(
       import.meta.dirname,
@@ -190,6 +183,7 @@ export default defineNuxtConfig({
   },
 
   i18n: {
+    langDir: "locales",
     locales: APP_LOCALES as any,
     defaultLocale: DEFAULT_LOCALE,
     strategy: "prefix_except_default",
@@ -197,7 +191,7 @@ export default defineNuxtConfig({
     detectBrowserLanguage: {
       useCookie: true,
       cookieKey: "user_lang",
-      redirectOn: "all", // Redirects on all paths (fixes 404 on URLs without language prefix)
+      redirectOn: "all",
     },
   },
 

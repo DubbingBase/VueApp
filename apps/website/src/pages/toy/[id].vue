@@ -23,8 +23,8 @@
             :to="
               localePath(
                 activeDubProject
-                  ? `/toy/${toy.id}/edit/${activeDubProject.id}`
-                  : `/toy/${toy.id}/edit/new`,
+                  ? `/toy/${toy.id}/projects/${activeDubProject.id}/edit`
+                  : `/toy/${toy.id}/projects/new`,
               )
             "
             class="px-3 py-1.5 bg-amber-600/20 hover:bg-amber-600/30 text-amber-400 text-xs font-semibold rounded-xl border border-amber-500/30 flex items-center gap-1.5 transition-colors"

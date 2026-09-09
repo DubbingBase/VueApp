@@ -66,9 +66,9 @@ function getMediaType(contentType?: string | null): any {
   if (contentType === 'toy') return 'toy';
   return 'serie';
 }
-import type { Movie as MovieModel } from "@supabase/functions/_shared/movie";
-import type { Serie as SerieModel } from "@supabase/functions/_shared/serie";
-import { Actor } from "@supabase/functions/_shared/types";
+import type { Movie as MovieModel } from "@app/shared-logic";
+import type { Serie as SerieModel } from "@app/shared-logic";
+import { Actor } from "@app/shared-logic";
 
 type EnhancedWorkItem = {
   media: MovieModel | SerieModel;

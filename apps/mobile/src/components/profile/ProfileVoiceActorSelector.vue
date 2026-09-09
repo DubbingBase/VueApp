@@ -98,7 +98,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useProfileStore } from '@/stores/profile'
 import { useAuthStore } from '@/stores/auth'
-import { supabase } from '@/api/supabase'
+import { nitroRequest } from '@/api/nitro'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorMessage from '@/components/common/ErrorMessage.vue'
 
@@ -198,9 +198,9 @@ const loadAllVoiceActors = async (query?: string) => {
   errorMessage.value = ''
 
   try {
-    const requestBody = query && query.trim() ? { query: query.trim() } : {}
-    const { data, error } = await supabase.functions.invoke('list-voice-actors', {
-      body: requestBody
+    const requestQuery = query && query.trim() ? { query: query.trim() } : {}
+    const { data, error } = await nitroRequest('/api/list-voice-actors', {
+      query: requestQuery
     })
 
     if (error) throw error

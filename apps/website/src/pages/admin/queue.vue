@@ -658,17 +658,17 @@ const getAppMediaUrl = (item: any): string => {
         episode !== null &&
         episode !== undefined
       ) {
-        return `/serie/${tmdbId}/season/${season}/details/${episode}`;
+        return `/show/${tmdbId}/season/${season}/episode/${episode}`;
       }
       if (season !== null && season !== undefined) {
-        return `/serie/${tmdbId}/season/${season}`;
+        return `/show/${tmdbId}/season/${season}`;
       }
-      return `/serie/${tmdbId}`;
+      return `/show/${tmdbId}`;
     case "season":
       if (season !== null && season !== undefined) {
-        return `/serie/${tmdbId}/season/${season}`;
+        return `/show/${tmdbId}/season/${season}`;
       }
-      return `/serie/${tmdbId}`;
+      return `/show/${tmdbId}`;
     case "episode":
       if (
         season !== null &&
@@ -676,9 +676,9 @@ const getAppMediaUrl = (item: any): string => {
         episode !== null &&
         episode !== undefined
       ) {
-        return `/serie/${tmdbId}/season/${season}/details/${episode}`;
+        return `/show/${tmdbId}/season/${season}/episode/${episode}`;
       }
-      return `/serie/${tmdbId}`;
+      return `/show/${tmdbId}`;
     case "video_game":
     case "game":
       return `/game/${tmdbId}`;

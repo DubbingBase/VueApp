@@ -115,7 +115,7 @@ import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
 
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { supabase } from "@/api/supabase";
+import { nitroRequest } from "@/api/nitro";
 
 const route = useRoute();
 const router = useRouter();
@@ -137,8 +137,8 @@ const fetchStudioDetails = async () => {
   if (!isEditMode.value || !id) return;
   isLoading.value = true;
   try {
-    const { data: funcData, error } = await supabase.functions.invoke("get-studio-details", {
-      body: { studioId: id },
+    const { data: funcData, error } = await nitroRequest("/api/get-studio-details", {
+      query: { studioId: id },
     });
 
     if (error) throw error;
@@ -174,7 +174,8 @@ const saveStudio = async () => {
       logo_url: logoUrl.value.trim() || null,
     };
 
-    const { error: saveErr } = await supabase.functions.invoke("save-studio", {
+    const { error: saveErr } = await nitroRequest("/api/save-studio", {
+      method: "POST",
       body: {
         id: isEditMode.value ? id : null,
         updates: studioPayload,

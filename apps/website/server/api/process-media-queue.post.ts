@@ -9,6 +9,7 @@ import { useSupabaseAdmin } from "../utils/db/client";
 import { requireAdmin } from "../utils/auth";
 import { useWikipediaCache, useIgdbClient } from "../utils";
 import { extractAvailableLanguages } from "../utils/cache/wikipedia";
+import { areAllLlmQuotasExhausted } from "../utils/llm";
 
 export default defineEventHandler(async (event) => {
   const internalSecret = getHeader(event, "x-internal-secret");
@@ -97,22 +98,44 @@ export default defineEventHandler(async (event) => {
     const supabaseAdmin = useSupabaseAdmin(event);
 
     // Step 1: Pop a message based on queue selection / priority order
+    // ponytail: check all quotas before dequeuing extract — if all models exhausted, keep element queued
+    const skipExtract = areAllLlmQuotasExhausted();
+    if (skipExtract) {
+      console.warn(
+        "[QUEUE] All LLM quotas exhausted (cached), skipping wiki_extract pop",
+      );
+    }
     let targetQueue: "wiki_extract" | "wiki_check" | "wiki_discovery" =
       specificQueue ?? "wiki_extract";
     let queueRes: any;
 
     if (specificQueue) {
+      if (specificQueue === "wiki_extract" && skipExtract) {
+        return {
+          ok: true,
+          processed: 0,
+          results: [],
+          queue: "wiki_extract",
+          reason: "quota_exhausted",
+          message:
+            "All LLM quotas exhausted, extract queue skipped (element remains queued)",
+        };
+      }
       queueRes = await supabaseAdmin.rpc("pop_media_queue_message", {
         p_queue_name: specificQueue,
         p_vt_seconds: 90,
       });
     } else {
-      // Priority 1: wiki_extract (LLM ready)
-      queueRes = await supabaseAdmin.rpc("pop_media_queue_message", {
-        p_queue_name: "wiki_extract",
-        p_vt_seconds: 90,
-      });
-      targetQueue = "wiki_extract";
+      // Priority 1: wiki_extract (LLM ready) — skip if quotas exhausted
+      if (!skipExtract) {
+        queueRes = await supabaseAdmin.rpc("pop_media_queue_message", {
+          p_queue_name: "wiki_extract",
+          p_vt_seconds: 90,
+        });
+        targetQueue = "wiki_extract";
+      } else {
+        queueRes = { data: [], error: null } as any;
+      }
 
       // Priority 2: wiki_check (TOC regex check)
       if (
@@ -300,10 +323,12 @@ export default defineEventHandler(async (event) => {
         const wikipediaCache = useWikipediaCache();
         const entity = await wikipediaCache.getAllSitelinksEntity(wikiId);
         const sitelinks = entity.entities[wikiId]?.sitelinks;
-        const availableLanguages = extractAvailableLanguages(sitelinks);
+        const allLanguages = extractAvailableLanguages(sitelinks);
+        // ponytail: top 5 only to avoid 1:N blow-up (20 langs * 18/min = backlog)
+        const availableLanguages = allLanguages.slice(0, 5);
 
         console.log(
-          `[QUEUE] Discovered ${availableLanguages.length} languages for ${mediaTitle} (ranked by popularity)`,
+          `[QUEUE] Discovered ${allLanguages.length} languages for ${mediaTitle} (ranked, top 5 of ${allLanguages.length} enqueued)`,
         );
 
         if (availableLanguages.length === 0) {
@@ -329,7 +354,7 @@ export default defineEventHandler(async (event) => {
           };
         }
 
-        // Enqueue each language into Queue 2: wiki_check
+        // Enqueue each language into Queue 2: wiki_check (top 5 only)
         let enqueuedCount = 0;
         let alreadyEnqueuedCount = 0;
         for (const lang of availableLanguages) {
@@ -346,7 +371,10 @@ export default defineEventHandler(async (event) => {
           );
 
           if (enqueueError) {
-            if (enqueueError.message?.includes("already in the")) {
+            if (
+              enqueueError.message?.includes("already in the") ||
+              enqueueError.message?.includes("already exists for")
+            ) {
               alreadyEnqueuedCount++;
             } else {
               console.error(
@@ -373,7 +401,7 @@ export default defineEventHandler(async (event) => {
 
         await sendDiscordAdminNotification(
           "Queue Discovery Completed",
-          `Discovered **${availableLanguages.length} language(s)** for **${mediaTitle}** (${payload.media_type} ${payload.tmdb_id}).\n• Enqueued **${enqueuedCount}** new language checks\n• **${alreadyEnqueuedCount}** already pending.`,
+          `Discovered **${allLanguages.length} language(s)** for **${mediaTitle}** (${payload.media_type} ${payload.tmdb_id}) [top 5].\n• Enqueued **${enqueuedCount}** new checks\n• **${alreadyEnqueuedCount}** skipped/deduped.`,
           { event, queue: "wiki_discovery" },
         );
       } catch (err) {
@@ -621,6 +649,9 @@ export default defineEventHandler(async (event) => {
           ok: true,
           changes: extractResult.changes,
           creditsAdded: extractResult.creditsAdded,
+          llmModel: extractResult.llmModel,
+          llmQuota: extractResult.llmQuota,
+          note: extractResult.note,
         });
 
         let targetUrl: string | undefined = undefined;
@@ -628,11 +659,11 @@ export default defineEventHandler(async (event) => {
           targetUrl = `/movie/${payload.tmdb_id}`;
         } else if (payload.media_type === "tv") {
           if (payload.season_number && payload.episode_number) {
-            targetUrl = `/serie/${payload.tmdb_id}/season/${payload.season_number}/details/${payload.episode_number}`;
+            targetUrl = `/show/${payload.tmdb_id}/season/${payload.season_number}/episode/${payload.episode_number}`;
           } else if (payload.season_number) {
-            targetUrl = `/serie/${payload.tmdb_id}/season/${payload.season_number}`;
+            targetUrl = `/show/${payload.tmdb_id}/season/${payload.season_number}`;
           } else {
-            targetUrl = `/serie/${payload.tmdb_id}`;
+            targetUrl = `/show/${payload.tmdb_id}`;
           }
         } else if (payload.media_type === "video_game") {
           targetUrl = `/game/${payload.tmdb_id}`;
@@ -644,7 +675,7 @@ export default defineEventHandler(async (event) => {
             payload.season_number ? ` (Season ${payload.season_number})` : ""
           }${
             payload.episode_number ? ` (Episode ${payload.episode_number})` : ""
-          } [${lang.toUpperCase()}].\n• Added **${extractResult.creditsAdded ?? 0}** roles\n• Added **${extractResult.changes ?? 0}** new voice actors.`,
+          } [${lang.toUpperCase()}].\n• Added **${extractResult.creditsAdded ?? 0}** roles\n• Added **${extractResult.changes ?? 0}** new voice actors.\n• LLM model: **${extractResult.llmModel ?? "unknown"}**${extractResult.llmQuota ? ` (quota: ${extractResult.llmQuota})` : ""}${extractResult.note ? `\n• Note: ${extractResult.note}` : ""}`,
           {
             event,
             queue: "wiki_extract",
@@ -668,33 +699,43 @@ export default defineEventHandler(async (event) => {
           errMsg.includes("RESOURCE_EXHAUSTED") ||
           errMsg.includes("quota")
         ) {
+          // ponytail: never archive on quota exhaustion — keep element queued, delay 1h via RPC
           const MAX_RETRIES = 5;
-          if (readCt >= MAX_RETRIES) {
-            await supabaseAdmin.rpc("archive_media_queue_message_with_error", {
+          const { error: delayError } = await (supabaseAdmin as any).rpc(
+            "delay_media_queue_message",
+            {
               p_queue_name: targetQueue,
               p_msg_id: msgId,
-              p_error: `Max retries (${MAX_RETRIES}) reached due to LLM 429 rate limit.`,
-            });
-            results.push({
-              id: msgId,
-              ok: false,
-              changes: 0,
-              error: `Max retries (${MAX_RETRIES}) reached`,
-            });
-
+              p_delay_seconds: 3600,
+            },
+          );
+          if (delayError) {
+            console.error(
+              `[QUEUE] Failed to delay ${msgId} after quota exhaustion:`,
+              delayError,
+            );
+          }
+          results.push({
+            id: msgId,
+            ok: false,
+            changes: 0,
+            error:
+              readCt >= MAX_RETRIES
+                ? `Quota exhausted, delayed 1h (readCt ${readCt})`
+                : errMsg,
+            rate_limited: true,
+          });
+          // ponytail: notify once when first delayed, not on every cron tick
+          if (readCt === MAX_RETRIES) {
             await sendDiscordAdminNotification(
               `Queue Extraction Rate-Limited [${lang.toUpperCase()}]`,
-              `Max retries (${MAX_RETRIES}) reached for **${mediaTitle}** (${payload.media_type} ${payload.tmdb_id} [${lang.toUpperCase()}]):\n\`\`\`\n${errMsg}\n\`\`\``,
+              `Quota exhausted for **${mediaTitle}** (${payload.media_type} ${payload.tmdb_id} [${lang.toUpperCase()}]): delayed 1h (readCt ${readCt}).\n\`\`\`\n${errMsg}\n\`\`\``,
               { event, queue: "wiki_extract", color: 0xed4245 },
             );
           } else {
-            results.push({
-              id: msgId,
-              ok: false,
-              changes: 0,
-              error: errMsg,
-              rate_limited: true,
-            });
+            console.warn(
+              `[QUEUE] Quota exhausted for ${mediaTitle} (${payload.media_type} ${payload.tmdb_id} [${lang}]), delayed 1h (readCt ${readCt}, notification throttled)`,
+            );
           }
         } else {
           await supabaseAdmin.rpc("archive_media_queue_message_with_error", {

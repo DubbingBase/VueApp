@@ -1,5 +1,5 @@
 import { PersonData, Role } from "@/components/PersonItem.vue";
-import { Actor } from "@supabase/functions/_shared/types";
+import { Actor } from "@app/shared-logic";
 
 export const cleanCharacterName = (name: string): string => {
   if (!name) return name;

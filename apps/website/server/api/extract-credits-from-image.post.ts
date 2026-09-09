@@ -45,7 +45,7 @@ export default defineEventHandler(async (event) => {
     }
 
     let promptText =
-      "Extract the list of actors, their roles, and their French voice actors from this dubbing credits image. Return a JSON object with an 'extract' property containing an array of objects. Each object should have 'actor' (the original actor name), 'role' (the character name), and 'voiceActor' (the French voice actor name). Only return valid JSON. If a column is missing, leave it empty.";
+      "Extract the list of actors, their roles, and their French voice actors from this dubbing credits image. Return a JSON object with an 'extract' property containing an array of objects. Each object should have 'actor' (the original actor name), 'role' (the character name), and 'voiceActor' (the French voice actor name). Only return valid JSON. If a column is missing, leave it empty. Skip any row where the voice actor is not an exploitable person name (e.g. N/A, ?, unknown or placeholder/dash-only) — omit it. Keep original spelling exactly, preserving accents/diacritics and hyphens/dashes.";
 
     const baseCreditSchema = z.object({
       actor: z.string(),
@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
     });
 
     if (knownActorsText) {
-      promptText = `Extract the list of actors, their roles, and their French voice actors from this dubbing credits image.\nReturn a JSON object with an 'extract' property containing an array of objects.\nEach object should have 'actor' (the original actor name), 'role' (the character name), 'voiceActor' (the French voice actor name), and 'matchedActorId' (number or null, indicating the ID of the original actor from the known list below).\n\nTry to match the actors or roles from the image to the known list and include their ID in 'matchedActorId'. If a column is missing, leave it empty.${knownActorsText}`;
+      promptText = `Extract the list of actors, their roles, and their French voice actors from this dubbing credits image.\nReturn a JSON object with an 'extract' property containing an array of objects.\nEach object should have 'actor' (the original actor name), 'role' (the character name), 'voiceActor' (the French voice actor name), and 'matchedActorId' (number or null, indicating the ID of the original actor from the known list below).\n\nTry to match the actors or roles from the image to the known list and include their ID in 'matchedActorId'. If a column is missing, leave it empty. Skip any row where the voice actor is not an exploitable person name (e.g. N/A, ?, unknown or placeholder/dash-only) — omit it. Keep original spelling exactly, preserving accents/diacritics and hyphens/dashes.${knownActorsText}`;
 
       const schemaWithMatch = z.object({
         extract: z.array(
@@ -76,7 +76,11 @@ export default defineEventHandler(async (event) => {
 
       return {
         ok: true,
-        result: parsed.extract,
+        result: parsed.data.extract.filter((r) =>
+          isExploitableVoiceActorName(r.voiceActor),
+        ),
+        llmModel: parsed.model,
+        llmQuota: parsed.quota,
       };
     }
 
@@ -96,7 +100,11 @@ export default defineEventHandler(async (event) => {
 
     return {
       ok: true,
-      result: parsed.extract,
+      result: parsed.data.extract.filter((r) =>
+        isExploitableVoiceActorName(r.voiceActor),
+      ),
+      llmModel: parsed.model,
+      llmQuota: parsed.quota,
     };
   } catch (error: any) {
     if (error && typeof error === "object" && "statusCode" in error)

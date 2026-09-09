@@ -102,11 +102,17 @@ export async function fetchShowData(event: any, showId: number) {
     } = apiData;
 
     // ── Lazy Wikipedia Queue Enqueue ─────────────────────────────────
+    // Gated by PostHog 'enqueue-on-navigate' (server-side)
     const isProcessed = dubbingProjects.length > 0;
     const hasWiki = !!serieWithImageUrls?.external_ids?.wikidata_id;
     const isAdult = serieWithImageUrls?.adult === true;
 
-    if (!isProcessed && hasWiki && !isAdult) {
+    if (
+      !isProcessed &&
+      hasWiki &&
+      !isAdult &&
+      (await isEnqueueOnNavigateEnabled(event))
+    ) {
       const supabaseAdmin = useSupabaseAdmin();
       try {
         const { error } = await supabaseAdmin.rpc("enqueue_media_fetch", {
@@ -130,7 +136,7 @@ export async function fetchShowData(event: any, showId: number) {
                     imageUrl: `https://image.tmdb.org/t/p/w500${serieWithImageUrls.poster_path}`,
                   }
                 : {}),
-              url: `/serie/${showId}`,
+              url: `/show/${showId}`,
               color: 0x5865f2,
             },
           );

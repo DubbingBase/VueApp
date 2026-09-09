@@ -1,0 +1,195 @@
+# Components
+
+- **App** [client] — `apps/mobile/src/App.vue`
+- **ActionButtons** [client] — props: hasWikidataId, hasData, isFetching, isScanning, fetchError, queueStatus, queueErrorMessage — `apps/mobile/src/components/ActionButtons.vue`
+- **ActorItem** [client] — props: actor, voiceActors, isAdmin, goToActor, goToVoiceActor, editVoiceActorLink, confirmDeleteVoiceActorLink, openVoiceActorSearch — `apps/mobile/src/components/ActorItem.vue`
+- **ActorList** [client] — props: actors, voiceActors — `apps/mobile/src/components/ActorList.vue`
+- **ActorVoiceActorItem** [client] — props: type, actor, item — `apps/mobile/src/components/ActorVoiceActorItem.vue`
+- **ActorWithVoiceActors** [client] — `apps/mobile/src/components/ActorWithVoiceActors.vue`
+- **CollectionCard** [client] — props: collection — `apps/mobile/src/components/CollectionCard.vue`
+- **CreditsReviewModal** [client] — props: isOpen, extractedCredits — `apps/mobile/src/components/CreditsReviewModal.vue`
+- **CrewList** [client] — props: groupedCrew — `apps/mobile/src/components/CrewList.vue`
+- **DubbingProjectsView** [client] — props: contentId, contentType, projects, actors, isAdmin, getVoiceActorByTmdbId, goToActor, goToVoiceActor, editVoiceActorLink, confirmDeleteVoiceActorLink — `apps/mobile/src/components/DubbingProjectsView.vue`
+- **EpisodeBanner** [client] — `apps/mobile/src/components/EpisodeBanner.vue`
+- **EpisodesList** [client] — `apps/mobile/src/components/EpisodesList.vue`
+- **JobSearchModal** [client] — props: isOpen, jobs — `apps/mobile/src/components/JobSearchModal.vue`
+- **MediaInfoCard** [client] — `apps/mobile/src/components/MediaInfoCard.vue`
+- **MediaItem** [client] — `apps/mobile/src/components/MediaItem.vue`
+- **MediaThumbnail** [client] — props: path, type, required, default — `apps/mobile/src/components/MediaThumbnail.vue`
+- **MovieCard** [client] — `apps/mobile/src/components/MovieCard.vue`
+- **NoActors** [client] — `apps/mobile/src/components/NoActors.vue`
+- **NoVoiceActor** [client] — props: actor — `apps/mobile/src/components/NoVoiceActor.vue`
+- **PersonItem** [client] — props: person, type, subtitleOverride — `apps/mobile/src/components/PersonItem.vue`
+- **PersonSearchModal** [client] — props: isOpen, mediaId, workType, linkVoiceActor — `apps/mobile/src/components/PersonSearchModal.vue`
+- **RequestVoiceActorCard** [client] — props: voiceActor — `apps/mobile/src/components/RequestVoiceActorCard.vue`
+- **SearchResultItem** [client] — `apps/mobile/src/components/SearchResultItem.vue`
+- **SeasonBanner** [client] — `apps/mobile/src/components/SeasonBanner.vue`
+- **Serie** [client] — props: value, type, required — `apps/mobile/src/components/Serie.vue`
+- **StudioCard** [client] — props: studio — `apps/mobile/src/components/StudioCard.vue`
+- **StudioSearchModal** [client] — props: isOpen — `apps/mobile/src/components/StudioSearchModal.vue`
+- **TmdbPersonSearchModal** [client] — props: isOpen, persons — `apps/mobile/src/components/TmdbPersonSearchModal.vue`
+- **VoiceActor** [client] — props: modelValue — `apps/mobile/src/components/VoiceActor.vue`
+- **VoiceActorBio** [client] — `apps/mobile/src/components/VoiceActorBio.vue`
+- **VoiceActorFetchModal** [client] — props: isOpen, voiceActor — `apps/mobile/src/components/VoiceActorFetchModal.vue`
+- **VoiceActorHeader** [client] — `apps/mobile/src/components/VoiceActorHeader.vue`
+- **VoiceActorList** [client] — props: voiceActors, actor, isAdmin, goToVoiceActor, editVoiceActorLink, confirmDeleteVoiceActorLink, openVoiceActorSearch — `apps/mobile/src/components/VoiceActorList.vue`
+- **VoiceActorWorksGrouped** [client] — `apps/mobile/src/components/VoiceActorWorksGrouped.vue`
+- **AppActionSheet** [client] — props: isOpen, header, buttons — `apps/mobile/src/components/common/AppActionSheet.vue`
+- **AppAlertContainer** [client] — `apps/mobile/src/components/common/AppAlertContainer.vue`
+- **AppAvatar** [client] — props: size — `apps/mobile/src/components/common/AppAvatar.vue`
+- **AppBackButton** [client] — `apps/mobile/src/components/common/AppBackButton.vue`
+- **AppBadge** [client] — props: color — `apps/mobile/src/components/common/AppBadge.vue`
+- **AppButton** [client] — props: fill, expand, color, shape, disabled, type — `apps/mobile/src/components/common/AppButton.vue`
+- **AppCard** [client] — props: button, clickable, href, replace — `apps/mobile/src/components/common/AppCard.vue`
+- **AppCardContent** [client] — `apps/mobile/src/components/common/AppCardContent.vue`
+- **AppChip** [client] — props: outline, color — `apps/mobile/src/components/common/AppChip.vue`
+- **AppImage** [client] — props: src, alt — `apps/mobile/src/components/common/AppImage.vue`
+- **AppInput** [client] — props: modelValue, label, labelPlacement, type, placeholder, disabled — `apps/mobile/src/components/common/AppInput.vue`
+- **AppLabel** [client] — props: wrap — `apps/mobile/src/components/common/AppLabel.vue`
+- **AppList** [client] — props: inset — `apps/mobile/src/components/common/AppList.vue`
+- **AppListItem** [client] — props: button, clickable, href, disabled, lines, detail, replace — `apps/mobile/src/components/common/AppListItem.vue`
+- **AppModal** [client] — props: isOpen, isFullScreen, maxHeight, canSwipe, overlay, breakpoints, initialBreakpoint — `apps/mobile/src/components/common/AppModal.vue`
+- **AppSearchbar** [client] — props: modelValue, placeholder, disabled, animated, debounce — `apps/mobile/src/components/common/AppSearchbar.vue`
+- **AppSkeleton** [client] — props: animated — `apps/mobile/src/components/common/AppSkeleton.vue`
+- **AppSpinner** [client] — props: name, color — `apps/mobile/src/components/common/AppSpinner.vue`
+- **AppText** [client] — props: color, tag — `apps/mobile/src/components/common/AppText.vue`
+- **AppTextarea** [client] — props: modelValue, label, labelPlacement, placeholder, disabled, rows — `apps/mobile/src/components/common/AppTextarea.vue`
+- **AppToggle** [client] — props: checked, disabled, color — `apps/mobile/src/components/common/AppToggle.vue`
+- **ConfirmDialog** [client] — `apps/mobile/src/components/common/ConfirmDialog.vue`
+- **EditableField** [client] — `apps/mobile/src/components/common/EditableField.vue`
+- **EmptyState** [client] — props: text — `apps/mobile/src/components/common/EmptyState.vue`
+- **ErrorMessage** [client] — `apps/mobile/src/components/common/ErrorMessage.vue`
+- **ImageEditorModal** [client] — props: isOpen, imageFile, aspectRatio — `apps/mobile/src/components/common/ImageEditorModal.vue`
+- **LoadingSpinner** [client] — `apps/mobile/src/components/common/LoadingSpinner.vue`
+- **AppContent** [client] — props: fullscreen — `apps/mobile/src/components/common/layout/AppContent.vue`
+- **AppHeader** [client] — `apps/mobile/src/components/common/layout/AppHeader.vue`
+- **AppPage** [client] — `apps/mobile/src/components/common/layout/AppPage.vue`
+- **AppSegment** [client] — props: modelValue, scrollable, bgColor — `apps/mobile/src/components/common/layout/AppSegment.vue`
+- **AppSegmentButton** [client] — props: value, contentId — `apps/mobile/src/components/common/layout/AppSegmentButton.vue`
+- **AppSegmentContent** [client] — props: id — `apps/mobile/src/components/common/layout/AppSegmentContent.vue`
+- **AppSegmentView** [client] — props: activeSegment — `apps/mobile/src/components/common/layout/AppSegmentView.vue`
+- **AppTitle** [client] — `apps/mobile/src/components/common/layout/AppTitle.vue`
+- **AppToolbar** [client] — `apps/mobile/src/components/common/layout/AppToolbar.vue`
+- **AddWorkModal** [client] — `apps/mobile/src/components/profile/AddWorkModal.vue`
+- **ProfileBasicInfo** [client] — `apps/mobile/src/components/profile/ProfileBasicInfo.vue`
+- **ProfilePictureEditor** [client] — `apps/mobile/src/components/profile/ProfilePictureEditor.vue`
+- **ProfileVoiceActorSelector** [client] — `apps/mobile/src/components/profile/ProfileVoiceActorSelector.vue`
+- **WorkItem** [client] — `apps/mobile/src/components/profile/WorkItem.vue`
+- **WorkList** [client] — props: canEdit — `apps/mobile/src/components/profile/WorkList.vue`
+- **about** [client] — `apps/mobile/src/views/about.vue`
+- **actor-details** [client] — `apps/mobile/src/views/actor-details.vue`
+- **advertisement-details** [client] — `apps/mobile/src/views/advertisement-details.vue`
+- **audiobook-details** [client] — `apps/mobile/src/views/audiobook-details.vue`
+- **edit-dubbing-project** [client] — `apps/mobile/src/views/edit-dubbing-project.vue`
+- **edit-studio** [client] — `apps/mobile/src/views/edit-studio.vue`
+- **game-details** [client] — `apps/mobile/src/views/game-details.vue`
+- **home** [client] — `apps/mobile/src/views/home.vue`
+- **login** [client] — `apps/mobile/src/views/login.vue`
+- **movie-details** [client] — `apps/mobile/src/views/movie-details.vue`
+- **podcast-details** [client] — `apps/mobile/src/views/podcast-details.vue`
+- **profile** [client] — `apps/mobile/src/views/profile.vue`
+- **search** [client] — `apps/mobile/src/views/search.vue`
+- **season-by-episodes** [client] — `apps/mobile/src/views/season-by-episodes.vue`
+- **season-details** [client] — `apps/mobile/src/views/season-details.vue`
+- **serie-details** [client] — `apps/mobile/src/views/serie-details.vue`
+- **settings** [client] — `apps/mobile/src/views/settings.vue`
+- **studio-details** [client] — `apps/mobile/src/views/studio-details.vue`
+- **toy-details** [client] — `apps/mobile/src/views/toy-details.vue`
+- **voice-actor-details** [client] — `apps/mobile/src/views/voice-actor-details.vue`
+- **voice-actor-profile** [client] — `apps/mobile/src/views/voice-actor-profile.vue`
+- **app** [client] — `apps/website/src/app.vue`
+- **Footer** [client] — `apps/website/src/components/Footer.vue`
+- **ForceEnqueueButton** [client] — props: mediaType, mediaId, seasonNumber, episodeNumber, language — `apps/website/src/components/ForceEnqueueButton.vue`
+- **Header** [client] — `apps/website/src/components/Header.vue`
+- **LanguageBanner** [client] — `apps/website/src/components/LanguageBanner.vue`
+- **MediaSkeleton** [client] — `apps/website/src/components/MediaSkeleton.vue`
+- **PersonSkeleton** [client] — `apps/website/src/components/PersonSkeleton.vue`
+- **ReportModal** [client] — props: open, targetUrl — `apps/website/src/components/ReportModal.vue`
+- **SearchModal** [client] — `apps/website/src/components/SearchModal.vue`
+- **SmartBanner** [client] — `apps/website/src/components/SmartBanner.vue`
+- **UnderConstruction** [client] — `apps/website/src/components/UnderConstruction.vue`
+- **AsyncAutocomplete** [client] — props: modelValue, options, loading, placeholder, disabled, allowCreate, displayFn — `apps/website/src/components/admin/AsyncAutocomplete.vue`
+- **LanguageSelect** [client] — props: modelValue, required — `apps/website/src/components/admin/LanguageSelect.vue`
+- **BarChart** [client] — `apps/website/src/components/admin/charts/BarChart.vue`
+- **LineChart** [client] — `apps/website/src/components/admin/charts/LineChart.vue`
+- **PieChart** [client] — `apps/website/src/components/admin/charts/PieChart.vue`
+- **AdvertisementProjectEditor** [client] — `apps/website/src/components/admin/editors/AdvertisementProjectEditor.vue`
+- **AudiobookProjectEditor** [client] — `apps/website/src/components/admin/editors/AudiobookProjectEditor.vue`
+- **GameProjectEditor** [client] — `apps/website/src/components/admin/editors/GameProjectEditor.vue`
+- **MovieProjectEditor** [client] — `apps/website/src/components/admin/editors/MovieProjectEditor.vue`
+- **PodcastProjectEditor** [client] — `apps/website/src/components/admin/editors/PodcastProjectEditor.vue`
+- **ShowProjectEditor** [client] — `apps/website/src/components/admin/editors/ShowProjectEditor.vue`
+- **ToyProjectEditor** [client] — `apps/website/src/components/admin/editors/ToyProjectEditor.vue`
+- **MediaDetailsLayout** [client] — props: title, backdropUrl, posterUrl, loading — `apps/website/src/components/layout/MediaDetailsLayout.vue`
+- **PersonDetailsLayout** [client] — props: name, profileUrl, backdropUrl, loading — `apps/website/src/components/layout/PersonDetailsLayout.vue`
+- **DetailsActionBar** [client] — `apps/website/src/components/layout/details/DetailsActionBar.vue`
+- **DetailsHero** [client] — props: title, backdropUrl, blurBackdrop, imageUrl, imageAspectRatio — `apps/website/src/components/layout/details/DetailsHero.vue`
+- **DetailsPage** [client] — `apps/website/src/components/layout/details/DetailsPage.vue`
+- **admin** [client] — `apps/website/src/layouts/admin.vue`
+- **about** [client] — `apps/website/src/pages/about.vue`
+- **[id]** [client] — `apps/website/src/pages/actor/[id].vue`
+- **[id]** [client] — `apps/website/src/pages/admin/add-voice-cast/[id].vue`
+- **audit-logs** [client] — `apps/website/src/pages/admin/audit-logs.vue`
+- **career-grid** [client] — `apps/website/src/pages/admin/career-grid.vue`
+- **duplicates-va** [client] — `apps/website/src/pages/admin/duplicates-va.vue`
+- **duplicates-work** [client] — `apps/website/src/pages/admin/duplicates-work.vue`
+- **index** [client] — `apps/website/src/pages/admin/index.vue`
+- **manual-merge-va** [client] — `apps/website/src/pages/admin/manual-merge-va.vue`
+- **queue** [client] — `apps/website/src/pages/admin/queue.vue`
+- **reports** [client] — `apps/website/src/pages/admin/reports.vue`
+- **[id]** [client] — `apps/website/src/pages/admin/studios/edit/[id].vue`
+- **new** [client] — `apps/website/src/pages/admin/studios/new.vue`
+- **user-va-profiles** [client] — `apps/website/src/pages/admin/user-va-profiles.vue`
+- **users** [client] — `apps/website/src/pages/admin/users.vue`
+- **voice-actor-spreadsheet** [client] — `apps/website/src/pages/admin/voice-actor-spreadsheet.vue`
+- **edit** [client] — `apps/website/src/pages/advertisement/[adId]/projects/[projectId]/edit.vue`
+- **new** [client] — `apps/website/src/pages/advertisement/[adId]/projects/new.vue`
+- **[id]** [client] — `apps/website/src/pages/advertisement/[id].vue`
+- **new** [client] — `apps/website/src/pages/advertisement/new.vue`
+- **edit** [client] — `apps/website/src/pages/audiobook/[audiobookId]/projects/[projectId]/edit.vue`
+- **new** [client] — `apps/website/src/pages/audiobook/[audiobookId]/projects/new.vue`
+- **[id]** [client] — `apps/website/src/pages/audiobook/[id].vue`
+- **index** [client] — `apps/website/src/pages/contribute/index.vue`
+- **play** [client] — `apps/website/src/pages/contribute/task/play.vue`
+- **discussions** [client] — `apps/website/src/pages/discussions.vue`
+- **edit** [client] — `apps/website/src/pages/game/[gameId]/projects/[projectId]/edit.vue`
+- **new** [client] — `apps/website/src/pages/game/[gameId]/projects/new.vue`
+- **[id]** [client] — `apps/website/src/pages/game/[id].vue`
+- **guidelines** [client] — `apps/website/src/pages/guidelines.vue`
+- **index** [client] — `apps/website/src/pages/index.vue`
+- **leaderboard** [client] — `apps/website/src/pages/leaderboard.vue`
+- **legal** [client] — `apps/website/src/pages/legal.vue`
+- **login** [client] — `apps/website/src/pages/login.vue`
+- **[id]** [client] — `apps/website/src/pages/movie/[id].vue`
+- **edit** [client] — `apps/website/src/pages/movie/[movieId]/projects/[projectId]/edit.vue`
+- **new** [client] — `apps/website/src/pages/movie/[movieId]/projects/new.vue`
+- **movies** [client] — `apps/website/src/pages/movies.vue`
+- **[id]** [client] — `apps/website/src/pages/podcast/[id].vue`
+- **edit** [client] — `apps/website/src/pages/podcast/[podcastId]/projects/[projectId]/edit.vue`
+- **new** [client] — `apps/website/src/pages/podcast/[podcastId]/projects/new.vue`
+- **new** [client] — `apps/website/src/pages/podcast/new.vue`
+- **privacy** [client] — `apps/website/src/pages/privacy.vue`
+- **api-key** [client] — `apps/website/src/pages/profile/api-key.vue`
+- **index** [client] — `apps/website/src/pages/profile/index.vue`
+- **settings** [client] — `apps/website/src/pages/profile/settings.vue`
+- **profile** [client] — `apps/website/src/pages/profile.vue`
+- **register** [client] — `apps/website/src/pages/register.vue`
+- **series** [client] — `apps/website/src/pages/series.vue`
+- **[episodeNumber]** [client] — `apps/website/src/pages/show/[id]/season/[seasonNumber]/episode/[episodeNumber].vue`
+- **[seasonNumber]** [client] — `apps/website/src/pages/show/[id]/season/[seasonNumber].vue`
+- **[id]** [client] — `apps/website/src/pages/show/[id].vue`
+- **edit** [client] — `apps/website/src/pages/show/[showId]/projects/[projectId]/edit.vue`
+- **new** [client] — `apps/website/src/pages/show/[showId]/projects/new.vue`
+- **[id]** [client] — `apps/website/src/pages/studio/[id].vue`
+- **edit** [client] — `apps/website/src/pages/studio/[studioId]/edit.vue`
+- **studios** [client] — `apps/website/src/pages/studios.vue`
+- **terms-api** [client] — `apps/website/src/pages/terms-api.vue`
+- **terms** [client] — `apps/website/src/pages/terms.vue`
+- **[id]** [client] — `apps/website/src/pages/toy/[id].vue`
+- **edit** [client] — `apps/website/src/pages/toy/[toyId]/projects/[projectId]/edit.vue`
+- **new** [client] — `apps/website/src/pages/toy/[toyId]/projects/new.vue`
+- **new** [client] — `apps/website/src/pages/toy/new.vue`
+- **[id]** [client] — `apps/website/src/pages/voice-actor/[id].vue`
+- **edit** [client] — `apps/website/src/pages/voice-actor/[voiceActorId]/edit.vue`
+- **new** [client] — `apps/website/src/pages/voice-actor/new.vue`
+- **voice-actors** [client] — `apps/website/src/pages/voice-actors.vue`
