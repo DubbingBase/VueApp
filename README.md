@@ -12,18 +12,6 @@ This project is a **Monorepo** managed by [Turbo Repo](https://turbo.build/) and
 
 ## 🚀 Getting Started
 
-### Pull request website previews
-
-Internal pull requests that change the website can be previewed automatically at a
-per-PR Cloudflare Workers URL. The preview is updated when new commits are pushed
-and deleted when the pull request is closed. Fork pull requests are intentionally
-skipped because deployment credentials are never exposed to fork builds.
-
-Previews use only public Supabase credentials and do not receive production server
-secrets, the production KV namespace, or the scheduled dispatcher. Configure the
-`cloudflare-preview` GitHub environment with the secrets documented in
-[`todo_cloudflare_pr_deploy.md`](todo_cloudflare_pr_deploy.md).
-
 ### Prerequisites
 
 - Node.js (Latest LTS recommended)
