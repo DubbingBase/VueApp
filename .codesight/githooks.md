@@ -5,6 +5,5 @@
 ## `pre-commit` — husky
 
 - **mise**: `mise run format-staged`
-- **npx**: `npx --yes codesight --wiki && git add .codesight`
 
 _Source: .husky/pre-commit_
