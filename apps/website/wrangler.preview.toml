@@ -1,0 +1,15 @@
+name = "dubbingbase-website-pr-preview"
+main = ".output/server/index.mjs"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat", "disable_nodejs_process_v2"]
+workers_dev = true
+
+[assets]
+directory = ".output/public"
+binding = "ASSETS"
+
+[observability]
+enabled = false
+
+[vars]
+DEPLOYMENT_ENV = "preview"

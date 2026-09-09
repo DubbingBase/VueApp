@@ -1,0 +1,151 @@
+name: Website PR Preview
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+    paths:
+      - "apps/website/**"
+      - "packages/shared-logic/**"
+      - "packages/locales/**"
+      - "pnpm-lock.yaml"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: website-pr-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  WORKER_NAME: dubbingbase-website-pr-${{ github.event.pull_request.number }}
+
+jobs:
+  deploy:
+    if: >-
+      github.event.action != 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    environment: cloudflare-preview
+    steps:
+      - name: Checkout pull request
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build website preview
+        env:
+          DEPLOYMENT_ENV: preview
+          NITRO_PRESET: cloudflare-module
+          NUXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          NUXT_PUBLIC_SUPABASE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: pnpm --filter=@app/website build
+
+      - name: Deploy preview Worker
+        working-directory: apps/website
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PREVIEW_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_PREVIEW_ACCOUNT_ID }}
+        run: pnpm exec wrangler deploy --config wrangler.preview.toml --name "$WORKER_NAME"
+
+      - name: Smoke test preview
+        env:
+          PREVIEW_URL: https://${{ env.WORKER_NAME }}.${{ secrets.CLOUDFLARE_WORKERS_SUBDOMAIN }}.workers.dev
+        run: curl --fail --retry 5 --retry-all-errors --max-time 30 "$PREVIEW_URL/"
+
+      - name: Publish preview URL
+        uses: actions/github-script@v7
+        env:
+          PREVIEW_URL: https://${{ env.WORKER_NAME }}.${{ secrets.CLOUDFLARE_WORKERS_SUBDOMAIN }}.workers.dev
+          PREVIEW_SHA: ${{ github.event.pull_request.head.sha }}
+        with:
+          script: |
+            const marker = '<!-- dubbingbase-cloudflare-preview -->';
+            const body = `${marker}
+            ### Cloudflare website preview
+
+            **URL:** ${process.env.PREVIEW_URL}
+            **Commit:** `${process.env.PREVIEW_SHA.slice(0, 12)}`
+
+            This preview uses read-only public Supabase credentials and is deleted when the PR closes.`;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              per_page: 100,
+            });
+            const existing = comments.find((comment) => comment.body?.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+  cleanup:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    environment: cloudflare-preview
+    steps:
+      - name: Delete preview Worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PREVIEW_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_PREVIEW_ACCOUNT_ID }}
+        run: |
+          response_file="$(mktemp)"
+          status=$(curl --silent --show-error --output "$response_file" --write-out '%{http_code}' \
+            --request DELETE \
+            --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            --header 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/$WORKER_NAME")
+          if [ "$status" = "404" ]; then
+            echo "Preview Worker already deleted: $WORKER_NAME"
+            exit 0
+          fi
+          if [ "$status" -lt 200 ] || [ "$status" -ge 300 ]; then
+            cat "$response_file"
+            exit 1
+          fi
+          echo "Deleted preview Worker: $WORKER_NAME"
+
+      - name: Mark preview as deleted
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = '<!-- dubbingbase-cloudflare-preview -->';
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              per_page: 100,
+            });
+            const existing = comments.find((comment) => comment.body?.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: `${marker}\n### Cloudflare website preview\n\nPreview deleted because this PR was closed.`,
+              });
+            }
