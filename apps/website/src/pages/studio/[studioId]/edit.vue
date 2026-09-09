@@ -132,11 +132,6 @@
   </template>
 
 <script setup lang="ts">
-defineRouteRules({
-  swr: false,
-  cache: false
-});
-
 import { ref, computed, onMounted } from 'vue';
 import imageCompression from "browser-image-compression";
 

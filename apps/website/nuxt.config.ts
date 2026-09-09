@@ -1,16 +1,7 @@
 import tailwindcss from "@tailwindcss/vite";
 import { resolve } from "node:path";
 import { defineNuxtConfig } from "nuxt/config";
-import {
-  APP_LOCALES,
-  DEFAULT_LOCALE,
-  NON_DEFAULT_LOCALES,
-  MEDIA_ROUTE_PREFIXES,
-} from "@app/shared-logic";
-
-const SWR_CONFIG = {
-  swr: process.env.NODE_ENV === "development" ? false : 3600,
-};
+import { APP_LOCALES, DEFAULT_LOCALE } from "@app/shared-logic";
 
 function env(name: string): string | undefined {
   return process.env[name] ?? process.env[`NUXT_${name}`];
@@ -18,17 +9,6 @@ function env(name: string): string | undefined {
 
 const supabaseUrl = env("SUPABASE_URL") ?? env("PUBLIC_SUPABASE_URL");
 const supabaseAnonKey = env("SUPABASE_ANON_KEY") ?? env("PUBLIC_SUPABASE_KEY");
-
-function generateRouteRules() {
-  const rules: Record<string, typeof SWR_CONFIG> = {};
-  for (const prefix of MEDIA_ROUTE_PREFIXES) {
-    rules[`/${prefix}/**`] = SWR_CONFIG;
-    for (const locale of NON_DEFAULT_LOCALES) {
-      rules[`/${locale}/${prefix}/**`] = SWR_CONFIG;
-    }
-  }
-  return rules;
-}
 
 export default defineNuxtConfig({
   rootDir: resolve(import.meta.dirname),
@@ -120,8 +100,6 @@ export default defineNuxtConfig({
   experimental: {
     inlineRouteRules: true,
   },
-
-  routeRules: generateRouteRules(),
 
   vite: {
     plugins: [tailwindcss()],

@@ -392,6 +392,7 @@
 </template>
 
 <script setup lang="ts">
+defineRouteRules({ swr: 3600 });
 import MediaDetailsLayout from "../../components/layout/MediaDetailsLayout.vue";
 import { useRoute, useRouter } from "vue-router";
 

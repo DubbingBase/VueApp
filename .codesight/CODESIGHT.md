@@ -5,7 +5,7 @@
 
 > 80 routes | 16 models | 193 components | 71 lib files | 63 env vars | 11 middleware | 4% test coverage
 > **Token savings:** this file is ~13,900 tokens. Without it, AI exploration would cost ~149,200 tokens. **Saves ~135,300 tokens per conversation.**
-> **Last scanned:** 2026-09-09 12:54 — re-run after significant changes
+> **Last scanned:** 2026-09-09 13:52 — re-run after significant changes
 
 ---
 
@@ -649,13 +649,13 @@
 ## auth
 - auth — `apps/mobile/src/stores/auth.ts`
 - generate-social-content.post — `apps/website/server/api/generate-social-content.post.ts`
-- 00-cache — `apps/website/server/middleware/00-cache.ts`
 - auth — `apps/website/server/middleware/auth.ts`
 - auth — `apps/website/server/utils/auth.ts`
 - auth — `apps/website/src/middleware/auth.ts`
 - authenticated-fetch — `apps/website/src/plugins/authenticated-fetch.ts`
 
 ## custom
+- 00-cache — `apps/website/server/middleware/00-cache.ts`
 - 00-e2e-mock — `apps/website/server/middleware/00-e2e-mock.ts`
 - admin — `apps/website/src/middleware/admin.ts`
 - 20260618000000_migrate_to_pgmq — `packages/database/supabase/migrations/20260618000000_migrate_to_pgmq.sql`

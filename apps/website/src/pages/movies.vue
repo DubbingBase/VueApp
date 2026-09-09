@@ -44,6 +44,7 @@
 </template>
 
 <script setup lang="ts">
+defineRouteRules({ swr: 3600 });
 import { computed } from 'vue';
 
 const { t } = useI18n();
