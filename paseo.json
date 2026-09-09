@@ -1,0 +1,6 @@
+{
+  "worktree": {
+    "setup": "mise install",
+    "teardown": "mise run backend-stop"
+  }
+}

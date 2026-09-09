@@ -667,7 +667,8 @@ const saveGameProject = async () => {
     let projectId = isEditMode.value ? Number(projectIdParam) : null;
 
     if (isEditMode.value && projectId) {
-      await supabase.from("dubbing_projects").update(projectPayload).eq("id", projectId);
+      const { error } = await supabase.from("dubbing_projects").update(projectPayload).eq("id", projectId);
+      if (error) throw error;
     } else {
       const { data } = await supabase.from("dubbing_projects").insert([projectPayload]).select().single();
       projectId = data?.id ?? null;
@@ -693,10 +694,17 @@ const saveGameProject = async () => {
     ].filter(j => j.person_id !== null);
 
     // Delete old crew & insert new
-    await supabase.from("dubbing_project_crew").delete().eq("dubbing_project_id", projectId);
+    const { error: deleteCrewError } = await supabase
+      .from("dubbing_project_crew")
+      .delete()
+      .eq("dubbing_project_id", projectId);
+    if (deleteCrewError) throw deleteCrewError;
     if (crewJobs.length > 0) {
       const crewPayload = crewJobs.map(j => ({ dubbing_project_id: projectId!, job_id: j.job_id, person_id: Number(j.person_id) }));
-      await supabase.from("dubbing_project_crew").insert(crewPayload as any);
+      const { error: insertCrewError } = await supabase
+        .from("dubbing_project_crew")
+        .insert(crewPayload as any);
+      if (insertCrewError) throw insertCrewError;
     }
 
     // Save Works (Cast)
