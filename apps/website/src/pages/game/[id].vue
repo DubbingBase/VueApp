@@ -433,7 +433,9 @@ const formattedCharacters = computed(() => {
       return {
         ...char,
         id: `${char.id}-${work.id}`,
-        voiceActor: { ...work.voice_actor, performance: work.performance, note: work.note },
+        voiceActor: work.voice_actor
+          ? { ...work.voice_actor, performance: work.performance, note: work.note }
+          : null,
       };
     });
   });
@@ -454,7 +456,9 @@ const formattedCharacters = computed(() => {
       id: `mock-${work.id}`,
       name: resolvedName || 'Inconnu',
       mug_shot: null,
-      voiceActor: { ...work.voice_actor, performance: work.performance, note: work.note }
+      voiceActor: work.voice_actor
+        ? { ...work.voice_actor, performance: work.performance, note: work.note }
+        : null,
     };
   });
 

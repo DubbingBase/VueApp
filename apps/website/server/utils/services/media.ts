@@ -499,6 +499,7 @@ export class MediaService {
           id: work.id,
           actor_id: work.actor_id,
           performance: work.performance,
+          note: work.note,
           dubbing_projects: work.dubbing_projects,
         },
         media: compactMedia,
