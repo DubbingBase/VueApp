@@ -270,8 +270,9 @@ interface FormattedCastItem {
 }
 
 const formattedCast = computed<FormattedCastItem[]>(() => {
-  if (!activeDubProject.value || !activeDubProject.value.work) return [];
-  return (activeDubProject.value.work || []).map((w: any) => ({
+  if (!activeDubProject.value) return [];
+  const works = activeDubProject.value.works || activeDubProject.value.work || [];
+  return works.map((w: any) => ({
     work_id: w.id,
     voice_actor_id: w.voice_actors?.id || w.voice_actor_id,
     firstname: w.voice_actors?.firstname || "",

@@ -372,6 +372,7 @@ import {
   StarIcon
 } from "lucide-vue-next";
 import ReportModal from "../../components/ReportModal.vue";
+import { matchCastWorks } from "../../utils/media-cast";
 
 const isReportModalOpen = ref(false);
 
@@ -513,7 +514,9 @@ const formattedCast = computed(() => {
   // Get works (dubbing links) for the currently active dubbing project
   const works = activeDubProject.value?.works || [];
 
-  return movie.value.credits.cast.flatMap((actor: any) => {
+  const { matches, unmatchedWorks } = matchCastWorks(movie.value.credits.cast, works);
+
+  const matchedCards = matches.flatMap(({ actor, works: actorWorks }) => {
     // TMDB returns profile_path without full URL sometimes in raw payload,
     // but the backend processMedia adds TMDB urls to it.
     // If it's a relative path starting with /, prepend tmdb url.
@@ -523,8 +526,7 @@ const formattedCast = computed(() => {
     }
 
     // Find the voice actor work for this physical actor
-    const matchingWorks = works.filter((w: any) => w.actor_id === actor.id);
-    const cards = matchingWorks.length > 0 ? matchingWorks : [null];
+    const cards = actorWorks.length > 0 ? actorWorks : [null];
 
     return cards.map((work: any) => {
     const voiceActor = work?.voice_actor;
@@ -553,6 +555,22 @@ const formattedCast = computed(() => {
     };
     });
   });
+
+  // Keep manually entered works visible even when TMDB no longer returns the
+  // linked actor (or the work has no TMDB actor id).
+  const unmatchedCards = unmatchedWorks.map((work: any) => ({
+    id: `work-${work.id}`,
+    name: work.character_name || t("details.unknownCharacter"),
+    profile_path: null,
+    character: work.character_name || null,
+    voiceActor: work.voice_actor
+      ? { ...work.voice_actor, note: work.note }
+      : null,
+    characterImage: null,
+    workCharacterName: work.character_name || null,
+  }));
+
+  return [...matchedCards, ...unmatchedCards];
 });
 
 const searchQuery = ref("");

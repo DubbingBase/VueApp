@@ -341,6 +341,7 @@ import {
   StarIcon
 } from "lucide-vue-next";
 import ReportModal from "../../../../../../components/ReportModal.vue";
+import { matchCastWorks } from "../../../../../../utils/media-cast";
 
 const isReportModalOpen = ref(false);
 
@@ -476,14 +477,15 @@ const formattedCast = computed(() => {
 
   const works = activeDubProject.value?.works || [];
 
-  return episode.value.credits.cast.flatMap((actor: any) => {
+  const { matches, unmatchedWorks } = matchCastWorks(episode.value.credits.cast, works);
+
+  const matchedCards = matches.flatMap(({ actor, works: actorWorks }) => {
     let profilePath = actor.profile_path;
     if (profilePath && profilePath.startsWith("/")) {
       profilePath = `https://image.tmdb.org/t/p/w185${profilePath}`;
     }
 
-    const matchingWorks = works.filter((w: any) => w.actor_id === actor.id);
-    const cards = matchingWorks.length > 0 ? matchingWorks : [null];
+    const cards = actorWorks.length > 0 ? actorWorks : [null];
 
     return cards.map((work: any) => {
     const voiceActor = work?.voice_actor;
@@ -518,6 +520,20 @@ const formattedCast = computed(() => {
     };
     });
   });
+
+  const unmatchedCards = unmatchedWorks.map((work: any) => ({
+    id: `work-${work.id}`,
+    name: work.character_name || t("details.unknownCharacter"),
+    profile_path: null,
+    character: work.character_name || null,
+    voiceActor: work.voice_actor
+      ? { ...work.voice_actor, note: work.note }
+      : null,
+    characterImage: null,
+    workCharacterName: work.character_name || null,
+  }));
+
+  return [...matchedCards, ...unmatchedCards];
 });
 
 const searchQuery = ref("");

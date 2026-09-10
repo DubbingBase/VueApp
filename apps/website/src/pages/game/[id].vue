@@ -279,6 +279,7 @@ import { computed, ref, watch } from 'vue';
 import { useIntersectionObserver, refDebounced } from '@vueuse/core';
 import { ArrowLeftIcon, UserIcon, MicIcon, SearchIcon, Gamepad2Icon, Loader2Icon, StarIcon, ExternalLinkIcon } from 'lucide-vue-next';
 import ReportModal from '../../components/ReportModal.vue';
+import { sameMediaId } from '../../utils/media-cast';
 
 const isReportModalOpen = ref(false);
 
@@ -421,10 +422,10 @@ const formattedCharacters = computed(() => {
     // Find the voice actor work for this character.
     // Check actor_id (set by prepare_game) and character_id (set by manual entry in the edit form).
     const matchingWorks = works.filter((w: any) =>
-      w.actor_id === mappedActorId ||
-      w.actor_id === hashId ||
-      w.character_id === char.id ||
-      w.character_id === mappedActorId
+      sameMediaId(w.actor_id, mappedActorId) ||
+      sameMediaId(w.actor_id, hashId) ||
+      sameMediaId(w.character_id, char.id) ||
+      sameMediaId(w.character_id, mappedActorId)
     );
 
     if (matchingWorks.length === 0) return [{ ...char, voiceActor: null }];
@@ -450,7 +451,7 @@ const formattedCharacters = computed(() => {
   const mockChars = unmatchedWorks.map((work: any) => {
     let resolvedName = work.character_name || null;
     if (!resolvedName && work.character_id) {
-      const igdbChar = igdbChars.find((c: IgdbCharacter) => igdbCharacterId(c.id) === work.character_id || c.id === work.character_id);
+      const igdbChar = igdbChars.find((c: IgdbCharacter) => sameMediaId(igdbCharacterId(c.id), work.character_id) || sameMediaId(c.id, work.character_id));
       if (igdbChar) resolvedName = igdbChar.name;
     }
     return {
