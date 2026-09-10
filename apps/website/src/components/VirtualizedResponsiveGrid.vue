@@ -23,9 +23,13 @@ const props = withDefaults(
     estimateRowHeight: number;
     rowClass?: string;
     itemKey?: (item: T, index: number) => string | number;
+    hasMore?: boolean;
+    onReachEnd?: () => void;
   }>(),
   {
     rowClass: "grid gap-4",
+    hasMore: false,
+    onReachEnd: undefined,
   },
 );
 
@@ -73,6 +77,16 @@ const virtualizer = useWindowVirtualizer<HTMLElement>(
   })),
 );
 
+const lastVirtualRow = computed(
+  () => virtualizer.value.getVirtualItems().at(-1)?.index ?? -1,
+);
+
+watch([lastVirtualRow, () => props.hasMore], () => {
+  if (props.hasMore && lastVirtualRow.value >= rows.value.length - 2) {
+    props.onReachEnd?.();
+  }
+});
+
 const measureRow = (element: Element | ComponentPublicInstance | null) => {
   if (element instanceof globalThis.HTMLElement) {
     virtualizer.value.measureElement(element);
@@ -81,7 +95,8 @@ const measureRow = (element: Element | ComponentPublicInstance | null) => {
 
 const updateScrollMargin = () => {
   if (container.value) {
-    scrollMargin.value = container.value.getBoundingClientRect().top + window.scrollY;
+    scrollMargin.value =
+      container.value.getBoundingClientRect().top + window.scrollY;
   }
 };
 
@@ -106,20 +121,34 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="container" class="relative w-full" :style="{ height: `${virtualizer.getTotalSize()}px` }">
+  <div
+    ref="container"
+    class="relative w-full"
+    :style="{ height: `${virtualizer.getTotalSize()}px` }"
+  >
     <div
       v-for="virtualRow in virtualizer.getVirtualItems()"
       :key="String(virtualRow.key)"
       :data-index="virtualRow.index"
       class="absolute left-0 top-0 w-full"
-      :style="{ transform: `translateY(${virtualRow.start - virtualizer.options.scrollMargin}px)` }"
+      :style="{
+        transform: `translateY(${virtualRow.start - virtualizer.options.scrollMargin}px)`,
+      }"
       :ref="measureRow"
     >
       <div
         :class="rowClass"
-        :style="{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }"
+        :style="{
+          gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`,
+        }"
       >
-        <template v-for="(item, index) in rows[virtualRow.index]" :key="itemKey?.(item, virtualRow.index * columnCount + index) ?? virtualRow.index * columnCount + index">
+        <template
+          v-for="(item, index) in rows[virtualRow.index]"
+          :key="
+            itemKey?.(item, virtualRow.index * columnCount + index) ??
+            virtualRow.index * columnCount + index
+          "
+        >
           <slot :item="item" :index="virtualRow.index * columnCount + index" />
         </template>
       </div>

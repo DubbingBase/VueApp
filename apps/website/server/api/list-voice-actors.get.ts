@@ -9,8 +9,14 @@ export default defineEventHandler(async (event) => {
 
   const query = getQuery(event);
   const searchQuery = query.query as string | undefined;
-  const limit = parseInt(String(query.limit)) || 100;
-  const offset = parseInt(String(query.offset)) || 0;
+  const requestedLimit = Number.parseInt(String(query.limit), 10);
+  const requestedOffset = Number.parseInt(String(query.offset), 10);
+  const limit = Number.isFinite(requestedLimit)
+    ? Math.min(Math.max(requestedLimit, 1), 100)
+    : 100;
+  const offset = Number.isFinite(requestedOffset)
+    ? Math.max(requestedOffset, 0)
+    : 0;
 
   const supabaseAdmin = event.context.supabaseAdmin || useSupabaseAdmin();
 
