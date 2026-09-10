@@ -2,6 +2,7 @@ import { useCache, useAdvertisementClient } from "../../utils";
 import { getDubbingProjects } from "../../utils/db/queries";
 import { useSupabaseAdmin } from "../../utils/db/client";
 import { sendDiscordAdminNotification } from "../../utils/notifications/discord";
+import { scheduleBackgroundTask } from "../../utils/background";
 import type { AdvertisementResponse } from "@app/shared-logic";
 
 export default defineEventHandler(
@@ -63,34 +64,36 @@ export default defineEventHandler(
 
       const isProcessed = dubbingProjects.length > 0;
       // Gated by PostHog 'enqueue-on-navigate' (server-side)
-      if (!isProcessed && (await isEnqueueOnNavigateEnabled(event))) {
-        const supabaseAdmin = useSupabaseAdmin();
-        try {
-          const { error } = await supabaseAdmin.rpc("enqueue_media_fetch", {
-            p_media_type: "advertisement",
-            p_tmdb_id: adId,
-            p_season_number: undefined,
-            p_episode_number: undefined,
-          });
-          if (error) {
-            if (!error.message?.includes("already in the")) {
+      if (!isProcessed) {
+        scheduleBackgroundTask(
+          event,
+          async () => {
+            if (!(await isEnqueueOnNavigateEnabled())) return;
+            const supabaseAdmin = useSupabaseAdmin(event);
+            const { error } = await supabaseAdmin.rpc("enqueue_media_fetch", {
+              p_media_type: "advertisement",
+              p_tmdb_id: adId,
+              p_season_number: undefined,
+              p_episode_number: undefined,
+            });
+            if (error && !error.message?.includes("already in the")) {
               console.error("Failed to lazily enqueue advertisement:", error);
+            } else if (!error) {
+              await sendDiscordAdminNotification(
+                "Media Enqueued (Auto)",
+                `Automatically enqueued advertisement **${ad?.title || adId}** (Ad ID: ${adId}) for dubbing discovery.`,
+                {
+                  queue: "wiki_discovery",
+                  ...(ad?.poster_url ? { imageUrl: ad.poster_url } : {}),
+                  url: `/advertisement/${adId}`,
+                  color: 0x5865f2,
+                  event,
+                },
+              );
             }
-          } else {
-            await sendDiscordAdminNotification(
-              "Media Enqueued (Auto)",
-              `Automatically enqueued advertisement **${ad?.title || adId}** (Ad ID: ${adId}) for dubbing discovery.`,
-              {
-                queue: "wiki_discovery",
-                ...(ad?.poster_url ? { imageUrl: ad.poster_url } : {}),
-                url: `/advertisement/${adId}`,
-                color: 0x5865f2,
-              },
-            );
-          }
-        } catch (err) {
-          console.error("Error auto-enqueueing advertisement:", err);
-        }
+          },
+          "advertisement discovery",
+        );
       }
 
       baseData = {

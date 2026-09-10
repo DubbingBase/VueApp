@@ -4,6 +4,7 @@ import { getDubbingProjects } from "../../utils/db/queries";
 import { processMedia } from "../../utils/urls/tmdb";
 import { useSupabaseAdmin } from "../../utils/db/client";
 import { sendDiscordAdminNotification } from "../../utils/notifications/discord";
+import { scheduleBackgroundTask } from "../../utils/background";
 
 export async function fetchMovieData(event: any, movieId: number) {
   setHeader(
@@ -92,43 +93,43 @@ export async function fetchMovieData(event: any, movieId: number) {
     const hasWiki = !!movieWithImageUrls?.external_ids?.wikidata_id;
     const isAdult = movieWithImageUrls?.adult === true;
 
-    if (
-      !isProcessed &&
-      hasWiki &&
-      !isAdult &&
-      (await isEnqueueOnNavigateEnabled(event))
-    ) {
-      const supabaseAdmin = useSupabaseAdmin();
-      try {
-        const { error } = await supabaseAdmin.rpc("enqueue_media_fetch", {
-          p_media_type: "movie",
-          p_tmdb_id: movieId,
-          p_season_number: undefined,
-          p_episode_number: undefined,
-        });
-        if (error) {
-          if (!error.message?.includes("already in the")) {
-            console.error("Failed to lazily enqueue movie:", error);
+    if (!isProcessed && hasWiki && !isAdult) {
+      scheduleBackgroundTask(
+        event,
+        async () => {
+          if (!(await isEnqueueOnNavigateEnabled())) return;
+
+          const supabaseAdmin = useSupabaseAdmin(event);
+          const { error } = await supabaseAdmin.rpc("enqueue_media_fetch", {
+            p_media_type: "movie",
+            p_tmdb_id: movieId,
+            p_season_number: undefined,
+            p_episode_number: undefined,
+          });
+          if (error) {
+            if (!error.message?.includes("already in the")) {
+              console.error("Failed to lazily enqueue movie:", error);
+            }
+          } else {
+            await sendDiscordAdminNotification(
+              "Media Enqueued (Auto)",
+              `Automatically enqueued movie **${movieWithImageUrls?.title || movieId}** (TMDB: ${movieId}) for all-languages dubbing discovery.`,
+              {
+                queue: "wiki_discovery",
+                ...(movieWithImageUrls?.poster_path
+                  ? {
+                      imageUrl: `https://image.tmdb.org/t/p/w500${movieWithImageUrls.poster_path}`,
+                    }
+                  : {}),
+                url: `/movie/${movieId}`,
+                color: 0x5865f2,
+                event,
+              },
+            );
           }
-        } else {
-          await sendDiscordAdminNotification(
-            "Media Enqueued (Auto)",
-            `Automatically enqueued movie **${movieWithImageUrls?.title || movieId}** (TMDB: ${movieId}) for all-languages dubbing discovery.`,
-            {
-              queue: "wiki_discovery",
-              ...(movieWithImageUrls?.poster_path
-                ? {
-                    imageUrl: `https://image.tmdb.org/t/p/w500${movieWithImageUrls.poster_path}`,
-                  }
-                : {}),
-              url: `/movie/${movieId}`,
-              color: 0x5865f2,
-            },
-          );
-        }
-      } catch (err) {
-        console.error("Error auto-enqueueing movie:", err);
-      }
+        },
+        "movie discovery",
+      );
     }
 
     baseData = {

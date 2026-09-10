@@ -3,6 +3,7 @@ import { buildIgdbImageUrl } from "../../utils/api/igdb";
 import { getDubbingProjects } from "../../utils/db/queries";
 import { useSupabaseAdmin } from "../../utils/db/client";
 import { sendDiscordAdminNotification } from "../../utils/notifications/discord";
+import { scheduleBackgroundTask } from "../../utils/background";
 import { setPublicCacheHeaders } from "../../utils/cache/http";
 import type { IgdbGame, IgdbCharacter } from "@app/shared-logic";
 
@@ -95,34 +96,36 @@ export default defineEventHandler(async (event) => {
     // Lazy enqueue if not yet processed - Gated by PostHog 'enqueue-on-navigate' (server-side)
     const dubbingProjects = await getDubbingProjects(gameId, "video_game");
     const isProcessed = dubbingProjects.length > 0;
-    if (!isProcessed && (await isEnqueueOnNavigateEnabled(event))) {
-      const supabaseAdmin = useSupabaseAdmin();
-      try {
-        const { error } = await supabaseAdmin.rpc("enqueue_media_fetch", {
-          p_media_type: "video_game",
-          p_tmdb_id: gameId,
-          p_season_number: undefined,
-          p_episode_number: undefined,
-        });
-        if (error) {
-          if (!error.message?.includes("already in the")) {
+    if (!isProcessed) {
+      scheduleBackgroundTask(
+        event,
+        async () => {
+          if (!(await isEnqueueOnNavigateEnabled())) return;
+          const supabaseAdmin = useSupabaseAdmin(event);
+          const { error } = await supabaseAdmin.rpc("enqueue_media_fetch", {
+            p_media_type: "video_game",
+            p_tmdb_id: gameId,
+            p_season_number: undefined,
+            p_episode_number: undefined,
+          });
+          if (error && !error.message?.includes("already in the")) {
             console.error("Failed to lazily enqueue video_game:", error);
+          } else if (!error) {
+            await sendDiscordAdminNotification(
+              "Media Enqueued (Auto)",
+              `Automatically enqueued video game **${game?.name || gameId}** (IGDB: ${gameId}) for dubbing discovery.`,
+              {
+                queue: "wiki_discovery",
+                ...(game?.cover?.url ? { imageUrl: game.cover.url } : {}),
+                url: `/game/${gameId}`,
+                color: 0x5865f2,
+                event,
+              },
+            );
           }
-        } else {
-          await sendDiscordAdminNotification(
-            "Media Enqueued (Auto)",
-            `Automatically enqueued video game **${game?.name || gameId}** (IGDB: ${gameId}) for dubbing discovery.`,
-            {
-              queue: "wiki_discovery",
-              ...(game?.cover?.url ? { imageUrl: game.cover.url } : {}),
-              url: `/game/${gameId}`,
-              color: 0x5865f2,
-            },
-          );
-        }
-      } catch (err) {
-        console.error("Error auto-enqueueing video_game:", err);
-      }
+        },
+        "game discovery",
+      );
     }
 
     // Don't cache the error fallback, so recovery isn't delayed by stale poison
