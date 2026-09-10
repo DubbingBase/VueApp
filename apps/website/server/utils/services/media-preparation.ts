@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getErrorMessage } from "../error-message";
 import { findOrCreateDubbingProject } from "../db/dubbing-project";
 import { insertVoiceActorAndWork } from "./voice-actor";
 import { useWikipediaCache, useIgdbClient } from "../index";
@@ -234,7 +235,7 @@ export async function checkMediaDubbingSections(options: {
       wikipediaUrl: wikiPageUrl,
     };
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error);
+    const errorMsg = getErrorMessage(error);
     return {
       ok: false,
       title: mediaTitle,
@@ -335,7 +336,7 @@ export async function checkGameDubbingSections(options: {
       wikipediaUrl: wikiPageUrl,
     };
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error);
+    const errorMsg = getErrorMessage(error);
     return {
       ok: false,
       title: gameTitle,
@@ -509,7 +510,7 @@ export async function extractMediaDubbingCredits(options: {
           : undefined,
     };
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error);
+    const errorMsg = getErrorMessage(error);
     return {
       ok: false,
       changes: 0,
@@ -642,7 +643,7 @@ export async function extractGameDubbingCredits(options: {
           : undefined,
     };
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error);
+    const errorMsg = getErrorMessage(error);
     return {
       ok: false,
       changes: 0,
