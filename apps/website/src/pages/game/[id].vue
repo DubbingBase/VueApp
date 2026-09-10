@@ -273,17 +273,12 @@
             </div>
           </div>
 
-          <VirtualizedResponsiveGrid
+          <PaginatedResponsiveGrid
+            :key="searchQuery"
             :items="filteredCharacters"
-            :breakpoints="[
-              { minWidth: 0, columns: 1 },
-              { minWidth: 768, columns: 2 },
-              { minWidth: 1024, columns: 3 },
-              { minWidth: 1280, columns: 4 },
-            ]"
-            :estimate-row-height="390"
+            :page-size="12"
+            grid-class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
             :item-key="(character) => character.id"
-            row-class="grid gap-4 md:gap-6"
           >
             <template #default="{ item: char }">
               <div
@@ -430,7 +425,7 @@
                 </div>
               </div>
             </template>
-          </VirtualizedResponsiveGrid>
+          </PaginatedResponsiveGrid>
           <span class="block text-xs text-gray-400 mt-4">{{
             $t("media.rolesCount", {
               shown: filteredCharacters.length,
