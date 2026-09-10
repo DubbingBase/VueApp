@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-defineRouteRules({ swr: process.env.NODE_ENV === "development" ? false : 3600 });
+defineRouteRules({ swr: 3600 });
 import { computed } from 'vue';
 
 const { t } = useI18n();

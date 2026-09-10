@@ -135,7 +135,7 @@
 
 <script setup lang="ts">
 defineRouteRules({
-  swr: process.env.NODE_ENV === "development" ? false : 3600,
+  swr: 3600,
 });
 import { ref, computed, watch } from "vue";
 import { refDebounced } from "@vueuse/core";
