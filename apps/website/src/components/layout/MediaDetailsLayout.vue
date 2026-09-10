@@ -21,7 +21,7 @@
         </template>
       </DetailsActionBar>
 
-      <div class="w-full p-8">
+      <div class="w-full min-w-0 p-4 sm:p-6 lg:p-8">
         <slot name="content"></slot>
       </div>
     </DetailsPage>
@@ -30,9 +30,9 @@
 </template>
 
 <script setup lang="ts">
-import DetailsPage from './details/DetailsPage.vue';
-import DetailsHero from './details/DetailsHero.vue';
-import DetailsActionBar from './details/DetailsActionBar.vue';
+import DetailsPage from "./details/DetailsPage.vue";
+import DetailsHero from "./details/DetailsHero.vue";
+import DetailsActionBar from "./details/DetailsActionBar.vue";
 defineProps<{
   title?: string;
   backdropUrl?: string | null;
