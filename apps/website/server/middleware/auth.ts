@@ -8,7 +8,10 @@ export default defineEventHandler(async (event) => {
   // Attach supabaseAdmin client to event context (skip during builds/prerender
   // where Supabase may not be configured)
   if (config.supabaseUrl) {
-    event.context.supabaseAdmin = useSupabaseAdmin();
+    // Pass the event so Cloudflare runtime secrets are available when the
+    // singleton is initialized. Without it, the client can be created with
+    // the public key and then reused for server-side writes.
+    event.context.supabaseAdmin = useSupabaseAdmin(event);
   }
 
   const authHeader = getHeader(event, "authorization");
