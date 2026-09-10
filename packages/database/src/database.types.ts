@@ -434,6 +434,8 @@ export type Database = {
           created_at: string | null;
           created_by: string | null;
           date_of_birth: string | null;
+          duplicate_first_name_tokens: string[];
+          duplicate_last_name_tokens: string[];
           firstname: string;
           id: number;
           lastname: string;
