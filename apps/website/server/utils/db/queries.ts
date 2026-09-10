@@ -57,11 +57,7 @@ export async function getDubbingProjects(
       ...work,
       voice_actor: processVoiceActor(work.voice_actor),
     })),
-    studio_data: project.studio_data || {
-      id: null,
-      name: null,
-      logo_url: null,
-    },
+    studio_data: project.studio_data || null,
     crew: (project.crew || []).map((member: any) => ({
       ...member,
       person: processVoiceActor(member.person),
