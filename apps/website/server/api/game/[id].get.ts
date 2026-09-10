@@ -3,6 +3,7 @@ import { buildIgdbImageUrl } from "../../utils/api/igdb";
 import { getDubbingProjects } from "../../utils/db/queries";
 import { useSupabaseAdmin } from "../../utils/db/client";
 import { sendDiscordAdminNotification } from "../../utils/notifications/discord";
+import { setPublicCacheHeaders } from "../../utils/cache/http";
 import type { IgdbGame, IgdbCharacter } from "@app/shared-logic";
 
 function processIgdbGame(
@@ -52,59 +53,47 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: "Invalid id parameter" });
   }
 
-  setHeader(
-    event,
-    "Cache-Control",
-    "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
-  );
+  setPublicCacheHeaders(event, "detail");
 
   const cache = useCache(event);
   const igdbClient = useIgdbClient();
 
-  const cacheKey = `app:game:${gameId}`;
-  const cached = await cache.get<any>(cacheKey);
+  const cacheKey = `app:game:${gameId}:metadata`;
+  const cached = await cache.get<{
+    game: (IgdbGame & { media_type: "video_game" }) | null;
+    characters: ReturnType<typeof processIgdbCharacter>[];
+  }>(cacheKey);
 
-  let baseData = cached;
+  let metadata = cached;
 
-  if (!baseData) {
-    // Fetch IGDB game data + DB dubbing projects concurrently
-    const [apiData, dbData] = await Promise.all([
-      // External: IGDB game details + characters
-      (async () => {
-        try {
-          const [game, characters] = await Promise.all([
-            igdbClient.getGame(gameId),
-            igdbClient.getGameCharacters(gameId),
-          ]);
-          return {
-            igdbFailed: false,
-            game: game ? processIgdbGame(game) : null,
-            characters: characters.map(processIgdbCharacter),
-          };
-        } catch (err) {
-          console.error(`Failed to fetch IGDB game ${gameId}:`, err);
-          return {
-            igdbFailed: true,
-            game: {
-              id: gameId,
-              name: "Information indisponible (Timeout)",
-              summary: "Ce contenu n'a pas pu être chargé.",
-              media_type: "video_game" as const,
-              cover: undefined,
-            },
-            characters: [],
-          };
-        }
-      })(),
+  if (!metadata) {
+    let igdbFailed = false;
+    let game: (IgdbGame & { media_type: "video_game" }) | null = null;
+    let characters: ReturnType<typeof processIgdbCharacter>[] = [];
 
-      // DB: dubbing projects
-      getDubbingProjects(gameId, "video_game"),
-    ]);
+    try {
+      const [igdbGame, igdbCharacters] = await Promise.all([
+        igdbClient.getGame(gameId),
+        igdbClient.getGameCharacters(gameId),
+      ]);
+      game = igdbGame ? processIgdbGame(igdbGame) : null;
+      characters = igdbCharacters.map(processIgdbCharacter);
+    } catch (err) {
+      igdbFailed = true;
+      console.error(`Failed to fetch IGDB game ${gameId}:`, err);
+      game = {
+        id: gameId,
+        name: "Information indisponible (Timeout)",
+        summary: "Ce contenu n'a pas pu être chargé.",
+        media_type: "video_game",
+        cover: undefined,
+      };
+    }
 
-    const { game, characters, igdbFailed } = apiData;
-    const dubbingProjects = dbData;
+    metadata = { game, characters };
 
     // Lazy enqueue if not yet processed - Gated by PostHog 'enqueue-on-navigate' (server-side)
+    const dubbingProjects = await getDubbingProjects(gameId, "video_game");
     const isProcessed = dubbingProjects.length > 0;
     if (!isProcessed && (await isEnqueueOnNavigateEnabled(event))) {
       const supabaseAdmin = useSupabaseAdmin();
@@ -136,17 +125,13 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    baseData = {
-      game,
-      characters,
-      dubbingProjects,
-    };
-
     // Don't cache the error fallback, so recovery isn't delayed by stale poison
     if (!igdbFailed) {
-      await cache.set(cacheKey, baseData, "LONG");
+      await cache.set(cacheKey, metadata, "LONG");
     }
   }
 
-  return baseData;
+  // Dubbing works are mutable admin data and must not be served from the IGDB metadata cache.
+  const dubbingProjects = await getDubbingProjects(gameId, "video_game");
+  return { ...metadata, dubbingProjects };
 });
