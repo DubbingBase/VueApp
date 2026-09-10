@@ -46,7 +46,7 @@
                class="text-xs px-1.5 py-0.5 rounded-full font-medium transition-colors"
                :class="
                  activeDubId === project.id
-                   ? 'bg-cyan-500/20 text-cyan-700 dark:text-[#00E5FF]'
+                   ? 'bg-black/15 text-black'
                    : 'bg-gray-100 dark:bg-[#2a2a2a] text-gray-500 dark:text-gray-400'
                "
              >
