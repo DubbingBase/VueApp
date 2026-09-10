@@ -26,6 +26,13 @@ export function setPublicCacheHeaders(
   event: H3Event,
   profile: CacheProfile = "detail",
 ): void {
+  if (import.meta.dev || process.env.NODE_ENV === "development") {
+    setHeader(event, "Cache-Control", "no-store, no-cache, must-revalidate");
+    setHeader(event, "Pragma", "no-cache");
+    setHeader(event, "Expires", "0");
+    return;
+  }
+
   const headerValue =
     CACHE_PROFILE_HEADERS[profile] || CACHE_PROFILE_HEADERS.detail;
   setHeader(event, "Cache-Control", headerValue);

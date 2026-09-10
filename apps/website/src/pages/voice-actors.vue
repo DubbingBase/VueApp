@@ -129,9 +129,6 @@
 </template>
 
 <script setup lang="ts">
-defineRouteRules({
-  swr: 3600,
-});
 import { ref, computed, watch } from "vue";
 import { refDebounced } from "@vueuse/core";
 

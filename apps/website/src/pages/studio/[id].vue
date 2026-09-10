@@ -178,7 +178,6 @@
 </template>
 
 <script setup lang="ts">
-defineRouteRules({ swr: 3600 });
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStudioData, fetchStudioDetails } from '@app/shared-logic';
