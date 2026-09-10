@@ -10,6 +10,7 @@ import { requireAdmin } from "../utils/auth";
 import { useWikipediaCache, useIgdbClient } from "../utils";
 import { extractAvailableLanguages } from "../utils/cache/wikipedia";
 import { areAllLlmQuotasExhausted } from "../utils/llm";
+import { getErrorMessage } from "../utils/error-message";
 
 export default defineEventHandler(async (event) => {
   const internalSecret = getHeader(event, "x-internal-secret");
@@ -405,7 +406,7 @@ export default defineEventHandler(async (event) => {
           { event, queue: "wiki_discovery" },
         );
       } catch (err) {
-        const errMsg = err instanceof Error ? err.message : String(err);
+        const errMsg = getErrorMessage(err);
         console.error(`[QUEUE] Error in discovery job ${msgId}:`, errMsg);
 
         await supabaseAdmin.rpc("archive_media_queue_message_with_error", {
@@ -565,7 +566,7 @@ export default defineEventHandler(async (event) => {
 
         return { ok: true, processed: 1, results, queue: targetQueue };
       } catch (err) {
-        const errMsg = err instanceof Error ? err.message : String(err);
+        const errMsg = getErrorMessage(err);
         console.error(
           `[QUEUE] Error checking sections for message ${msgId}:`,
           errMsg,
@@ -686,7 +687,7 @@ export default defineEventHandler(async (event) => {
           },
         );
       } catch (err) {
-        const errMsg = err instanceof Error ? err.message : String(err);
+        const errMsg = getErrorMessage(err);
         console.error(
           `[QUEUE] Error extracting credits for message ${msgId}:`,
           errMsg,
@@ -764,7 +765,7 @@ export default defineEventHandler(async (event) => {
 
     return { ok: true, processed: 0, results: [], queue: targetQueue };
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error);
+    const errorMsg = getErrorMessage(error);
     console.error("[QUEUE] Uncaught error in process-media-queue:", errorMsg);
 
     await sendDiscordAdminNotification(
