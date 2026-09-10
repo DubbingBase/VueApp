@@ -75,14 +75,19 @@
 
     <!-- Actors Grid -->
     <div v-else>
-      <PaginatedResponsiveGrid
+      <VirtualizedResponsiveGrid
         :items="filteredActors"
-        :page-size="pageSize"
-        :page="page"
-        :total-items="totalActors"
-        grid-class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 md:gap-8 pt-4"
+        :breakpoints="[
+          { minWidth: 0, columns: 2 },
+          { minWidth: 640, columns: 3 },
+          { minWidth: 768, columns: 4 },
+          { minWidth: 1024, columns: 6 },
+        ]"
+        :estimate-row-height="190"
         :item-key="(actor) => actor.id"
-        @update:page="page = $event"
+        :has-more="hasMoreActors"
+        :on-reach-end="loadMoreActors"
+        row-class="grid gap-6 md:gap-8 pt-4"
       >
         <template #default="{ item: actor }">
           <NuxtLink
@@ -117,7 +122,7 @@
             </h3>
           </NuxtLink>
         </template>
-      </PaginatedResponsiveGrid>
+      </VirtualizedResponsiveGrid>
       <span class="block text-xs text-gray-400 mt-4">{{
         $t("studio.actorsCount", {
           shown: filteredActors.length,
@@ -154,7 +159,8 @@ interface VoiceActorPage {
 }
 
 const pageSize = 48;
-const page = ref(1);
+const additionalActors = ref<VoiceActorSummary[]>([]);
+const isLoadingMore = ref(false);
 
 useHead({
   title: "Tous les Comédiens de doublage - DubbingBase",
@@ -181,7 +187,7 @@ const {
     return await $fetch<VoiceActorPage>("/api/list-voice-actors", {
       query: {
         limit: pageSize,
-        offset: (page.value - 1) * pageSize,
+        offset: 0,
         query: debouncedSearch.value.trim() || undefined,
       },
     });
@@ -189,20 +195,52 @@ const {
   {
     getCachedData: (key, nuxtApp) =>
       nuxtApp.payload.data[key] ?? nuxtApp.static.data[key],
-    watch: [debouncedSearch, page],
+    watch: [debouncedSearch],
   },
 );
 
+const allActors = computed<VoiceActorSummary[]>(() => [
+  ...(data.value?.voice_actors ?? []),
+  ...additionalActors.value,
+]);
+
+const totalActors = computed(() => data.value?.total ?? allActors.value.length);
+const hasMoreActors = computed(
+  () => allActors.value.length < totalActors.value,
+);
+
+const loadMoreActors = async () => {
+  if (isLoadingMore.value || !hasMoreActors.value) return;
+
+  const requestQuery = debouncedSearch.value.trim();
+  isLoadingMore.value = true;
+  try {
+    const nextPage = await $fetch<VoiceActorPage>("/api/list-voice-actors", {
+      query: {
+        limit: pageSize,
+        offset: allActors.value.length,
+        query: requestQuery || undefined,
+      },
+    });
+
+    if (requestQuery !== debouncedSearch.value.trim()) return;
+
+    const existingIds = new Set(allActors.value.map((actor) => actor.id));
+    additionalActors.value = [
+      ...additionalActors.value,
+      ...nextPage.voice_actors.filter((actor) => !existingIds.has(actor.id)),
+    ];
+  } finally {
+    isLoadingMore.value = false;
+  }
+};
+
 watch(debouncedSearch, () => {
-  page.value = 1;
+  additionalActors.value = [];
 });
 
 // Filtrage local simple avec debounce
 const filteredActors = computed(() => {
-  return data.value?.voice_actors ?? [];
+  return allActors.value;
 });
-
-const totalActors = computed(
-  () => data.value?.total ?? filteredActors.value.length,
-);
 </script>
