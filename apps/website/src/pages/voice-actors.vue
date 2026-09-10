@@ -41,9 +41,20 @@
 
     <!-- Actors Grid -->
     <div v-else>
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 md:gap-8 pt-4">
-        <NuxtLink 
-          v-for="actor in visibleActors" 
+      <VirtualizedResponsiveGrid
+        :items="filteredActors"
+        :breakpoints="[
+          { minWidth: 0, columns: 2 },
+          { minWidth: 640, columns: 3 },
+          { minWidth: 768, columns: 4 },
+          { minWidth: 1024, columns: 6 },
+        ]"
+        :estimate-row-height="190"
+        :item-key="(actor) => actor.id"
+        row-class="grid gap-6 md:gap-8 pt-4"
+      >
+        <template #default="{ item: actor }">
+        <NuxtLink
           :key="actor.id" 
           :to="localePath('/voice-actor/' + actor.id)"
           class="group cursor-pointer flex flex-col items-center"
@@ -66,22 +77,9 @@
             {{ actor.firstname }} {{ actor.lastname }}
           </h3>
         </NuxtLink>
-      </div>
-
-      <!-- Sentinel & Load More -->
-      <div
-        v-if="hasMore"
-        ref="loadMoreSentinel"
-        class="py-10 flex flex-col items-center justify-center gap-3"
-      >
-        <button
-          @click="loadMore"
-          class="px-5 py-2.5 bg-white dark:bg-[#1d1d1d] hover:bg-gray-100 dark:hover:bg-[#2a2a2a] text-sm font-medium rounded-xl text-gray-700 dark:text-gray-200 transition-all border border-gray-200 dark:border-[#2a2a2a] shadow-sm cursor-pointer"
-        >
-          {{ $t('common.loadMore', 'Load more') }}
-        </button>
-        <span class="text-xs text-gray-400">{{ $t('studio.actorsCount', { shown: visibleActors.length, total: filteredActors.length }) }}</span>
-      </div>
+        </template>
+      </VirtualizedResponsiveGrid>
+      <span class="block text-xs text-gray-400 mt-4">{{ $t('studio.actorsCount', { shown: filteredActors.length, total: filteredActors.length }) }}</span>
     </div>
   </div>
 </template>
@@ -89,7 +87,7 @@
 <script setup lang="ts">
 defineRouteRules({ swr: process.env.NODE_ENV === "development" ? false : 3600 });
 import { ref, computed, watch } from 'vue';
-import { useIntersectionObserver, refDebounced } from '@vueuse/core';
+import { refDebounced } from '@vueuse/core';
 
 const { t } = useI18n();
 const localePath = useLocalePath();
@@ -135,28 +133,4 @@ const filteredActors = computed(() => {
   });
 });
 
-const displayedCount = ref(36);
-const visibleActors = computed(() => {
-  return filteredActors.value.slice(0, displayedCount.value);
-});
-const hasMore = computed(() => {
-  return displayedCount.value < filteredActors.value.length;
-});
-const loadMore = () => {
-  displayedCount.value += 36;
-};
-const loadMoreSentinel = ref<HTMLElement | null>(null);
-useIntersectionObserver(
-  loadMoreSentinel,
-  ([entry]) => {
-    if (entry?.isIntersecting && hasMore.value) {
-      loadMore();
-    }
-  },
-  { rootMargin: '400px' },
-);
-
-watch(debouncedSearch, () => {
-  displayedCount.value = 36;
-});
 </script>
