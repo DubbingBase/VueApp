@@ -500,7 +500,7 @@
 
 <script setup lang="ts">
 defineRouteRules({
-  swr: process.env.NODE_ENV === "development" ? false : 3600,
+  swr: 3600,
 });
 import MediaDetailsLayout from "../../components/layout/MediaDetailsLayout.vue";
 import { useRoute, useRouter } from "vue-router";
