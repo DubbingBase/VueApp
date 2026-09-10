@@ -1,14 +1,28 @@
 import tailwindcss from "@tailwindcss/vite";
 import { resolve } from "node:path";
 import { defineNuxtConfig } from "nuxt/config";
-import { APP_LOCALES, DEFAULT_LOCALE } from "@app/shared-logic";
+import {
+  APP_LOCALES,
+  DEFAULT_LOCALE,
+  MEDIA_ROUTE_PREFIXES,
+  NON_DEFAULT_LOCALES,
+} from "@app/shared-logic";
 
 function env(name: string): string | undefined {
   return process.env[name] ?? process.env[`NUXT_${name}`];
 }
 
 const supabaseUrl = env("SUPABASE_URL") ?? env("PUBLIC_SUPABASE_URL");
-const supabaseAnonKey = env("SUPABASE_ANON_KEY") ?? env("PUBLIC_SUPABASE_KEY");
+const supabasePublishableKey = env("SUPABASE_PUBLISHABLE_KEY");
+const productionRouteRules = Object.fromEntries(
+  MEDIA_ROUTE_PREFIXES.flatMap((prefix) => [
+    [`/${prefix}/**`, { swr: 3600 }],
+    ...NON_DEFAULT_LOCALES.map((locale) => [
+      `/${locale}/${prefix}/**`,
+      { swr: 3600 },
+    ]),
+  ]),
+);
 
 export default defineNuxtConfig({
   rootDir: resolve(import.meta.dirname),
@@ -79,13 +93,13 @@ export default defineNuxtConfig({
     adminEmail: env("ADMIN_EMAIL"),
     public: {
       supabaseUrl: supabaseUrl || "https://mock.supabase.co",
-      supabaseKey: supabaseAnonKey || "mock-anon-key",
+      supabaseKey: supabasePublishableKey || "mock-publishable-key",
     },
   },
 
   supabase: {
     url: supabaseUrl || "https://mock.supabase.co",
-    key: supabaseAnonKey || "mock-anon-key",
+    key: supabasePublishableKey || "mock-publishable-key",
     redirect: false,
     types: resolve(
       import.meta.dirname,
@@ -100,6 +114,11 @@ export default defineNuxtConfig({
   experimental: {
     inlineRouteRules: true,
   },
+
+  // Never enable Nitro's SWR route cache in development. Production-only
+  // rules keep local data and API changes immediately visible to developers.
+  routeRules:
+    process.env.NODE_ENV === "development" ? {} : productionRouteRules,
 
   vite: {
     plugins: [tailwindcss()],

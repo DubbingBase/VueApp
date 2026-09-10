@@ -19,19 +19,21 @@
         <span
           v-if="voiceActor.date_of_birth"
           class="text-gray-900 dark:text-gray-100 font-medium text-sm md:text-base bg-white/60 dark:bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-lg"
-        >{{ $t('common.born') }}{{ voiceActor.date_of_birth.split('-')[0] }}
+          >{{ $t("common.born") }}{{ voiceActor.date_of_birth.split("-")[0] }}
         </span>
         <span
           v-if="voiceActor.years_active"
           class="text-gray-900 dark:text-gray-100 font-medium text-sm md:text-base bg-white/60 dark:bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-lg"
-        >{{ $t('voiceActor.active') }}{{ voiceActor.years_active }}
+          >{{ $t("voiceActor.active") }}{{ voiceActor.years_active }}
         </span>
       </template>
 
       <template #biography>
         <div class="mb-12 max-w-4xl" v-if="voiceActor.bio">
           <section>
-            <h2 class="text-2xl font-bold mb-4">{{ $t('profile.biography') }}</h2>
+            <h2 class="text-2xl font-bold mb-4">
+              {{ $t("profile.biography") }}
+            </h2>
             <p
               class="text-gray-700 dark:text-gray-300 leading-relaxed text-lg whitespace-pre-wrap"
             >
@@ -45,10 +47,7 @@
         <!-- Completeness Score -->
         <div v-if="user" class="flex items-center gap-4">
           <div class="relative w-8 h-8 flex-shrink-0">
-            <svg
-              class="w-full h-full transform -rotate-90"
-              viewBox="0 0 36 36"
-            >
+            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
               <path
                 class="text-gray-200 dark:text-[#2a2a2a]"
                 stroke-width="3"
@@ -92,7 +91,7 @@
               d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
             />
           </svg>
-          <span class="hidden sm:inline">{{ $t('common.edit') }}</span>
+          <span class="hidden sm:inline">{{ $t("common.edit") }}</span>
         </NuxtLink>
 
         <button
@@ -119,11 +118,10 @@
       </template>
 
       <template #content>
-
         <!-- Studios -->
         <div v-if="workedStudios.length > 0" class="mb-12 max-w-4xl">
           <section>
-            <h2 class="text-2xl font-bold mb-4">{{ $t('footer.studios') }}</h2>
+            <h2 class="text-2xl font-bold mb-4">{{ $t("footer.studios") }}</h2>
             <div class="flex flex-wrap gap-4">
               <NuxtLink
                 v-for="studio in workedStudios"
@@ -147,9 +145,13 @@
                   v-else
                   class="w-10 h-10 bg-gray-100 dark:bg-[#2a2a2a] rounded-lg flex items-center justify-center shrink-0"
                 >
-                  <span class="text-gray-400 font-bold">{{ studio.name?.charAt(0)?.toUpperCase() || '' }}</span>
+                  <span class="text-gray-400 font-bold">{{
+                    studio.name?.charAt(0)?.toUpperCase() || ""
+                  }}</span>
                 </div>
-                <span class="font-semibold text-gray-900 dark:text-gray-100">{{ studio.name }}</span>
+                <span class="font-semibold text-gray-900 dark:text-gray-100">{{
+                  studio.name
+                }}</span>
               </NuxtLink>
             </div>
           </section>
@@ -163,7 +165,7 @@
             >
               <div>
                 <h2 class="text-2xl font-bold">
-                  {{ $t('voiceActor.filmography', 'Filmography') }}
+                  {{ $t("voiceActor.filmography", "Filmography") }}
                 </h2>
               </div>
 
@@ -198,7 +200,7 @@
                         : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200',
                     ]"
                   >
-                    {{ $t('voiceActor.grouped', 'Grouped') }}
+                    {{ $t("voiceActor.grouped", "Grouped") }}
                   </button>
                   <button
                     @click="displayMode = 'list'"
@@ -209,7 +211,7 @@
                         : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200',
                     ]"
                   >
-                    {{ $t('voiceActor.list', 'List') }}
+                    {{ $t("voiceActor.list", "List") }}
                   </button>
                 </div>
 
@@ -219,10 +221,10 @@
                   class="bg-white dark:bg-[#161616] border border-gray-200 dark:border-[#2a2a2a] text-gray-900 dark:text-gray-200 text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block p-2 cursor-pointer"
                 >
                   <option value="newest">
-                    {{ $t('voiceActor.newestFirst', 'Newest First') }}
+                    {{ $t("voiceActor.newestFirst", "Newest First") }}
                   </option>
                   <option value="oldest">
-                    {{ $t('voiceActor.oldestFirst', 'Oldest First') }}
+                    {{ $t("voiceActor.oldestFirst", "Oldest First") }}
                   </option>
                 </select>
               </div>
@@ -265,181 +267,210 @@
             v-if="sortedWorks.length === 0"
             class="text-gray-500 text-center py-12 bg-white dark:bg-[#161616] rounded-2xl border border-gray-200 dark:border-[#2a2a2a]"
           >
-            {{ $t('voiceActor.noWorksFound', 'No works found for this actor.') }}
+            {{
+              $t("voiceActor.noWorksFound", "No works found for this actor.")
+            }}
           </div>
 
           <template v-if="displayMode === 'list'">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-              <div
-                v-for="item in visibleWorks"
-                :key="item.work.id"
-                class="bg-white dark:bg-[#161616] border border-gray-200 dark:border-[#2a2a2a] rounded-2xl p-4 shadow-sm transition-colors hover:border-gray-300 dark:hover:border-gray-700 block group"
-              >
-                <div class="flex flex-col sm:grid sm:grid-cols-3 gap-4 h-full">
-                  <!-- Column 1: Media -->
-                  <NuxtLink
-                    :to="localePath(getMediaLink(item.work.dubbing_projects?.content_type, item.media.id))"
-                    class="flex flex-row sm:flex-col min-w-0 gap-4 sm:gap-0 items-center sm:items-start cursor-pointer"
+            <PaginatedResponsiveGrid
+              :key="searchQuery"
+              :items="sortedWorks"
+              :page-size="12"
+              grid-class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
+              :item-key="(item) => item.work.id"
+            >
+              <template #default="{ item }">
+                <div
+                  :key="item.work.id"
+                  class="bg-white dark:bg-[#161616] border border-gray-200 dark:border-[#2a2a2a] rounded-2xl p-4 shadow-sm transition-colors hover:border-gray-300 dark:hover:border-gray-700 block group"
+                >
+                  <div
+                    class="flex flex-col sm:grid sm:grid-cols-3 gap-4 h-full"
                   >
-                    <div
-                      class="w-16 sm:w-full aspect-[2/3] rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 sm:mb-3 flex-shrink-0"
+                    <!-- Column 1: Media -->
+                    <NuxtLink
+                      :to="
+                        localePath(
+                          getMediaLink(
+                            item.work.dubbing_projects?.content_type,
+                            item.media.id,
+                          ),
+                        )
+                      "
+                      class="flex flex-row sm:flex-col min-w-0 gap-4 sm:gap-0 items-center sm:items-start cursor-pointer"
                     >
-                      <NuxtImg
-                        format="webp"
-                        loading="lazy"
-                        decoding="async"
-                        v-if="item.media.poster_path"
-                        :src="resolveImageUrl(item.media.poster_path)"
-                        :alt="
-                          (item.media as any).title || (item.media as any).name
-                        "
-                        class="w-full h-full object-cover transition-transform duration-300"
-                      />
                       <div
-                        v-else
-                        class="w-full h-full flex items-center justify-center text-gray-400"
+                        class="w-16 sm:w-full aspect-[2/3] rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 sm:mb-3 flex-shrink-0"
                       >
-                        <ClapperboardIcon
-                          class="w-6 h-6 sm:w-8 sm:h-8 opacity-20"
+                        <NuxtImg
+                          format="webp"
+                          loading="lazy"
+                          decoding="async"
+                          v-if="item.media.poster_path"
+                          :src="resolveImageUrl(item.media.poster_path)"
+                          :alt="
+                            (item.media as any).title ||
+                            (item.media as any).name
+                          "
+                          class="w-full h-full object-cover transition-transform duration-300"
                         />
-                      </div>
-                    </div>
-                    <div class="flex flex-col min-w-0 flex-1">
-                      <span
-                        class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-0.5"
-                        >{{ item.sortDate ? item.sortDate.split('-')[0] : '' }}</span
-                      >
-                      <span
-                        class="font-bold text-sm text-gray-900 dark:text-gray-100 leading-tight line-clamp-2"
-                        :title="
-                          (item.media as any).title || (item.media as any).name
-                        "
-                        >{{ (item.media as any).title || (item.media as any).name }}</span
-                      >
-                      <div
-                        v-if="item.work.dubbing_projects?.studios"
-                             class="mt-1 flex min-w-0 overflow-hidden"
-                      >
-                        <span
-                          class="text-[9px] px-1.5 py-0.5 bg-gray-100 dark:bg-[#2a2a2a] text-gray-600 dark:text-gray-300 rounded-md font-medium border border-gray-200 dark:border-gray-700 truncate min-w-0"
-                          :title="item.work.dubbing_projects.studios.name"
+                        <div
+                          v-else
+                          class="w-full h-full flex items-center justify-center text-gray-400"
                         >
-                          {{ item.work.dubbing_projects.studios.name }}
-                        </span>
+                          <ClapperboardIcon
+                            class="w-6 h-6 sm:w-8 sm:h-8 opacity-20"
+                          />
+                        </div>
                       </div>
-                    </div>
-                  </NuxtLink>
-
-                  <!-- Column 2: Original Actor -->
-                  <NuxtLink
-                    v-if="item.data.actor"
-                    :to="localePath(`/actor/${item.data.actor.id}`)"
-                    class="flex flex-row sm:flex-col min-w-0 gap-4 sm:gap-0 items-center sm:items-start border-t border-gray-100 dark:border-[#2a2a2a] sm:border-t-0 pt-3 sm:pt-0 cursor-pointer"
-                  >
-                    <div
-                      class="w-16 sm:w-full aspect-[2/3] rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 sm:mb-3 flex-shrink-0"
-                    >
-                      <NuxtImg
-                        format="webp"
-                        loading="lazy"
-                        decoding="async"
-                        v-if="item.data.actor.profile_picture"
-                        :src="resolveImageUrl(item.data.actor.profile_picture)"
-                        :alt="item.data.actor.name"
-                        class="w-full h-full object-cover"
-                      />
-                      <div
-                        v-else
-                        class="w-full h-full flex items-center justify-center text-gray-400"
-                      >
-                        <UserIcon class="w-6 h-6 sm:w-8 sm:h-8 opacity-20" />
-                      </div>
-                    </div>
-                    <div class="flex flex-col min-w-0 flex-1">
-                      <span
-                        class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-0.5"
-                        >{{ $t('details.voicedBy') }}</span
-                      >
-                      <span
-                        class="font-medium text-sm text-gray-700 dark:text-gray-300 leading-tight line-clamp-2"
-                        >{{ item.data.actor.name }}</span
-                      >
-                    </div>
-                  </NuxtLink>
-                  <div
-                    v-else
-                    class="flex flex-row sm:flex-col min-w-0 gap-4 sm:gap-0 items-center sm:items-start border-t border-gray-100 dark:border-[#2a2a2a] sm:border-t-0 pt-3 sm:pt-0"
-                  >
-                    <div
-                      class="w-16 sm:w-full aspect-[2/3] rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 sm:mb-3 flex-shrink-0"
-                    >
-                      <div
-                        class="w-full h-full flex items-center justify-center text-gray-400"
-                      >
-                        <UserIcon class="w-6 h-6 sm:w-8 sm:h-8 opacity-20" />
-                      </div>
-                    </div>
-                    <div class="flex flex-col min-w-0 flex-1">
-                      <span
-                        class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-0.5"
-                        >{{ $t('details.voicedBy') }}</span
-                      >
-                      <span
-                        class="font-medium text-sm text-gray-700 dark:text-gray-300 leading-tight line-clamp-2"
-                        >{{ $t('details.unknownCharacter') }}</span
-                      >
-                    </div>
-                  </div>
-
-                  <!-- Column 3: Character -->
-                  <div
-                    class="flex flex-row sm:flex-col min-w-0 gap-4 sm:gap-0 items-center sm:items-start border-t border-gray-100 dark:border-[#2a2a2a] sm:border-t-0 pt-3 sm:pt-0"
-                  >
-                    <div
-                      class="w-16 sm:w-full aspect-[2/3] rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 sm:mb-3 relative flex-shrink-0"
-                    >
-                      <NuxtImg
-                        format="webp"
-                        loading="lazy"
-                        decoding="async"
-                        v-if="item.data.characterImage"
-                        :src="resolveImageUrl(item.data.characterImage)"
-                        :alt="item.data.character"
-                        class="w-full h-full object-cover"
-                      />
-                      <div
-                        v-else
-                        class="w-full h-full flex items-center justify-center text-gray-400"
-                      >
-                        <UserIcon class="w-6 h-6 sm:w-8 sm:h-8 opacity-20" />
-                      </div>
-                      <div
-                        v-if="item.work.performance"
-                        class="absolute bottom-1 left-1 right-1 flex justify-center"
-                      >
+                      <div class="flex flex-col min-w-0 flex-1">
                         <span
-                          class="bg-black/70 backdrop-blur text-white text-[9px] px-2 py-0.5 rounded-full truncate max-w-full font-medium"
+                          class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-0.5"
+                          >{{
+                            item.sortDate ? item.sortDate.split("-")[0] : ""
+                          }}</span
                         >
-                          {{ $te(`performance.${item.work.performance}`)
-                              ? $t(`performance.${item.work.performance}`)
-                              : item.work.performance }}
-                        </span>
+                        <span
+                          class="font-bold text-sm text-gray-900 dark:text-gray-100 leading-tight line-clamp-2"
+                          :title="
+                            (item.media as any).title ||
+                            (item.media as any).name
+                          "
+                          >{{
+                            (item.media as any).title ||
+                            (item.media as any).name
+                          }}</span
+                        >
+                        <div
+                          v-if="item.work.dubbing_projects?.studios"
+                          class="mt-1 flex min-w-0 overflow-hidden"
+                        >
+                          <span
+                            class="text-[9px] px-1.5 py-0.5 bg-gray-100 dark:bg-[#2a2a2a] text-gray-600 dark:text-gray-300 rounded-md font-medium border border-gray-200 dark:border-gray-700 truncate min-w-0"
+                            :title="item.work.dubbing_projects.studios.name"
+                          >
+                            {{ item.work.dubbing_projects.studios.name }}
+                          </span>
+                        </div>
+                      </div>
+                    </NuxtLink>
+
+                    <!-- Column 2: Original Actor -->
+                    <NuxtLink
+                      v-if="item.data.actor"
+                      :to="localePath(`/actor/${item.data.actor.id}`)"
+                      class="flex flex-row sm:flex-col min-w-0 gap-4 sm:gap-0 items-center sm:items-start border-t border-gray-100 dark:border-[#2a2a2a] sm:border-t-0 pt-3 sm:pt-0 cursor-pointer"
+                    >
+                      <div
+                        class="w-16 sm:w-full aspect-[2/3] rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 sm:mb-3 flex-shrink-0"
+                      >
+                        <NuxtImg
+                          format="webp"
+                          loading="lazy"
+                          decoding="async"
+                          v-if="item.data.actor.profile_picture"
+                          :src="
+                            resolveImageUrl(item.data.actor.profile_picture)
+                          "
+                          :alt="item.data.actor.name"
+                          class="w-full h-full object-cover"
+                        />
+                        <div
+                          v-else
+                          class="w-full h-full flex items-center justify-center text-gray-400"
+                        >
+                          <UserIcon class="w-6 h-6 sm:w-8 sm:h-8 opacity-20" />
+                        </div>
+                      </div>
+                      <div class="flex flex-col min-w-0 flex-1">
+                        <span
+                          class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-0.5"
+                          >{{ $t("details.voicedBy") }}</span
+                        >
+                        <span
+                          class="font-medium text-sm text-gray-700 dark:text-gray-300 leading-tight line-clamp-2"
+                          >{{ item.data.actor.name }}</span
+                        >
+                      </div>
+                    </NuxtLink>
+                    <div
+                      v-else
+                      class="flex flex-row sm:flex-col min-w-0 gap-4 sm:gap-0 items-center sm:items-start border-t border-gray-100 dark:border-[#2a2a2a] sm:border-t-0 pt-3 sm:pt-0"
+                    >
+                      <div
+                        class="w-16 sm:w-full aspect-[2/3] rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 sm:mb-3 flex-shrink-0"
+                      >
+                        <div
+                          class="w-full h-full flex items-center justify-center text-gray-400"
+                        >
+                          <UserIcon class="w-6 h-6 sm:w-8 sm:h-8 opacity-20" />
+                        </div>
+                      </div>
+                      <div class="flex flex-col min-w-0 flex-1">
+                        <span
+                          class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-0.5"
+                          >{{ $t("details.voicedBy") }}</span
+                        >
+                        <span
+                          class="font-medium text-sm text-gray-700 dark:text-gray-300 leading-tight line-clamp-2"
+                          >{{ $t("details.unknownCharacter") }}</span
+                        >
                       </div>
                     </div>
-                    <div class="flex flex-col min-w-0 flex-1">
-                      <span
-                        class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-0.5"
-                        >{{ $t('details.as') }}</span
+
+                    <!-- Column 3: Character -->
+                    <div
+                      class="flex flex-row sm:flex-col min-w-0 gap-4 sm:gap-0 items-center sm:items-start border-t border-gray-100 dark:border-[#2a2a2a] sm:border-t-0 pt-3 sm:pt-0"
+                    >
+                      <div
+                        class="w-16 sm:w-full aspect-[2/3] rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 sm:mb-3 relative flex-shrink-0"
                       >
-                      <span
-                        class="font-medium text-sm text-gray-700 dark:text-gray-300 leading-tight line-clamp-2"
-                        >{{ item.data.character || "Unknown" }}</span
-                      >
+                        <NuxtImg
+                          format="webp"
+                          loading="lazy"
+                          decoding="async"
+                          v-if="item.data.characterImage"
+                          :src="resolveImageUrl(item.data.characterImage)"
+                          :alt="item.data.character"
+                          class="w-full h-full object-cover"
+                        />
+                        <div
+                          v-else
+                          class="w-full h-full flex items-center justify-center text-gray-400"
+                        >
+                          <UserIcon class="w-6 h-6 sm:w-8 sm:h-8 opacity-20" />
+                        </div>
+                        <div
+                          v-if="item.work.performance"
+                          class="absolute bottom-1 left-1 right-1 flex justify-center"
+                        >
+                          <span
+                            class="bg-black/70 backdrop-blur text-white text-[9px] px-2 py-0.5 rounded-full truncate max-w-full font-medium"
+                          >
+                            {{
+                              $te(`performance.${item.work.performance}`)
+                                ? $t(`performance.${item.work.performance}`)
+                                : item.work.performance
+                            }}
+                          </span>
+                        </div>
+                      </div>
+                      <div class="flex flex-col min-w-0 flex-1">
+                        <span
+                          class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-0.5"
+                          >{{ $t("details.as") }}</span
+                        >
+                        <span
+                          class="font-medium text-sm text-gray-700 dark:text-gray-300 leading-tight line-clamp-2"
+                          >{{ item.data.character || "Unknown" }}</span
+                        >
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </template>
+            </PaginatedResponsiveGrid>
           </template>
           <template v-else>
             <div class="space-y-10">
@@ -476,126 +507,147 @@
                       {{ actorName }}
                     </h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
-                      {{ works.length }}{{ $t('common.works') }}</p>
+                      {{ works.length }}{{ $t("common.works") }}
+                    </p>
                   </div>
                 </NuxtLink>
 
                 <!-- Actor Works Grid -->
-                <div
-                  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
+                <PaginatedResponsiveGrid
+                  :items="works"
+                  :page-size="12"
+                  grid-class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
+                  :item-key="(item) => item.work.id"
                 >
-                  <div
-                    v-for="item in works"
-                    :key="item.work.id"
-                    class="bg-white dark:bg-[#161616] border border-gray-200 dark:border-[#2a2a2a] rounded-2xl p-4 shadow-sm transition-colors hover:border-gray-300 dark:hover:border-gray-700 block group"
-                  >
+                  <template #default="{ item }">
                     <div
-                      class="flex flex-col sm:grid sm:grid-cols-2 gap-4 h-full"
+                      :key="item.work.id"
+                      class="bg-white dark:bg-[#161616] border border-gray-200 dark:border-[#2a2a2a] rounded-2xl p-4 shadow-sm transition-colors hover:border-gray-300 dark:hover:border-gray-700 block group"
                     >
-                      <!-- Column 1: Media -->
-                      <NuxtLink
-                        :to="localePath(getMediaLink(item.work.dubbing_projects?.content_type, item.media.id))"
-                        class="flex flex-row sm:flex-col min-w-0 gap-4 sm:gap-0 items-center sm:items-start cursor-pointer"
-                      >
-                        <div
-                          class="w-16 sm:w-full aspect-[2/3] rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 sm:mb-3 flex-shrink-0"
-                        >
-                          <NuxtImg
-                            format="webp"
-                            loading="lazy"
-                            decoding="async"
-                            v-if="item.media.poster_path"
-                            :src="resolveImageUrl(item.media.poster_path)"
-                            :alt="
-                              (item.media as any).title ||
-                              (item.media as any).name
-                            "
-                            class="w-full h-full object-cover transition-transform duration-300"
-                          />
-                          <div
-                            v-else
-                            class="w-full h-full flex items-center justify-center text-gray-400"
-                          >
-                            <ClapperboardIcon class="w-6 h-6 opacity-20" />
-                          </div>
-                        </div>
-                        <div class="flex flex-col min-w-0 flex-1">
-                          <span
-                            class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-0.5"
-                            >{{ item.sortDate ? item.sortDate.split('-')[0] : '' }}</span
-                          >
-                          <span
-                            class="font-bold text-sm text-gray-900 dark:text-gray-100 leading-tight line-clamp-2"
-                            :title="
-                              (item.media as any).title ||
-                              (item.media as any).name
-                            "
-                            >{{ (item.media as any).title ||
-                              (item.media as any).name }}</span
-                          >
-                          <div
-                            v-if="item.work.dubbing_projects?.studios"
-                            class="mt-1 flex min-w-0 overflow-hidden"
-                          >
-                            <span
-                              class="text-[9px] px-1.5 py-0.5 bg-gray-100 dark:bg-[#2a2a2a] text-gray-600 dark:text-gray-300 rounded-md font-medium border border-gray-200 dark:border-gray-700 truncate min-w-0"
-                              :title="item.work.dubbing_projects.studios.name"
-                            >
-                              {{ item.work.dubbing_projects.studios.name }}
-                            </span>
-                          </div>
-                        </div>
-                      </NuxtLink>
-
-                      <!-- Column 2: Original Actor / Character -->
                       <div
-                        class="flex flex-row sm:flex-col min-w-0 gap-4 sm:gap-0 items-center sm:items-start border-t border-gray-100 dark:border-[#2a2a2a] sm:border-t-0 pt-3 sm:pt-0"
+                        class="flex flex-col sm:grid sm:grid-cols-2 gap-4 h-full"
                       >
-                        <div
-                          class="w-16 sm:w-full aspect-[2/3] rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 sm:mb-3 relative flex-shrink-0"
+                        <!-- Column 1: Media -->
+                        <NuxtLink
+                          :to="
+                            localePath(
+                              getMediaLink(
+                                item.work.dubbing_projects?.content_type,
+                                item.media.id,
+                              ),
+                            )
+                          "
+                          class="flex flex-row sm:flex-col min-w-0 gap-4 sm:gap-0 items-center sm:items-start cursor-pointer"
                         >
-                          <NuxtImg
-                            format="webp"
-                            loading="lazy"
-                            decoding="async"
-                            v-if="item.data.characterImage"
-                            :src="resolveImageUrl(item.data.characterImage)"
-                            :alt="item.data.character"
-                            class="w-full h-full object-cover"
-                          />
                           <div
-                            v-else
-                            class="w-full h-full flex items-center justify-center text-gray-400"
+                            class="w-16 sm:w-full aspect-[2/3] rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 sm:mb-3 flex-shrink-0"
                           >
-                            <UserIcon class="w-6 h-6 opacity-20" />
-                          </div>
-                          <div
-                            v-if="item.work.performance"
-                            class="absolute bottom-1 left-1 right-1 flex justify-center"
-                          >
-                            <span
-                              class="bg-black/70 backdrop-blur text-white text-[9px] px-2 py-0.5 rounded-full truncate max-w-full font-medium inline-block min-w-0"
+                            <NuxtImg
+                              format="webp"
+                              loading="lazy"
+                              decoding="async"
+                              v-if="item.media.poster_path"
+                              :src="resolveImageUrl(item.media.poster_path)"
+                              :alt="
+                                (item.media as any).title ||
+                                (item.media as any).name
+                              "
+                              class="w-full h-full object-cover transition-transform duration-300"
+                            />
+                            <div
+                              v-else
+                              class="w-full h-full flex items-center justify-center text-gray-400"
                             >
-                              {{ $te(`performance.${item.work.performance}`)
-                                  ? $t(`performance.${item.work.performance}`)
-                                  : item.work.performance }}
-                            </span>
+                              <ClapperboardIcon class="w-6 h-6 opacity-20" />
+                            </div>
                           </div>
-                        </div>
-                        <div class="flex flex-col min-w-0 flex-1">
-                          <span
-                            class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-0.5"
-                            >{{ $t('details.as') }}</span
+                          <div class="flex flex-col min-w-0 flex-1">
+                            <span
+                              class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-0.5"
+                              >{{
+                                item.sortDate ? item.sortDate.split("-")[0] : ""
+                              }}</span
+                            >
+                            <span
+                              class="font-bold text-sm text-gray-900 dark:text-gray-100 leading-tight line-clamp-2"
+                              :title="
+                                (item.media as any).title ||
+                                (item.media as any).name
+                              "
+                              >{{
+                                (item.media as any).title ||
+                                (item.media as any).name
+                              }}</span
+                            >
+                            <div
+                              v-if="item.work.dubbing_projects?.studios"
+                              class="mt-1 flex min-w-0 overflow-hidden"
+                            >
+                              <span
+                                class="text-[9px] px-1.5 py-0.5 bg-gray-100 dark:bg-[#2a2a2a] text-gray-600 dark:text-gray-300 rounded-md font-medium border border-gray-200 dark:border-gray-700 truncate min-w-0"
+                                :title="item.work.dubbing_projects.studios.name"
+                              >
+                                {{ item.work.dubbing_projects.studios.name }}
+                              </span>
+                            </div>
+                          </div>
+                        </NuxtLink>
+
+                        <!-- Column 2: Original Actor / Character -->
+                        <div
+                          class="flex flex-row sm:flex-col min-w-0 gap-4 sm:gap-0 items-center sm:items-start border-t border-gray-100 dark:border-[#2a2a2a] sm:border-t-0 pt-3 sm:pt-0"
+                        >
+                          <div
+                            class="w-16 sm:w-full aspect-[2/3] rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 sm:mb-3 relative flex-shrink-0"
                           >
-                          <span
-                            class="font-medium text-sm text-gray-700 dark:text-gray-300 leading-tight line-clamp-2"
-                        >{{ item.data.character || $t('details.unknownCharacter') }}</span
-                          >
+                            <NuxtImg
+                              format="webp"
+                              loading="lazy"
+                              decoding="async"
+                              v-if="item.data.characterImage"
+                              :src="resolveImageUrl(item.data.characterImage)"
+                              :alt="item.data.character"
+                              class="w-full h-full object-cover"
+                            />
+                            <div
+                              v-else
+                              class="w-full h-full flex items-center justify-center text-gray-400"
+                            >
+                              <UserIcon class="w-6 h-6 opacity-20" />
+                            </div>
+                            <div
+                              v-if="item.work.performance"
+                              class="absolute bottom-1 left-1 right-1 flex justify-center"
+                            >
+                              <span
+                                class="bg-black/70 backdrop-blur text-white text-[9px] px-2 py-0.5 rounded-full truncate max-w-full font-medium inline-block min-w-0"
+                              >
+                                {{
+                                  $te(`performance.${item.work.performance}`)
+                                    ? $t(`performance.${item.work.performance}`)
+                                    : item.work.performance
+                                }}
+                              </span>
+                            </div>
+                          </div>
+                          <div class="flex flex-col min-w-0 flex-1">
+                            <span
+                              class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-0.5"
+                              >{{ $t("details.as") }}</span
+                            >
+                            <span
+                              class="font-medium text-sm text-gray-700 dark:text-gray-300 leading-tight line-clamp-2"
+                              >{{
+                                item.data.character ||
+                                $t("details.unknownCharacter")
+                              }}</span
+                            >
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
+                  </template>
+                </PaginatedResponsiveGrid>
               </div>
             </div>
           </template>
@@ -610,19 +662,21 @@
               @click="loadMore"
               class="px-5 py-2.5 bg-white dark:bg-[#1d1d1d] hover:bg-gray-100 dark:hover:bg-[#2a2a2a] text-sm font-medium rounded-xl text-gray-700 dark:text-gray-200 transition-all border border-gray-200 dark:border-[#2a2a2a] shadow-sm cursor-pointer"
             >
-              {{ $t('common.loadMore', 'Load more') }}
+              {{ $t("common.loadMore", "Load more") }}
             </button>
             <span class="text-xs text-gray-400">
-              {{ displayMode === 'list'
-                  ? `${visibleWorks.length} / ${sortedWorks.length} works`
-                  : `${visibleGroupedWorks.length} / ${groupedWorks.length} actors` }}
+              {{
+                `${visibleGroupedWorks.length} / ${groupedWorks.length} actors`
+              }}
             </span>
           </div>
         </section>
       </template>
     </PersonDetailsLayout>
 
-    <div v-else class="text-center py-20 text-gray-500 min-h-screen">{{ $t('voiceActor.notFound') }}</div>
+    <div v-else class="text-center py-20 text-gray-500 min-h-screen">
+      {{ $t("voiceActor.notFound") }}
+    </div>
 
     <ReportModal v-model:open="isReportModalOpen" :target-url="currentUrl" />
   </div>
@@ -688,12 +742,12 @@ function normalizeContentType(contentType?: string | null): string {
 
 function getMediaLink(contentType?: string | null, mediaId?: number | string) {
   const c = normalizeContentType(contentType);
-  if (c === 'tv') return `/show/${mediaId}`;
-  if (c === 'video_game') return `/game/${mediaId}`;
-  if (c === 'audiobook') return `/audiobook/${mediaId}`;
-  if (c === 'podcast') return `/podcast/${mediaId}`;
-  if (c === 'advertisement') return `/advertisement/${mediaId}`;
-  if (c === 'toy') return `/toy/${mediaId}`;
+  if (c === "tv") return `/show/${mediaId}`;
+  if (c === "video_game") return `/game/${mediaId}`;
+  if (c === "audiobook") return `/audiobook/${mediaId}`;
+  if (c === "podcast") return `/podcast/${mediaId}`;
+  if (c === "advertisement") return `/advertisement/${mediaId}`;
+  if (c === "toy") return `/toy/${mediaId}`;
   return `/movie/${mediaId}`;
 }
 
@@ -874,10 +928,7 @@ useHead({
             name:
               actorName.value ||
               t("seo.voiceActorTitleFallback", "Voice Actor"),
-            jobTitle: t(
-              "seo.voiceActorTitleFallback",
-              "Voice Actor",
-            ),
+            jobTitle: t("seo.voiceActorTitleFallback", "Voice Actor"),
             image: profilePicture.value || ogImageUrl.value,
             url: canonicalUrl.value,
           },
@@ -897,7 +948,12 @@ const activeTab = ref<string>("all");
 
 const CATEGORY_TABS_CONFIG = [
   { id: "all", labelKey: "search.all", defaultLabel: "All", icon: LayersIcon },
-  { id: "movie", labelKey: "search.movie", defaultLabel: "Movies", icon: FilmIcon },
+  {
+    id: "movie",
+    labelKey: "search.movie",
+    defaultLabel: "Movies",
+    icon: FilmIcon,
+  },
   { id: "tv", labelKey: "search.tv", defaultLabel: "Series", icon: TvIcon },
   {
     id: "video_game",
@@ -1049,30 +1105,21 @@ const groupedWorks = computed(() => {
   });
 });
 
-const displayedListCount = ref(36);
 const displayedGroupCount = ref(10);
-
-const visibleWorks = computed(() => {
-  return sortedWorks.value.slice(0, displayedListCount.value);
-});
 
 const visibleGroupedWorks = computed(() => {
   return groupedWorks.value.slice(0, displayedGroupCount.value);
 });
 
 const hasMore = computed(() => {
-  if (displayMode.value === "list") {
-    return displayedListCount.value < sortedWorks.value.length;
-  }
-  return displayedGroupCount.value < groupedWorks.value.length;
+  return (
+    displayMode.value === "grouped" &&
+    displayedGroupCount.value < groupedWorks.value.length
+  );
 });
 
 const loadMore = () => {
-  if (displayMode.value === "list") {
-    displayedListCount.value += 36;
-  } else {
-    displayedGroupCount.value += 10;
-  }
+  displayedGroupCount.value += 10;
 };
 
 const loadMoreSentinel = ref<HTMLElement | null>(null);
@@ -1089,7 +1136,6 @@ useIntersectionObserver(
 
 // Reset displayed counts on search, tab, sort or display mode changes
 watch([searchQuery, activeTab, sortMode, displayMode], () => {
-  displayedListCount.value = 36;
   displayedGroupCount.value = 10;
 });
 </script>

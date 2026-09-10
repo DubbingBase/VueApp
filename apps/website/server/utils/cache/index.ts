@@ -18,9 +18,18 @@ export type CacheTTLPreset = keyof typeof CACHE_TTL | number;
 export class SimpleCache {
   private memoryCache = new Map<string, { data: any; expiry: number }>();
 
+  private get enabled(): boolean {
+    return !(
+      import.meta.dev ||
+      (typeof process !== "undefined" && process.env.NODE_ENV === "development")
+    );
+  }
+
   constructor(private kvGetter: () => any) {}
 
   async get<T>(key: string): Promise<T | null> {
+    if (!this.enabled) return null;
+
     try {
       const sanitizedKey = SimpleKeyValidator.sanitizeKey(key);
 
@@ -62,6 +71,8 @@ export class SimpleCache {
     data: T,
     ttl: CacheTTLPreset = "MEDIUM",
   ): Promise<boolean> {
+    if (!this.enabled) return false;
+
     try {
       const sanitizedKey = SimpleKeyValidator.sanitizeKey(key);
       const ttlSeconds =
@@ -94,6 +105,8 @@ export class SimpleCache {
   }
 
   async del(key: string): Promise<boolean> {
+    if (!this.enabled) return true;
+
     try {
       const sanitizedKey = SimpleKeyValidator.sanitizeKey(key);
       this.memoryCache.delete(sanitizedKey);
@@ -113,6 +126,8 @@ export class SimpleCache {
   }
 
   async exists(key: string): Promise<boolean> {
+    if (!this.enabled) return false;
+
     try {
       const sanitizedKey = SimpleKeyValidator.sanitizeKey(key);
 

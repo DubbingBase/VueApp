@@ -86,7 +86,6 @@
 </template>
 
 <script setup lang="ts">
-defineRouteRules({ swr: process.env.NODE_ENV === "development" ? false : 3600 });
 import { ref, computed, watch } from 'vue';
 import { useStudioData, fetchStudiosData } from '@app/shared-logic';
 import { useIntersectionObserver, refDebounced } from '@vueuse/core';

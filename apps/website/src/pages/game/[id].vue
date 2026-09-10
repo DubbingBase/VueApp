@@ -4,20 +4,33 @@
     <MediaDetailsLayout
       v-else-if="game"
       :title="game.name"
-      :backdrop-url="game.artworks?.[0]?.url || game.screenshots?.[0]?.url || null"
+      :backdrop-url="
+        game.artworks?.[0]?.url || game.screenshots?.[0]?.url || null
+      "
       :poster-url="coverUrl"
       :loading="pending"
     >
       <template #metadata>
-        <span class="text-gray-900 dark:text-gray-100 font-semibold text-base md:text-lg bg-white/60 dark:bg-black/50 backdrop-blur-md px-3 py-1 rounded-lg">
+        <span
+          class="text-gray-900 dark:text-gray-100 font-semibold text-base md:text-lg bg-white/60 dark:bg-black/50 backdrop-blur-md px-3 py-1 rounded-lg"
+        >
           {{ formatReleaseYear(game.first_release_date) }}
         </span>
-        <span v-if="game.rating" class="flex items-center gap-1.5 text-gray-900 dark:text-gray-100 font-bold text-sm md:text-base bg-white/60 dark:bg-black/50 backdrop-blur-md px-3 py-1 rounded-lg">
+        <span
+          v-if="game.rating"
+          class="flex items-center gap-1.5 text-gray-900 dark:text-gray-100 font-bold text-sm md:text-base bg-white/60 dark:bg-black/50 backdrop-blur-md px-3 py-1 rounded-lg"
+        >
           <StarIcon class="w-4 h-4 text-yellow-500 fill-current" />
           {{ (game.rating / 10).toFixed(1) }}
         </span>
         <div class="flex gap-2 ml-2">
-          <a :href="`https://www.igdb.com/games/${game.slug}`" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-bold rounded-lg bg-white/40 dark:bg-black/40 text-gray-800 dark:text-gray-200 hover:bg-white/60 dark:hover:bg-black/60 transition-colors backdrop-blur-md uppercase tracking-wider">{{ $t('game.igdb') }}<ExternalLinkIcon class="w-3 h-3 opacity-70" />
+          <a
+            :href="`https://www.igdb.com/games/${game.slug}`"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-bold rounded-lg bg-white/40 dark:bg-black/40 text-gray-800 dark:text-gray-200 hover:bg-white/60 dark:hover:bg-black/60 transition-colors backdrop-blur-md uppercase tracking-wider"
+            >{{ $t("game.igdb")
+            }}<ExternalLinkIcon class="w-3 h-3 opacity-70" />
           </a>
         </div>
       </template>
@@ -48,7 +61,9 @@
             </span>
           </NuxtLink>
         </div>
-        <div v-else class="text-sm text-gray-500 font-medium">{{ $t('game.noDubbingProjects') }}</div>
+        <div v-else class="text-sm text-gray-500 font-medium">
+          {{ $t("game.noDubbingProjects") }}
+        </div>
       </template>
 
       <template #actions-right>
@@ -58,30 +73,68 @@
             class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-[#2a2a2a] hover:border-cyan-500 transition-colors group bg-gray-50 dark:bg-[#1d1d1d]"
             title="Studio de doublage"
           >
-            <div class="w-6 h-6 rounded flex items-center justify-center overflow-hidden shrink-0 bg-white dark:bg-[#2a2a2a]">
-              <img v-if="activeDubProject.studio_data.logo_url" :src="activeDubProject.studio_data.logo_url" class="w-full h-full object-contain p-0.5" />
-              <span v-else class="font-bold text-xs text-gray-400">{{ activeDubProject.studio_data.name?.charAt(0) || '' }}</span>
+            <div
+              class="w-6 h-6 rounded flex items-center justify-center overflow-hidden shrink-0 bg-white dark:bg-[#2a2a2a]"
+            >
+              <img
+                v-if="activeDubProject.studio_data.logo_url"
+                :src="activeDubProject.studio_data.logo_url"
+                class="w-full h-full object-contain p-0.5"
+              />
+              <span v-else class="font-bold text-xs text-gray-400">{{
+                activeDubProject.studio_data.name?.charAt(0) || ""
+              }}</span>
             </div>
-            <span class="font-medium text-xs group-hover:text-cyan-500 transition-colors truncate max-w-[120px]">{{ activeDubProject.studio_data.name }}</span>
+            <span
+              class="font-medium text-xs group-hover:text-cyan-500 transition-colors truncate max-w-[120px]"
+              >{{ activeDubProject.studio_data.name }}</span
+            >
           </NuxtLink>
           <div class="h-6 w-px bg-gray-200 dark:bg-[#2a2a2a]"></div>
         </template>
 
         <ClientOnly>
-          <button v-if="isAdmin" @click="triggerPrepareGame" :disabled="isPreparing" class="text-sm text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors flex items-center gap-1.5 font-medium">
+          <button
+            v-if="isAdmin"
+            @click="triggerPrepareGame"
+            :disabled="isPreparing"
+            class="text-sm text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors flex items-center gap-1.5 font-medium"
+          >
             <Loader2Icon v-if="isPreparing" class="w-4 h-4 animate-spin" />
             <Gamepad2Icon v-else class="w-4 h-4" />
-            <span class="hidden sm:inline">{{ $t('game.prepareCredits', 'Extraire les crédits') }}</span>
+            <span class="hidden sm:inline">{{
+              $t("game.prepareCredits", "Extraire les crédits")
+            }}</span>
           </button>
 
-        <NuxtLink v-if="isAdmin && game?.id" :to="localePath(activeDubId ? `/game/${game.id}/projects/${activeDubId}/edit` : `/game/${game.id}/projects/new`)" class="text-sm text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors flex items-center gap-1.5 font-medium">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          <NuxtLink
+            v-if="isAdmin && game?.id"
+            :to="
+              localePath(
+                activeDubId
+                  ? `/game/${game.id}/projects/${activeDubId}/edit`
+                  : `/game/${game.id}/projects/new`,
+              )
+            "
+            class="text-sm text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors flex items-center gap-1.5 font-medium"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+              />
             </svg>
-            <span class="hidden sm:inline">{{ $t('common.edit') }}</span>
+            <span class="hidden sm:inline">{{ $t("common.edit") }}</span>
           </NuxtLink>
         </ClientOnly>
-        
+
         <ForceEnqueueButton
           v-if="game?.id"
           media-type="video_game"
@@ -114,154 +167,280 @@
       <template #content>
         <!-- Overview -->
         <div class="mb-12 max-w-4xl">
+          <section>
+            <h2 class="text-2xl font-bold mb-4">
+              {{ $t("details.synopsis", "Synopsis") }}
+            </h2>
+            <p
+              class="text-gray-700 dark:text-gray-300 leading-relaxed text-lg mb-8"
+            >
+              {{
+                game.summary ||
+                $t("details.noSynopsis", "Aucun synopsis disponible.")
+              }}
+            </p>
+
+            <div
+              class="grid grid-cols-2 md:grid-cols-4 gap-6 bg-white dark:bg-[#1d1d1d] p-6 rounded-xl border border-gray-200 dark:border-[#2a2a2a] shadow-sm dark:shadow-none"
+            >
+              <div>
+                <h3
+                  class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2"
+                >
+                  {{ $t("game.developer", "Développeur") }}
+                </h3>
+                <p class="font-medium text-sm">
+                  {{ getDevelopers(game) || "-" }}
+                </p>
+              </div>
+              <div>
+                <h3
+                  class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2"
+                >
+                  {{ $t("game.publisher", "Éditeur") }}
+                </h3>
+                <p class="font-medium text-sm">
+                  {{ getPublishers(game) || "-" }}
+                </p>
+              </div>
+              <div class="col-span-2 md:col-span-1">
+                <h3
+                  class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2"
+                >
+                  {{ $t("game.genres", "Genres") }}
+                </h3>
+                <div class="flex flex-wrap gap-1.5">
+                  <span
+                    v-for="genre in game.genres"
+                    :key="genre.id"
+                    class="px-2 py-0.5 bg-gray-100 dark:bg-[#2a2a2a] text-xs font-medium rounded-md text-gray-700 dark:text-gray-300"
+                  >
+                    {{ genre.name }}
+                  </span>
+                </div>
+              </div>
+              <div class="col-span-2 md:col-span-1">
+                <h3
+                  class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2"
+                >
+                  {{ $t("game.platforms", "Plateformes") }}
+                </h3>
+                <div class="flex flex-wrap gap-1.5">
+                  <span
+                    v-for="platform in game.platforms"
+                    :key="platform.id"
+                    class="px-2 py-0.5 bg-gray-100 dark:bg-[#2a2a2a] text-xs font-medium rounded-md text-gray-700 dark:text-gray-300"
+                  >
+                    {{ platform.name }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Voice Cast -->
         <section>
-          <h2 class="text-2xl font-bold mb-4">{{ $t('details.synopsis', 'Synopsis') }}</h2>
-          <p class="text-gray-700 dark:text-gray-300 leading-relaxed text-lg mb-8">
-            {{ game.summary || $t('details.noSynopsis', 'Aucun synopsis disponible.') }}
-          </p>
-          
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-6 bg-white dark:bg-[#1d1d1d] p-6 rounded-xl border border-gray-200 dark:border-[#2a2a2a] shadow-sm dark:shadow-none">
-            <div>
-              <h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ $t('game.developer', 'Développeur') }}</h3>
-              <p class="font-medium text-sm">{{ getDevelopers(game) || '-' }}</p>
-            </div>
-            <div>
-              <h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ $t('game.publisher', 'Éditeur') }}</h3>
-              <p class="font-medium text-sm">{{ getPublishers(game) || '-' }}</p>
-            </div>
-            <div class="col-span-2 md:col-span-1">
-              <h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ $t('game.genres', 'Genres') }}</h3>
-              <div class="flex flex-wrap gap-1.5">
-                <span v-for="genre in game.genres" :key="genre.id" class="px-2 py-0.5 bg-gray-100 dark:bg-[#2a2a2a] text-xs font-medium rounded-md text-gray-700 dark:text-gray-300">
-                  {{ genre.name }}
-                </span>
+          <div class="flex flex-col mb-6 gap-2">
+            <div
+              class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4"
+            >
+              <div>
+                <h2 class="text-2xl font-bold">
+                  {{ $t("details.castAndCrew", "Casting") }}
+                </h2>
+                <div class="text-gray-500 dark:text-gray-400 text-sm mt-1">
+                  {{
+                    $t("media.rolesCount", {
+                      shown: filteredCharacters.length,
+                      total: formattedCharacters.length,
+                    })
+                  }}
+                </div>
               </div>
-            </div>
-            <div class="col-span-2 md:col-span-1">
-              <h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ $t('game.platforms', 'Plateformes') }}</h3>
-              <div class="flex flex-wrap gap-1.5">
-                <span v-for="platform in game.platforms" :key="platform.id" class="px-2 py-0.5 bg-gray-100 dark:bg-[#2a2a2a] text-xs font-medium rounded-md text-gray-700 dark:text-gray-300">
-                  {{ platform.name }}
-                </span>
+
+              <div class="relative w-full sm:w-64">
+                <SearchIcon
+                  class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                />
+                <input
+                  v-model="searchInput"
+                  type="search"
+                  :placeholder="$t('search.placeholder', 'Rechercher...')"
+                  class="w-full bg-white dark:bg-[#161616] border border-gray-200 dark:border-[#2a2a2a] rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-[#00E5FF] transition-all text-gray-900 dark:text-white"
+                />
               </div>
             </div>
           </div>
+
+          <PaginatedResponsiveGrid
+            :key="searchQuery"
+            :items="filteredCharacters"
+            :page-size="12"
+            grid-class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
+            :item-key="(character) => character.id"
+          >
+            <template #default="{ item: char }">
+              <div
+                :key="char.id"
+                class="bg-white dark:bg-[#161616] border border-gray-200 dark:border-[#2a2a2a] rounded-2xl p-4 shadow-sm transition-colors hover:border-gray-300 dark:hover:border-gray-700"
+              >
+                <!-- 2 Column Layout for Games (Character -> Voice Actor) -->
+                <div class="flex flex-col sm:grid sm:grid-cols-2 gap-4">
+                  <!-- Character -->
+                  <div
+                    class="flex flex-row sm:flex-col min-w-0 gap-4 sm:gap-0 items-center sm:items-start"
+                  >
+                    <div
+                      class="w-16 sm:w-full relative block overflow-hidden rounded-xl aspect-[2/3] bg-gray-200 dark:bg-[#222] sm:mb-3 flex-shrink-0"
+                    >
+                      <NuxtImg
+                        format="webp"
+                        loading="lazy"
+                        decoding="async"
+                        v-if="char.mug_shot?.url"
+                        :src="char.mug_shot.url"
+                        class="w-full h-full object-cover"
+                        alt="Character"
+                      />
+                      <div
+                        v-else
+                        class="w-full h-full flex items-center justify-center text-gray-400"
+                      >
+                        <UserIcon class="w-8 h-8 opacity-50" />
+                      </div>
+                    </div>
+                    <div
+                      class="flex flex-col min-w-0 flex-1 w-full overflow-hidden"
+                    >
+                      <div
+                        class="flex items-center gap-1.5 text-[10px] text-gray-500 uppercase tracking-widest font-semibold mb-1"
+                      >
+                        <UserIcon class="w-3 h-3 flex-shrink-0" />
+                        <span class="truncate block w-full">{{
+                          $t("details.character", "Personnage")
+                        }}</span>
+                      </div>
+                      <div
+                        class="font-bold text-sm text-gray-900 dark:text-white truncate block w-full"
+                        :title="char.name"
+                      >
+                        {{ char.name }}
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Voice Actor -->
+                  <div
+                    class="flex flex-row sm:flex-col min-w-0 gap-4 sm:gap-0 items-center sm:items-start border-t border-gray-100 dark:border-[#2a2a2a] sm:border-t-0 pt-4 sm:pt-0 mt-2 sm:mt-0"
+                  >
+                    <template v-if="char.voiceActor">
+                      <NuxtLink
+                        :to="localePath(`/voice-actor/${char.voiceActor.id}`)"
+                        class="w-16 sm:w-full group relative block overflow-hidden rounded-xl aspect-[2/3] bg-gray-200 dark:bg-[#222] sm:mb-3 flex-shrink-0"
+                      >
+                        <NuxtImg
+                          format="webp"
+                          loading="lazy"
+                          decoding="async"
+                          v-if="char.voiceActor.profile_picture"
+                          :src="char.voiceActor.profile_picture"
+                          class="w-full h-full object-cover transition-transform duration-300"
+                          alt="Voice Actor"
+                        />
+                        <div
+                          v-else
+                          class="w-full h-full flex items-center justify-center text-2xl font-bold text-gray-400 uppercase bg-gray-300 dark:bg-gray-800"
+                        >
+                          {{ char.voiceActor.firstname?.[0]
+                          }}{{ char.voiceActor.lastname?.[0] }}
+                        </div>
+                      </NuxtLink>
+                      <div
+                        class="flex flex-col min-w-0 flex-1 w-full overflow-hidden"
+                      >
+                        <div
+                          class="flex items-center gap-1.5 text-[10px] text-gray-500 uppercase tracking-widest font-semibold mb-1"
+                        >
+                          <MicIcon class="w-3 h-3 flex-shrink-0" />
+                          <span class="truncate block w-full">{{
+                            $t("details.voiceActor", "Voice Actor")
+                          }}</span>
+                        </div>
+                        <NuxtLink
+                          :to="localePath(`/voice-actor/${char.voiceActor.id}`)"
+                          class="font-bold text-sm text-gray-900 dark:text-white truncate hover:underline block w-full"
+                          :title="
+                            char.voiceActor.firstname +
+                            ' ' +
+                            char.voiceActor.lastname
+                          "
+                        >
+                          {{ char.voiceActor.firstname }}
+                          {{ char.voiceActor.lastname }}
+                        </NuxtLink>
+                        <div
+                          v-if="char.voiceActor.performance"
+                          class="text-xs text-cyan-600 dark:text-cyan-400 truncate mt-1"
+                        >
+                          {{ char.voiceActor.performance }}
+                        </div>
+                        <div
+                          v-if="char.voiceActor.note"
+                          class="text-xs text-gray-500 dark:text-gray-400 mt-1"
+                        >
+                          {{ char.voiceActor.note }}
+                        </div>
+                      </div>
+                    </template>
+                    <template v-else>
+                      <div
+                        class="w-16 sm:w-full relative block overflow-hidden rounded-xl aspect-[2/3] bg-gray-200 dark:bg-[#222] sm:mb-3 flex-shrink-0"
+                      >
+                        <div
+                          class="w-full h-full flex items-center justify-center text-gray-400"
+                        >
+                          <UserIcon class="w-8 h-8 opacity-50" />
+                        </div>
+                      </div>
+                      <div
+                        class="flex flex-col min-w-0 flex-1 w-full overflow-hidden"
+                      >
+                        <div
+                          class="flex items-center gap-1.5 text-[10px] text-gray-400 uppercase tracking-widest font-semibold mb-1"
+                        >
+                          <MicIcon class="w-3 h-3 opacity-50 flex-shrink-0" />
+                          <span class="truncate block w-full">{{
+                            $t("details.voiceActor", "Voice Actor")
+                          }}</span>
+                        </div>
+                        <div
+                          class="text-sm text-gray-400 italic truncate block w-full"
+                        >
+                          {{ $t("details.notSpecified", "Non spécifié") }}
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </PaginatedResponsiveGrid>
+          <span class="block text-xs text-gray-400 mt-4">{{
+            $t("media.rolesCount", {
+              shown: filteredCharacters.length,
+              total: filteredCharacters.length,
+            })
+          }}</span>
         </section>
-      </div>
-
-      <!-- Voice Cast -->
-      <section>
-        <div class="flex flex-col mb-6 gap-2">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-            <div>
-              <h2 class="text-2xl font-bold">{{ $t('details.castAndCrew', 'Casting') }}</h2>
-              <div class="text-gray-500 dark:text-gray-400 text-sm mt-1">{{ $t('media.rolesCount', { shown: filteredCharacters.length, total: formattedCharacters.length }) }}</div>
-            </div>
-            
-            <div class="relative w-full sm:w-64">
-              <SearchIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                v-model="searchInput"
-                type="search"
-                :placeholder="$t('search.placeholder', 'Rechercher...')"
-                class="w-full bg-white dark:bg-[#161616] border border-gray-200 dark:border-[#2a2a2a] rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-[#00E5FF] transition-all text-gray-900 dark:text-white"
-              />
-            </div>
-          </div>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-          <div
-            v-for="char in visibleCharacters"
-            :key="char.id"
-            class="bg-white dark:bg-[#161616] border border-gray-200 dark:border-[#2a2a2a] rounded-2xl p-4 shadow-sm transition-colors hover:border-gray-300 dark:hover:border-gray-700"
-          >
-            <!-- 2 Column Layout for Games (Character -> Voice Actor) -->
-            <div class="flex flex-col sm:grid sm:grid-cols-2 gap-4">
-              
-              <!-- Character -->
-              <div class="flex flex-row sm:flex-col min-w-0 gap-4 sm:gap-0 items-center sm:items-start">
-                <div class="w-16 sm:w-full relative block overflow-hidden rounded-xl aspect-[2/3] bg-gray-200 dark:bg-[#222] sm:mb-3 flex-shrink-0">
-                  <NuxtImg format="webp" loading="lazy" decoding="async" v-if="char.mug_shot?.url" :src="char.mug_shot.url" class="w-full h-full object-cover" alt="Character" />
-                  <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
-                    <UserIcon class="w-8 h-8 opacity-50" />
-                  </div>
-                </div>
-                <div class="flex flex-col min-w-0 flex-1 w-full overflow-hidden">
-                  <div class="flex items-center gap-1.5 text-[10px] text-gray-500 uppercase tracking-widest font-semibold mb-1">
-                    <UserIcon class="w-3 h-3 flex-shrink-0" />
-                    <span class="truncate block w-full">{{ $t('details.character', 'Personnage') }}</span>
-                  </div>
-                  <div class="font-bold text-sm text-gray-900 dark:text-white truncate block w-full" :title="char.name">
-                    {{ char.name }}
-                  </div>
-                </div>
-              </div>
-
-              <!-- Voice Actor -->
-              <div class="flex flex-row sm:flex-col min-w-0 gap-4 sm:gap-0 items-center sm:items-start border-t border-gray-100 dark:border-[#2a2a2a] sm:border-t-0 pt-4 sm:pt-0 mt-2 sm:mt-0">
-                <template v-if="char.voiceActor">
-                  <NuxtLink :to="localePath(`/voice-actor/${char.voiceActor.id}`)" class="w-16 sm:w-full group relative block overflow-hidden rounded-xl aspect-[2/3] bg-gray-200 dark:bg-[#222] sm:mb-3 flex-shrink-0">
-                    <NuxtImg format="webp" loading="lazy" decoding="async" v-if="char.voiceActor.profile_picture" :src="char.voiceActor.profile_picture" class="w-full h-full object-cover transition-transform duration-300" alt="Voice Actor" />
-                    <div v-else class="w-full h-full flex items-center justify-center text-2xl font-bold text-gray-400 uppercase bg-gray-300 dark:bg-gray-800">
-                      {{ char.voiceActor.firstname?.[0] }}{{ char.voiceActor.lastname?.[0] }}
-                    </div>
-                  </NuxtLink>
-                  <div class="flex flex-col min-w-0 flex-1 w-full overflow-hidden">
-                    <div class="flex items-center gap-1.5 text-[10px] text-gray-500 uppercase tracking-widest font-semibold mb-1">
-                      <MicIcon class="w-3 h-3 flex-shrink-0" />
-                      <span class="truncate block w-full">{{ $t('details.voiceActor', 'Voice Actor') }}</span>
-                    </div>
-                    <NuxtLink :to="localePath(`/voice-actor/${char.voiceActor.id}`)" class="font-bold text-sm text-gray-900 dark:text-white truncate hover:underline block w-full" :title="char.voiceActor.firstname + ' ' + char.voiceActor.lastname">
-                      {{ char.voiceActor.firstname }} {{ char.voiceActor.lastname }}
-                    </NuxtLink>
-                    <div v-if="char.voiceActor.performance" class="text-xs text-cyan-600 dark:text-cyan-400 truncate mt-1">
-                      {{ char.voiceActor.performance }}
-                    </div>
-                    <div v-if="char.voiceActor.note" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {{ char.voiceActor.note }}
-                    </div>
-                  </div>
-                </template>
-                <template v-else>
-                  <div class="w-16 sm:w-full relative block overflow-hidden rounded-xl aspect-[2/3] bg-gray-200 dark:bg-[#222] sm:mb-3 flex-shrink-0">
-                    <div class="w-full h-full flex items-center justify-center text-gray-400">
-                      <UserIcon class="w-8 h-8 opacity-50" />
-                    </div>
-                  </div>
-                  <div class="flex flex-col min-w-0 flex-1 w-full overflow-hidden">
-                    <div class="flex items-center gap-1.5 text-[10px] text-gray-400 uppercase tracking-widest font-semibold mb-1">
-                      <MicIcon class="w-3 h-3 opacity-50 flex-shrink-0" />
-                      <span class="truncate block w-full">{{ $t('details.voiceActor', 'Voice Actor') }}</span>
-                    </div>
-                    <div class="text-sm text-gray-400 italic truncate block w-full">{{ $t('details.notSpecified', 'Non spécifié') }}</div>
-                  </div>
-                </template>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Infinite Scroll Sentinel & Load More button -->
-        <div
-          v-if="hasMore"
-          ref="loadMoreSentinel"
-          class="py-10 flex flex-col items-center justify-center gap-3"
-        >
-          <button
-            @click="loadMore"
-            class="px-5 py-2.5 bg-white dark:bg-[#1d1d1d] hover:bg-gray-100 dark:hover:bg-[#2a2a2a] text-sm font-medium rounded-xl text-gray-700 dark:text-gray-200 transition-all border border-gray-200 dark:border-[#2a2a2a] shadow-sm cursor-pointer"
-          >
-            {{ $t('common.loadMore', 'Load more') }}
-          </button>
-          <span class="text-xs text-gray-400">{{ $t('media.rolesCount', { shown: visibleCharacters.length, total: filteredCharacters.length }) }}</span>
-        </div>
-      </section>
       </template>
     </MediaDetailsLayout>
 
-    <div v-else-if="!pending" class="text-center py-20 text-gray-500 min-h-screen">
-      {{ $t('details.notFound', 'Jeu vidéo introuvable.') }}
+    <div
+      v-else-if="!pending"
+      class="text-center py-20 text-gray-500 min-h-screen"
+    >
+      {{ $t("details.notFound", "Jeu vidéo introuvable.") }}
     </div>
 
     <ReportModal v-model:open="isReportModalOpen" :target-url="currentUrl" />
@@ -269,29 +448,41 @@
 </template>
 
 <script setup lang="ts">
-defineRouteRules({ swr: process.env.NODE_ENV === "development" ? false : 3600 });
 import MediaSkeleton from "../../components/MediaSkeleton.vue";
 import MediaDetailsLayout from "../../components/layout/MediaDetailsLayout.vue";
-import { useRoute, useRouter } from 'vue-router';
-import { fetchGameData } from '@app/shared-logic';
-import type { IgdbGame, IgdbCharacter } from '@app/shared-logic';
-import { computed, ref, watch } from 'vue';
-import { useIntersectionObserver, refDebounced } from '@vueuse/core';
-import { ArrowLeftIcon, UserIcon, MicIcon, SearchIcon, Gamepad2Icon, Loader2Icon, StarIcon, ExternalLinkIcon } from 'lucide-vue-next';
-import ReportModal from '../../components/ReportModal.vue';
-import { sameMediaId } from '../../utils/media-cast';
+import { useRoute, useRouter } from "vue-router";
+import { fetchGameData } from "@app/shared-logic";
+import type { IgdbGame, IgdbCharacter } from "@app/shared-logic";
+import { computed, ref, watch } from "vue";
+import { refDebounced } from "@vueuse/core";
+import {
+  ArrowLeftIcon,
+  UserIcon,
+  MicIcon,
+  SearchIcon,
+  Gamepad2Icon,
+  Loader2Icon,
+  StarIcon,
+  ExternalLinkIcon,
+} from "lucide-vue-next";
+import ReportModal from "../../components/ReportModal.vue";
+import { sameMediaId } from "../../utils/media-cast";
 
 const isReportModalOpen = ref(false);
 
 const route = useRoute();
 const router = useRouter();
 const supabase = useSupabaseClient();
-const gameId = (Array.isArray(route.params.id) ? route.params.id[0] : route.params.id) || '';
+const gameId =
+  (Array.isArray(route.params.id) ? route.params.id[0] : route.params.id) || "";
 const currentUrl = computed(() => `https://dubbingbase.com${route.fullPath}`);
 
 const user = useSupabaseUser();
 const isAdmin = computed(() => {
-  return user.value?.app_metadata?.role === 'admin' || user.value?.user_metadata?.role === 'admin';
+  return (
+    user.value?.app_metadata?.role === "admin" ||
+    user.value?.user_metadata?.role === "admin"
+  );
 });
 
 const isPreparing = ref(false);
@@ -313,8 +504,8 @@ const { data, pending, refresh } = useAsyncData(
     // but we already have valid data from SSR, we preserve the IGDB data
     // while still accepting the fresh database data (votes, dubbing projects).
     if (
-      newData && 
-      newData.game?.name === "Information indisponible (Timeout)" && 
+      newData &&
+      newData.game?.name === "Information indisponible (Timeout)" &&
       cachedData?.game &&
       cachedData.game.name !== "Information indisponible (Timeout)"
     ) {
@@ -336,17 +527,18 @@ const { data, pending, refresh } = useAsyncData(
 const game = computed(() => data.value?.game);
 const characters = computed(() => data.value?.characters || []);
 const dubbingProjects = computed(() => {
-  const projects = [...(data.value?.dubbingProjects || [])]
-    .filter((p) => projectHasVoiceActor(p));
+  const projects = [...(data.value?.dubbingProjects || [])].filter((p) =>
+    projectHasVoiceActor(p),
+  );
   const currentLocale = locale.value.toLowerCase();
   return projects.sort((a, b) => {
     const aIsPref = a.language?.toLowerCase().startsWith(currentLocale) ? 1 : 0;
     const bIsPref = b.language?.toLowerCase().startsWith(currentLocale) ? 1 : 0;
-    
+
     if (aIsPref !== bIsPref) {
       return bIsPref - aIsPref;
     }
-    
+
     const aWorks = a.works?.length || 0;
     const bWorks = b.works?.length || 0;
     return bWorks - aWorks;
@@ -378,15 +570,20 @@ const activeDubId = computed(() => {
 });
 
 const activeDubProject = computed(() => {
-  return dubbingProjects.value.find((p: any) => p.id === activeDubId.value) || dubbingProjects.value[0];
+  return (
+    dubbingProjects.value.find((p: any) => p.id === activeDubId.value) ||
+    dubbingProjects.value[0]
+  );
 });
 
 const getDisplayLanguage = (langCode: string | undefined | null) => {
-  if (!langCode) return 'Unknown';
+  if (!langCode) return "Unknown";
   try {
-    const displayNames = new Intl.DisplayNames([locale.value || 'en'], { type: 'language' });
+    const displayNames = new Intl.DisplayNames([locale.value || "en"], {
+      type: "language",
+    });
     const name = displayNames.of(langCode);
-    return (typeof name === 'string' && name.length > 0)
+    return typeof name === "string" && name.length > 0
       ? name.charAt(0).toUpperCase() + name.slice(1)
       : langCode;
   } catch (e) {
@@ -394,9 +591,18 @@ const getDisplayLanguage = (langCode: string | undefined | null) => {
   }
 };
 
-const getDevelopers = (g: IgdbGame) => g.involved_companies?.filter(c => c.developer).map(c => c.company.name).join(", ");
-const getPublishers = (g: IgdbGame) => g.involved_companies?.filter(c => c.publisher).map(c => c.company.name).join(", ");
-const formatReleaseYear = (ts?: number) => ts ? new Date(ts * 1000).getFullYear().toString() : "";
+const getDevelopers = (g: IgdbGame) =>
+  g.involved_companies
+    ?.filter((c) => c.developer)
+    .map((c) => c.company.name)
+    .join(", ");
+const getPublishers = (g: IgdbGame) =>
+  g.involved_companies
+    ?.filter((c) => c.publisher)
+    .map((c) => c.company.name)
+    .join(", ");
+const formatReleaseYear = (ts?: number) =>
+  ts ? new Date(ts * 1000).getFullYear().toString() : "";
 
 // Map IGDB character IDs to Actor IDs (what we use in the work table)
 function igdbCharacterId(charId: number): number {
@@ -413,19 +619,23 @@ const formattedCharacters = computed(() => {
   const mappedIgdbChars = igdbChars.flatMap((char: IgdbCharacter) => {
     // Character ID was mapped in prepare_game using igdbCharacterId
     const mappedActorId = igdbCharacterId(char.id);
-    
+
     // Fallback ID mapping used by LLM for unresolved names
-    const hashId = Math.abs(
-      char.name.split("").reduce((hash, c) => (hash * 31 + c.charCodeAt(0)) | 0, 0),
-    ) + 8_000_000_000;
+    const hashId =
+      Math.abs(
+        char.name
+          .split("")
+          .reduce((hash, c) => (hash * 31 + c.charCodeAt(0)) | 0, 0),
+      ) + 8_000_000_000;
 
     // Find the voice actor work for this character.
     // Check actor_id (set by prepare_game) and character_id (set by manual entry in the edit form).
-    const matchingWorks = works.filter((w: any) =>
-      sameMediaId(w.actor_id, mappedActorId) ||
-      sameMediaId(w.actor_id, hashId) ||
-      sameMediaId(w.character_id, char.id) ||
-      sameMediaId(w.character_id, mappedActorId)
+    const matchingWorks = works.filter(
+      (w: any) =>
+        sameMediaId(w.actor_id, mappedActorId) ||
+        sameMediaId(w.actor_id, hashId) ||
+        sameMediaId(w.character_id, char.id) ||
+        sameMediaId(w.character_id, mappedActorId),
     );
 
     if (matchingWorks.length === 0) return [{ ...char, voiceActor: null }];
@@ -436,7 +646,11 @@ const formattedCharacters = computed(() => {
         ...char,
         id: `${char.id}-${work.id}`,
         voiceActor: work.voice_actor
-          ? { ...work.voice_actor, performance: work.performance, note: work.note }
+          ? {
+              ...work.voice_actor,
+              performance: work.performance,
+              note: work.note,
+            }
           : null,
       };
     });
@@ -444,22 +658,30 @@ const formattedCharacters = computed(() => {
 
   // Find all works that were NOT matched to an IGDB character
   const unmatchedWorks = works.filter((w: any) => !matchedWorkIds.has(w.id));
-  
+
   // Create mock characters for unmatched works.
   // Try to resolve the name from the IGDB character list (by character_id) before
   // falling back to work.character_name, then 'Inconnu'.
   const mockChars = unmatchedWorks.map((work: any) => {
     let resolvedName = work.character_name || null;
     if (!resolvedName && work.character_id) {
-      const igdbChar = igdbChars.find((c: IgdbCharacter) => sameMediaId(igdbCharacterId(c.id), work.character_id) || sameMediaId(c.id, work.character_id));
+      const igdbChar = igdbChars.find(
+        (c: IgdbCharacter) =>
+          sameMediaId(igdbCharacterId(c.id), work.character_id) ||
+          sameMediaId(c.id, work.character_id),
+      );
       if (igdbChar) resolvedName = igdbChar.name;
     }
     return {
       id: `mock-${work.id}`,
-      name: resolvedName || 'Inconnu',
+      name: resolvedName || "Inconnu",
       mug_shot: null,
       voiceActor: work.voice_actor
-        ? { ...work.voice_actor, performance: work.performance, note: work.note }
+        ? {
+            ...work.voice_actor,
+            performance: work.performance,
+            note: work.note,
+          }
         : null,
     };
   });
@@ -478,12 +700,12 @@ const formattedCharacters = computed(() => {
     if (aHasMug !== bHasMug) return bHasMug - aHasMug;
 
     // 3. Sort alphabetically by name as a fallback
-    return (a.name || '').localeCompare(b.name || '');
+    return (a.name || "").localeCompare(b.name || "");
   });
 });
 
-const searchQuery = ref('');
-const searchInput = ref('');
+const searchQuery = ref("");
+const searchInput = ref("");
 const debouncedSearch = refDebounced(searchInput, 150);
 watch(debouncedSearch, (val) => {
   searchQuery.value = val;
@@ -493,50 +715,33 @@ const filteredCharacters = computed(() => {
   if (!searchQuery.value) return formattedCharacters.value;
   const query = searchQuery.value.toLowerCase().trim();
   return formattedCharacters.value.filter((char: any) => {
-    const characterName = char.name?.toLowerCase() || '';
-    const vaName = char.voiceActor ? `${char.voiceActor.firstname || ''} ${char.voiceActor.lastname || ''}`.toLowerCase() : '';
-    const vaPerformance = char.voiceActor?.performance?.toLowerCase() || '';
-    const vaNote = char.voiceActor?.note?.toLowerCase() || '';
-    return characterName.includes(query) || vaName.includes(query) || vaPerformance.includes(query) || vaNote.includes(query);
+    const characterName = char.name?.toLowerCase() || "";
+    const vaName = char.voiceActor
+      ? `${char.voiceActor.firstname || ""} ${char.voiceActor.lastname || ""}`.toLowerCase()
+      : "";
+    const vaPerformance = char.voiceActor?.performance?.toLowerCase() || "";
+    const vaNote = char.voiceActor?.note?.toLowerCase() || "";
+    return (
+      characterName.includes(query) ||
+      vaName.includes(query) ||
+      vaPerformance.includes(query) ||
+      vaNote.includes(query)
+    );
   });
-});
-
-const displayedCount = ref(36);
-const visibleCharacters = computed(() => {
-  return filteredCharacters.value.slice(0, displayedCount.value);
-});
-
-const hasMore = computed(() => {
-  return displayedCount.value < filteredCharacters.value.length;
-});
-
-const loadMore = () => {
-  displayedCount.value += 36;
-};
-
-const loadMoreSentinel = ref<HTMLElement | null>(null);
-
-useIntersectionObserver(
-  loadMoreSentinel,
-  ([entry]) => {
-    if (entry?.isIntersecting && hasMore.value) {
-      loadMore();
-    }
-  },
-  { rootMargin: '400px' },
-);
-
-watch([searchQuery, activeDubId], () => {
-  displayedCount.value = 36;
 });
 
 async function triggerPrepareGame() {
   if (!isAdmin.value) return;
   isPreparing.value = true;
   try {
-    const result = await $fetch('/api/prepare_game', { method: 'POST', body: { igdbId: Number(gameId) } });
+    const result = await $fetch("/api/prepare_game", {
+      method: "POST",
+      body: { igdbId: Number(gameId) },
+    });
     if (result.ok) {
-      console.info(`[prepare_game] LLM: ${result.llmModel ?? "unknown"} | ${result.note ?? `${result.creditsAdded} credits added`}`);
+      console.info(
+        `[prepare_game] LLM: ${result.llmModel ?? "unknown"} | ${result.note ?? `${result.creditsAdded} credits added`}`,
+      );
     } else {
       console.error("prepare_game failed:", result.error);
     }
@@ -551,8 +756,10 @@ async function triggerPrepareGame() {
 useHead({
   titleTemplate: null,
   title: computed(() => {
-    const year = game.value?.first_release_date ? ` (${formatReleaseYear(game.value.first_release_date)})` : '';
-    let base = game.value ? `${game.value.name}${year}` : 'Jeu Vidéo';
+    const year = game.value?.first_release_date
+      ? ` (${formatReleaseYear(game.value.first_release_date)})`
+      : "";
+    let base = game.value ? `${game.value.name}${year}` : "Jeu Vidéo";
     if (activeDubProject.value) {
       base += ` - Doublage ${getDisplayLanguage(activeDubProject.value.language)}`;
     }
@@ -560,23 +767,27 @@ useHead({
   }),
   meta: [
     {
-      name: 'description',
+      name: "description",
       content: computed(() => {
-        let desc = game.value?.summary || `Découvrez les voix françaises et le casting du jeu vidéo ${game.value?.name}.`;
+        let desc =
+          game.value?.summary ||
+          `Découvrez les voix françaises et le casting du jeu vidéo ${game.value?.name}.`;
         if (activeDubProject.value) {
-          desc = `Découvrez le casting complet des voix pour le doublage ${getDisplayLanguage(activeDubProject.value.language)} du jeu ${game.value?.name}. ` + desc;
+          desc =
+            `Découvrez le casting complet des voix pour le doublage ${getDisplayLanguage(activeDubProject.value.language)} du jeu ${game.value?.name}. ` +
+            desc;
         }
         return desc;
-      })
+      }),
     },
     {
-      property: 'og:image',
-      content: computed(() => coverUrl.value || '')
-    }
+      property: "og:image",
+      content: computed(() => coverUrl.value || ""),
+    },
   ],
   link: [
-    { rel: 'preconnect', href: 'https://images.igdb.com', crossorigin: '' },
-    { rel: 'dns-prefetch', href: 'https://images.igdb.com' },
-  ]
+    { rel: "preconnect", href: "https://images.igdb.com", crossorigin: "" },
+    { rel: "dns-prefetch", href: "https://images.igdb.com" },
+  ],
 });
 </script>

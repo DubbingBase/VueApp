@@ -335,7 +335,6 @@
 </template>
 
 <script setup lang="ts">
-defineRouteRules({ swr: process.env.NODE_ENV === "development" ? false : 3600 });
 import PersonDetailsLayout from "../../components/layout/PersonDetailsLayout.vue";
 import { onMounted, ref, watch, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";

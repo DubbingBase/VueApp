@@ -1,5 +1,7 @@
 <template>
-  <div class="relative w-full h-[50vh] min-h-[400px] bg-gray-200 dark:bg-[#1d1d1d]">
+  <div
+    class="relative w-full h-[42vh] min-h-[300px] md:h-[50vh] md:min-h-[400px] overflow-hidden bg-gray-200 dark:bg-[#1d1d1d]"
+  >
     <div class="absolute inset-0">
       <NuxtImg
         v-if="backdropUrl"
@@ -10,23 +12,39 @@
         alt="Backdrop"
         format="webp"
       />
-      <div v-if="backdropUrl" class="absolute inset-0 bg-gradient-to-t from-gray-50 dark:from-[#1b1b1b] to-transparent"></div>
-      <div v-if="backdropUrl" class="absolute inset-0 bg-black/10 dark:bg-black/40"></div>
+      <div
+        v-if="backdropUrl"
+        class="absolute inset-0 bg-gradient-to-t from-gray-50 dark:from-[#1b1b1b] to-transparent"
+      ></div>
+      <div
+        v-if="backdropUrl"
+        class="absolute inset-0 bg-black/10 dark:bg-black/40"
+      ></div>
     </div>
 
-    <div class="absolute bottom-0 left-0 w-full p-8 flex flex-col md:flex-row gap-6 items-end">
-      <div :class="[
-        imageAspectRatio === 'poster' ? 'w-32 md:w-48 object-cover rounded-lg shadow-xl shrink-0 overflow-hidden' : '',
-        imageAspectRatio === 'profile' ? 'w-32 md:w-48 rounded-lg overflow-hidden shadow-xl aspect-[2/3] bg-gray-100 dark:bg-[#161616] border border-white/10 shrink-0' : '',
-        imageAspectRatio === 'logo' ? 'w-32 h-32 md:w-48 md:h-48 rounded-xl shadow-xl bg-white dark:bg-[#2a2a2a] flex items-center justify-center overflow-hidden shrink-0 relative z-10' : ''
-      ]">
+    <div
+      class="absolute bottom-0 left-0 w-full p-4 sm:p-6 md:p-8 flex flex-col md:flex-row gap-4 md:gap-6 items-start md:items-end"
+    >
+      <div
+        :class="[
+          imageAspectRatio === 'poster'
+            ? 'w-24 sm:w-32 md:w-48 object-cover rounded-lg shadow-xl shrink-0 overflow-hidden'
+            : '',
+          imageAspectRatio === 'profile'
+            ? 'w-24 sm:w-32 md:w-48 rounded-lg overflow-hidden shadow-xl aspect-[2/3] bg-gray-100 dark:bg-[#161616] border border-white/10 shrink-0'
+            : '',
+          imageAspectRatio === 'logo'
+            ? 'w-24 h-24 sm:w-32 sm:h-32 md:w-48 md:h-48 rounded-xl shadow-xl bg-white dark:bg-[#2a2a2a] flex items-center justify-center overflow-hidden shrink-0 relative z-10'
+            : '',
+        ]"
+      >
         <NuxtImg
           v-if="imageUrl"
           :src="imageUrl"
           :placeholder="imageUrl.replace('/original/', '/w92/')"
           :class="[
             'w-full h-full',
-            imageAspectRatio === 'logo' ? 'object-contain p-4' : 'object-cover'
+            imageAspectRatio === 'logo' ? 'object-contain p-4' : 'object-cover',
           ]"
           :alt="title"
           format="webp"
@@ -38,9 +56,13 @@
           {{ title?.[0] }}
         </div>
       </div>
-      <div class="pb-4 max-w-3xl">
-        <h1 class="text-4xl md:text-5xl font-bold">{{ title }}</h1>
-        <div class="flex flex-wrap items-center gap-3 mt-4">
+      <div class="min-w-0 flex-1 max-w-3xl md:pb-4">
+        <h1
+          class="text-2xl sm:text-3xl md:text-5xl leading-tight font-bold break-words"
+        >
+          {{ title }}
+        </h1>
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3 mt-3 sm:mt-4">
           <slot name="metadata"></slot>
         </div>
       </div>
@@ -54,6 +76,6 @@ defineProps<{
   backdropUrl?: string | null;
   blurBackdrop?: boolean;
   imageUrl?: string | null;
-  imageAspectRatio?: 'poster' | 'profile' | 'logo';
+  imageAspectRatio?: "poster" | "profile" | "logo";
 }>();
 </script>

@@ -335,7 +335,6 @@
 </template>
 
 <script setup lang="ts">
-defineRouteRules({ swr: process.env.NODE_ENV === "development" ? false : 3600 });
 import { ref, computed, useTemplateRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
