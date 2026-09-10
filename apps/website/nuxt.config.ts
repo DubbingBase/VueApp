@@ -8,10 +8,7 @@ function env(name: string): string | undefined {
 }
 
 const supabaseUrl = env("SUPABASE_URL") ?? env("PUBLIC_SUPABASE_URL");
-const supabasePublishableKey =
-  env("SUPABASE_PUBLISHABLE_KEY") ??
-  env("SUPABASE_ANON_KEY") ??
-  env("PUBLIC_SUPABASE_KEY");
+const supabasePublishableKey = env("SUPABASE_PUBLISHABLE_KEY");
 
 export default defineNuxtConfig({
   rootDir: resolve(import.meta.dirname),
