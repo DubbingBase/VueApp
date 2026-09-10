@@ -8,7 +8,10 @@ function env(name: string): string | undefined {
 }
 
 const supabaseUrl = env("SUPABASE_URL") ?? env("PUBLIC_SUPABASE_URL");
-const supabaseAnonKey = env("SUPABASE_ANON_KEY") ?? env("PUBLIC_SUPABASE_KEY");
+const supabasePublishableKey =
+  env("SUPABASE_PUBLISHABLE_KEY") ??
+  env("SUPABASE_ANON_KEY") ??
+  env("PUBLIC_SUPABASE_KEY");
 
 export default defineNuxtConfig({
   rootDir: resolve(import.meta.dirname),
@@ -79,13 +82,13 @@ export default defineNuxtConfig({
     adminEmail: env("ADMIN_EMAIL"),
     public: {
       supabaseUrl: supabaseUrl || "https://mock.supabase.co",
-      supabaseKey: supabaseAnonKey || "mock-anon-key",
+      supabaseKey: supabasePublishableKey || "mock-publishable-key",
     },
   },
 
   supabase: {
     url: supabaseUrl || "https://mock.supabase.co",
-    key: supabaseAnonKey || "mock-anon-key",
+    key: supabasePublishableKey || "mock-publishable-key",
     redirect: false,
     types: resolve(
       import.meta.dirname,
