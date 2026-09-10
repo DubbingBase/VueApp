@@ -273,17 +273,12 @@
           </div>
 
           <template v-if="displayMode === 'list'">
-            <VirtualizedResponsiveGrid
+            <PaginatedResponsiveGrid
+              :key="searchQuery"
               :items="sortedWorks"
-              :breakpoints="[
-                { minWidth: 0, columns: 1 },
-                { minWidth: 768, columns: 2 },
-                { minWidth: 1024, columns: 3 },
-                { minWidth: 1280, columns: 4 },
-              ]"
-              :estimate-row-height="390"
+              :page-size="12"
+              grid-class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
               :item-key="(item) => item.work.id"
-              row-class="grid gap-4 md:gap-6"
             >
               <template #default="{ item }">
                 <div
@@ -475,7 +470,7 @@
                   </div>
                 </div>
               </template>
-            </VirtualizedResponsiveGrid>
+            </PaginatedResponsiveGrid>
           </template>
           <template v-else>
             <div class="space-y-10">
@@ -518,17 +513,11 @@
                 </NuxtLink>
 
                 <!-- Actor Works Grid -->
-                <VirtualizedResponsiveGrid
+                <PaginatedResponsiveGrid
                   :items="works"
-                  :breakpoints="[
-                    { minWidth: 0, columns: 1 },
-                    { minWidth: 768, columns: 2 },
-                    { minWidth: 1024, columns: 3 },
-                    { minWidth: 1280, columns: 4 },
-                  ]"
-                  :estimate-row-height="390"
+                  :page-size="12"
+                  grid-class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
                   :item-key="(item) => item.work.id"
-                  row-class="grid gap-4 md:gap-6"
                 >
                   <template #default="{ item }">
                     <div
@@ -658,7 +647,7 @@
                       </div>
                     </div>
                   </template>
-                </VirtualizedResponsiveGrid>
+                </PaginatedResponsiveGrid>
               </div>
             </div>
           </template>
