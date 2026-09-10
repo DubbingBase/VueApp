@@ -478,6 +478,7 @@
     "mixing": "Mixage (Mixage)"
   },
   "movie": {
+    "notFound": "Film introuvable",
     "addDubbingProject": "Ajouter un projet de doublage",
     "heroDescription": "Découvrez les films les plus populaires du moment."
   },
@@ -1287,6 +1288,7 @@
     "studiosCount": "{shown} / {total} studios"
   },
   "series": {
+    "notFound": "Série introuvable",
     "heroDescription": "Découvrez les séries télévisées les plus populaires du moment."
   }
 }

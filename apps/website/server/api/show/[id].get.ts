@@ -65,6 +65,15 @@ export async function fetchShowData(event: any, showId: number) {
         };
       })
       .catch((err) => {
+        if (err instanceof Error && err.message === "TMDB API error: 404") {
+          return {
+            serieWithImageUrls: null,
+            aggregateCredits: { cast: [] },
+            characterProfilePictures: [],
+            tvdbId: null,
+          };
+        }
+
         console.error(`Failed to fetch TMDB show ${showId}, using mock:`, err);
         const mockSerie = {
           id: showId,

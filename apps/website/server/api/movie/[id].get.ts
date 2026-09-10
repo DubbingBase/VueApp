@@ -42,6 +42,15 @@ export async function fetchMovieData(event: any, movieId: number) {
         };
       })
       .catch((err) => {
+        if (err instanceof Error && err.message === "TMDB API error: 404") {
+          return {
+            movieWithImageUrls: null,
+            characterProfilePictures: [],
+            collection: null,
+            tvdbId: null,
+          };
+        }
+
         console.error(
           `Failed to fetch TMDB movie ${movieId}, using mock:`,
           err,

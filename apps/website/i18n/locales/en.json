@@ -479,6 +479,7 @@
     "mixing": "Mixing (Mixage)"
   },
   "movie": {
+    "notFound": "Movie not found",
     "addDubbingProject": "Add Dubbing Project",
     "heroDescription": "Discover the most popular movies right now."
   },
@@ -1287,6 +1288,7 @@
     "studiosCount": "{shown} / {total} studios"
   },
   "series": {
+    "notFound": "Series not found",
     "heroDescription": "Discover the most popular TV series right now."
   }
 }

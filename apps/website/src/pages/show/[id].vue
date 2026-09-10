@@ -387,6 +387,10 @@
       </template>
     </MediaDetailsLayout>
 
+    <div v-else-if="!pending" class="text-center py-20 text-gray-500 min-h-screen">
+      {{ $t('series.notFound') }}
+    </div>
+
     <ReportModal v-model:open="isReportModalOpen" :target-url="currentUrl" />
   </div>
 </template>

@@ -479,6 +479,7 @@
     "mixing": "Mezcla (Mixage)"
   },
   "movie": {
+    "notFound": "Película no encontrada",
     "addDubbingProject": "Agregar proyecto de doblaje",
     "heroDescription": "Descubre las películas más populares del momento."
   },
@@ -1287,6 +1288,7 @@
     "studiosCount": "{shown} / {total} estudios"
   },
   "series": {
+    "notFound": "Serie no encontrada",
     "heroDescription": "Descubre las series de televisión más populares del momento."
   }
 }

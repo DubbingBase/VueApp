@@ -479,6 +479,7 @@
     "mixing": "ミキシング（ミクサージュ）"
   },
   "movie": {
+    "notFound": "映画が見つかりません",
     "addDubbingProject": "吹き替えプロジェクトを追加",
     "heroDescription": "今最も人気の映画を発見しましょう。"
   },
@@ -1287,6 +1288,7 @@
     "studiosCount": "{shown}／{total} スタジオ"
   },
   "series": {
+    "notFound": "シリーズが見つかりません",
     "heroDescription": "今最も人気のテレビシリーズを発見しましょう。"
   }
 }

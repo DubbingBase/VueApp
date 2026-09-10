@@ -9,8 +9,10 @@ export async function fetchShowData(
 
   try {
     const data = await $fetch<any>(`/api/show/${id}`, { headers });
-    if (!data) {
-      console.error("fetchShowData: Response is null");
+    if (!data || !data.serie) {
+      console.error(
+        "fetchShowData: Response is null or missing serie property",
+      );
       return null;
     }
     return data;
